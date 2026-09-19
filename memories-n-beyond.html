@@ -1,0 +1,724 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memories n Beyond — Handmade Personalized Gifts</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#FFF8F4;
+    --cream-deep:#FBEFE8;
+    --blush:#F6DEDA;
+    --pastel:#EFC6C0;
+    --rose:#C98D89;
+    --rose-deep:#A9645F;
+    --burgundy:#6E1F2B;
+    --burgundy-deep:#4A141D;
+    --ink:#3A2226;
+    --ink-soft:#6E4D50;
+    --paper:#FFFDFB;
+    --gold:#B4884E;
+    --line: rgba(110,31,43,0.14);
+    --shadow: 0 20px 50px -25px rgba(74,20,29,0.35);
+    --shadow-soft: 0 10px 30px -18px rgba(74,20,29,0.28);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--cream);
+    color:var(--ink);
+    font-family:'Manrope',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  h1,h2,h3,.serif{font-family:'Fraunces',serif;}
+  .container{max-width:1180px;margin:0 auto;padding:0 24px;}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;cursor:pointer;}
+  ::selection{background:var(--pastel);color:var(--burgundy-deep);}
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  /* ---------- Header ---------- */
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(255,248,244,0.82);
+    backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-wrap{display:flex;align-items:center;justify-content:space-between;height:78px;}
+  .brand{display:flex;align-items:center;gap:11px;}
+  .brand-mark{
+    width:40px;height:40px;border-radius:50%;
+    background:linear-gradient(145deg,var(--burgundy),var(--burgundy-deep));
+    display:flex;align-items:center;justify-content:center;
+    color:var(--cream); font-family:'Fraunces',serif; font-size:18px; font-weight:500;
+    box-shadow:0 6px 16px -6px rgba(74,20,29,0.55);
+  }
+  .brand-name{font-family:'Fraunces',serif;font-size:1.28rem;font-weight:500;color:var(--burgundy-deep);line-height:1.05;}
+  .brand-name span{display:block;font-family:'Manrope',sans-serif;font-size:0.62rem;letter-spacing:0.14em;color:var(--rose-deep);font-weight:600;margin-top:2px;}
+  nav.links{display:flex;gap:34px;align-items:center;}
+  nav.links a{
+    font-size:0.93rem; font-weight:600; color:var(--ink-soft);
+    position:relative; padding:4px 0; transition:color .25s ease;
+  }
+  nav.links a::after{
+    content:''; position:absolute; left:0; bottom:-2px; width:0; height:1.5px;
+    background:var(--burgundy); transition:width .3s ease;
+  }
+  nav.links a:hover{color:var(--burgundy-deep);}
+  nav.links a:hover::after{width:100%;}
+  .whatsapp-pill{
+    display:flex; align-items:center; gap:8px;
+    background:var(--burgundy); color:var(--cream);
+    padding:10px 20px; border-radius:999px; font-weight:600; font-size:0.88rem;
+    box-shadow:var(--shadow-soft); transition:transform .25s ease, background .25s ease;
+  }
+  .whatsapp-pill:hover{transform:translateY(-2px); background:var(--burgundy-deep);}
+  .menu-btn{display:none;background:none;border:none;color:var(--burgundy-deep);}
+
+  /* floating whatsapp for mobile / scroll */
+  .float-wa{
+    position:fixed; right:20px; bottom:22px; z-index:60;
+    width:56px;height:56px;border-radius:50%;
+    background:var(--burgundy); color:var(--cream);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 14px 30px -10px rgba(74,20,29,0.6);
+    transition:transform .25s ease;
+  }
+  .float-wa:hover{transform:scale(1.08);}
+
+  /* ---------- Hero ---------- */
+  .hero{position:relative; padding:88px 0 70px; overflow:hidden;}
+  .hero::before{
+    content:''; position:absolute; inset:0; z-index:-2;
+    background:
+      radial-gradient(60% 55% at 82% 8%, var(--blush) 0%, transparent 60%),
+      radial-gradient(45% 40% at 8% 90%, var(--pastel) 0%, transparent 60%);
+  }
+  .hero-grid{display:grid; grid-template-columns:1.05fr 0.95fr; gap:56px; align-items:center;}
+  .eyebrow-line{
+    display:flex; align-items:center; gap:10px; margin-bottom:22px;
+    color:var(--rose-deep); font-weight:700; font-size:0.85rem;
+  }
+  .eyebrow-line .dash{width:30px;height:1.5px;background:var(--rose-deep);}
+  .hero h1{
+    font-size:clamp(2.5rem, 4.6vw, 3.6rem);
+    line-height:1.12; color:var(--burgundy-deep); font-weight:500; letter-spacing:-0.01em;
+    margin:0 0 22px;
+  }
+  .hero p.lede{
+    font-size:1.08rem; color:var(--ink-soft); max-width:480px; line-height:1.65; margin:0 0 34px;
+  }
+  .hero-ctas{display:flex; gap:16px; align-items:center; flex-wrap:wrap; margin-bottom:44px;}
+  .btn-primary{
+    background:var(--burgundy); color:var(--cream); padding:15px 30px; border-radius:999px;
+    font-weight:700; font-size:0.95rem; border:none; box-shadow:var(--shadow-soft);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .btn-primary:hover{transform:translateY(-3px); box-shadow:0 22px 40px -18px rgba(74,20,29,0.55);}
+  .btn-ghost{
+    padding:15px 26px; border-radius:999px; font-weight:700; font-size:0.95rem;
+    border:1.5px solid var(--burgundy); color:var(--burgundy-deep); background:transparent;
+    transition:background .25s ease, color .25s ease;
+  }
+  .btn-ghost:hover{background:var(--burgundy); color:var(--cream);}
+
+  .trust-row{display:flex; gap:0; border-top:1px solid var(--line); padding-top:26px;}
+  .trust-item{flex:1; padding-right:18px;}
+  .trust-item + .trust-item{border-left:1px solid var(--line); padding-left:18px;}
+  .trust-num{font-family:'Fraunces',serif; font-size:1.5rem; color:var(--burgundy-deep); font-weight:500;}
+  .trust-label{font-size:0.78rem; color:var(--ink-soft); font-weight:600; margin-top:2px;}
+
+  /* polaroid stack visual */
+  .stack{position:relative; height:460px;}
+  .polaroid{
+    position:absolute; background:var(--paper); border-radius:6px; padding:12px 12px 34px;
+    box-shadow:var(--shadow); width:230px;
+  }
+  .polaroid .photo{
+    width:100%; height:160px; border-radius:2px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .polaroid .cap{
+    font-family:'Fraunces',serif; font-style:italic; color:var(--ink-soft); font-size:0.85rem;
+    text-align:center; margin-top:10px;
+  }
+  .p1{ top:0; left:34px; transform:rotate(-9deg); z-index:3; }
+  .p1 .photo{ background:linear-gradient(150deg,#E8B8AE,#C98D89 55%,#8A4A47);}
+  .p2{ top:60px; right:0; transform:rotate(7deg); z-index:2; width:210px;}
+  .p2 .photo{ height:150px; background:linear-gradient(150deg,#F0D6C8,#D9A5A0 60%,#8E4147);}
+  .p3{ bottom:6px; left:66px; transform:rotate(4deg); z-index:1; width:200px;}
+  .p3 .photo{ height:140px; background:linear-gradient(150deg,#F3E2D4,#CE9A96 55%,#6E1F2B);}
+  .twine{
+    position:absolute; top:34px; left:-6px; width:112%; height:2px;
+    background:repeating-linear-gradient(90deg, var(--rose-deep) 0 10px, transparent 10px 16px);
+    transform:rotate(-2deg); z-index:4; opacity:0.55;
+  }
+
+  /* ---------- Section headings ---------- */
+  .section{padding:96px 0;}
+  .section-head{max-width:560px; margin-bottom:52px;}
+  .section-head h2{
+    font-size:clamp(1.9rem,3vw,2.5rem); color:var(--burgundy-deep); font-weight:500; margin:0 0 14px; line-height:1.18;
+  }
+  .section-head p{color:var(--ink-soft); font-size:1.02rem; line-height:1.6; margin:0;}
+  .section-alt{background:var(--cream-deep);}
+
+  /* ---------- Filters ---------- */
+  .filters{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:40px;}
+  .filter-btn{
+    padding:10px 20px; border-radius:999px; font-size:0.87rem; font-weight:600;
+    border:1.5px solid var(--line); background:var(--paper); color:var(--ink-soft);
+    transition:all .25s ease;
+  }
+  .filter-btn:hover{border-color:var(--rose);}
+  .filter-btn.active{background:var(--burgundy); color:var(--cream); border-color:var(--burgundy);}
+
+  /* ---------- Product grid ---------- */
+  .grid-products{display:grid; grid-template-columns:repeat(4, 1fr); gap:26px;}
+  .p-card{
+    background:var(--paper); border-radius:20px; overflow:hidden;
+    border:1px solid var(--line); box-shadow:var(--shadow-soft);
+    transition:transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s ease;
+    cursor:pointer;
+  }
+  .p-card:hover{transform:translateY(-6px); box-shadow:var(--shadow);}
+  .p-visual{
+    position:relative; height:200px; display:flex; align-items:center; justify-content:center; overflow:hidden;
+  }
+  .p-visual .frame{
+    width:120px; height:150px; background:var(--paper); border-radius:4px; padding:8px 8px 20px;
+    box-shadow:0 12px 24px -10px rgba(74,20,29,0.35); transition:transform .4s ease;
+  }
+  .p-card:hover .p-visual .frame{transform:scale(1.05) rotate(-1.5deg);}
+  .p-visual .frame .inner{width:100%; height:100%; border-radius:2px;}
+  .p-visual .quick{
+    position:absolute; inset:auto 0 0 0; padding:12px 0 14px; text-align:center;
+    background:linear-gradient(0deg, rgba(74,20,29,0.86), rgba(74,20,29,0));
+    color:var(--cream); font-size:0.78rem; font-weight:700; letter-spacing:0.02em;
+    transform:translateY(100%); transition:transform .3s ease;
+  }
+  .p-card:hover .quick{transform:translateY(0);}
+  .p-body{padding:18px 20px 22px;}
+  .p-tag{font-size:0.72rem; color:var(--rose-deep); font-weight:700; margin-bottom:6px;}
+  .p-title{font-family:'Fraunces',serif; font-size:1.12rem; color:var(--burgundy-deep); font-weight:500; margin-bottom:8px; line-height:1.3;}
+  .p-price{font-size:0.92rem; color:var(--ink-soft); font-weight:600;}
+  .p-price b{color:var(--burgundy); font-weight:700;}
+
+  /* ---------- Modal ---------- */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(58,34,38,0.55); backdrop-filter:blur(3px);
+    display:flex; align-items:center; justify-content:center; z-index:100; padding:20px;
+    opacity:0; pointer-events:none; transition:opacity .3s ease;
+  }
+  .modal-overlay.open{opacity:1; pointer-events:auto;}
+  .modal-card{
+    background:var(--paper); border-radius:24px; max-width:820px; width:100%; max-height:88vh;
+    overflow:auto; display:grid; grid-template-columns:1fr 1fr; position:relative;
+    transform:translateY(24px) scale(0.98); transition:transform .35s cubic-bezier(.2,.8,.2,1);
+    box-shadow:0 40px 80px -30px rgba(74,20,29,0.5);
+  }
+  .modal-overlay.open .modal-card{transform:translateY(0) scale(1);}
+  .modal-close{
+    position:absolute; top:16px; right:16px; z-index:5; width:36px; height:36px; border-radius:50%;
+    background:rgba(255,255,255,0.9); border:none; color:var(--burgundy-deep); display:flex; align-items:center; justify-content:center;
+    box-shadow:0 6px 14px -6px rgba(0,0,0,0.3);
+  }
+  .modal-visual{
+    background:linear-gradient(160deg, var(--blush), var(--pastel));
+    display:flex; align-items:center; justify-content:center; padding:40px; min-height:280px;
+  }
+  .modal-visual .frame{width:190px; height:240px; background:var(--paper); border-radius:6px; padding:12px 12px 28px; box-shadow:var(--shadow);}
+  .modal-visual .frame .inner{width:100%; height:100%; border-radius:3px;}
+  .modal-info{padding:34px 32px;}
+  .modal-info .p-tag{margin-bottom:10px;}
+  .modal-info h3{font-family:'Fraunces',serif; font-size:1.5rem; color:var(--burgundy-deep); font-weight:500; margin:0 0 10px; line-height:1.25;}
+  .modal-info .price{font-size:1.05rem; color:var(--burgundy); font-weight:700; margin-bottom:18px;}
+  .modal-info ul{list-style:none; padding:0; margin:0 0 26px; display:flex; flex-direction:column; gap:11px;}
+  .modal-info ul li{display:flex; gap:10px; font-size:0.9rem; color:var(--ink-soft); line-height:1.5;}
+  .modal-info ul li svg{flex-shrink:0; margin-top:2px; color:var(--rose-deep);}
+  .modal-btn{
+    display:flex; align-items:center; justify-content:center; gap:9px; width:100%;
+    background:var(--burgundy); color:var(--cream); padding:15px; border-radius:14px; border:none;
+    font-weight:700; font-size:0.95rem; transition:background .25s ease, transform .25s ease;
+  }
+  .modal-btn:hover{background:var(--burgundy-deep); transform:translateY(-2px);}
+
+  /* ---------- How it works ---------- */
+  .steps{display:grid; grid-template-columns:repeat(3,1fr); gap:30px;}
+  .step-card{position:relative; padding:34px 26px 28px; background:var(--paper); border-radius:20px; border:1px solid var(--line);}
+  .step-num{
+    font-family:'Fraunces',serif; font-size:2.6rem; color:var(--pastel); font-weight:600; line-height:1; margin-bottom:14px;
+    -webkit-text-stroke:1.5px var(--rose-deep); color:transparent;
+  }
+  .step-card h3{font-family:'Fraunces',serif; font-size:1.18rem; color:var(--burgundy-deep); font-weight:500; margin:0 0 8px;}
+  .step-card p{color:var(--ink-soft); font-size:0.92rem; line-height:1.55; margin:0;}
+  .step-connector{position:absolute; top:52px; right:-30px; width:30px; height:1.5px; background:var(--line);}
+  .step-card:last-child .step-connector{display:none;}
+
+  /* ---------- Reviews ---------- */
+  .review-scroller{display:flex; gap:22px; overflow-x:auto; padding:6px 4px 20px; scroll-snap-type:x proximity;}
+  .review-scroller::-webkit-scrollbar{height:6px;}
+  .review-scroller::-webkit-scrollbar-thumb{background:var(--pastel); border-radius:10px;}
+  .r-card{
+    scroll-snap-align:start; flex:0 0 320px; background:var(--paper); border-radius:20px; padding:26px;
+    border:1px solid var(--line); box-shadow:var(--shadow-soft);
+  }
+  .r-stars{color:var(--gold); font-size:0.9rem; margin-bottom:12px; letter-spacing:2px;}
+  .r-text{font-size:0.94rem; color:var(--ink); line-height:1.6; margin-bottom:18px; font-family:'Fraunces',serif; font-style:italic;}
+  .r-who{display:flex; align-items:center; gap:10px;}
+  .r-avatar{
+    width:36px; height:36px; border-radius:50%; background:linear-gradient(145deg,var(--rose),var(--burgundy));
+    display:flex; align-items:center; justify-content:center; color:var(--cream); font-weight:700; font-size:0.85rem;
+  }
+  .r-name{font-size:0.85rem; font-weight:700; color:var(--burgundy-deep);}
+  .r-city{font-size:0.76rem; color:var(--ink-soft);}
+  .scroll-hint{display:flex; align-items:center; gap:8px; font-size:0.8rem; color:var(--ink-soft); margin-bottom:18px;}
+
+  /* ---------- CTA strip ---------- */
+  .cta-strip{
+    background:linear-gradient(120deg, var(--burgundy-deep), var(--burgundy));
+    border-radius:28px; padding:54px 50px; display:flex; align-items:center; justify-content:space-between; gap:30px; flex-wrap:wrap;
+    color:var(--cream);
+  }
+  .cta-strip h2{color:var(--cream); font-size:1.8rem; margin:0 0 8px;}
+  .cta-strip p{color:rgba(255,248,244,0.8); margin:0; max-width:420px; font-size:0.95rem;}
+  .cta-strip .btn-primary{background:var(--cream); color:var(--burgundy-deep);}
+  .cta-strip .btn-primary:hover{background:#fff;}
+
+  /* ---------- Footer ---------- */
+  footer{background:var(--burgundy-deep); color:rgba(255,248,244,0.82); padding:64px 0 28px;}
+  .foot-grid{display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:40px; padding-bottom:40px; border-bottom:1px solid rgba(255,248,244,0.14);}
+  .foot-brand .brand-name{color:var(--cream);}
+  .foot-brand p{font-size:0.88rem; line-height:1.6; color:rgba(255,248,244,0.65); margin:14px 0 18px; max-width:280px;}
+  .foot-social{display:flex; gap:12px;}
+  .foot-social a{
+    width:38px; height:38px; border-radius:50%; border:1px solid rgba(255,248,244,0.28);
+    display:flex; align-items:center; justify-content:center; transition:background .25s ease, border-color .25s ease;
+  }
+  .foot-social a:hover{background:rgba(255,248,244,0.12); border-color:rgba(255,248,244,0.5);}
+  .foot-col h4{font-family:'Fraunces',serif; font-weight:500; font-size:1rem; color:var(--cream); margin:0 0 16px;}
+  .foot-col a, .foot-col p{display:block; font-size:0.87rem; color:rgba(255,248,244,0.68); margin-bottom:11px; transition:color .2s ease;}
+  .foot-col a:hover{color:var(--cream);}
+  .foot-bottom{display:flex; justify-content:space-between; padding-top:24px; font-size:0.78rem; color:rgba(255,248,244,0.55); flex-wrap:wrap; gap:10px;}
+
+  /* ---------- Responsive ---------- */
+  @media (max-width:980px){
+    nav.links{display:none;}
+    .menu-btn{display:flex;}
+    .hero-grid{grid-template-columns:1fr;}
+    .stack{height:360px; order:-1; margin-bottom:10px;}
+    .trust-row{flex-direction:column; gap:14px;}
+    .trust-item{border-left:none !important; padding-left:0 !important; display:flex; align-items:baseline; gap:10px; padding-right:0;}
+    .trust-item + .trust-item{border-top:1px solid var(--line); padding-top:14px;}
+    .grid-products{grid-template-columns:repeat(2,1fr);}
+    .steps{grid-template-columns:1fr;}
+    .step-connector{display:none;}
+    .modal-card{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr 1fr; gap:32px;}
+    .cta-strip{padding:40px 28px;}
+  }
+  @media (max-width:560px){
+    .grid-products{grid-template-columns:1fr;}
+    .foot-grid{grid-template-columns:1fr;}
+    .whatsapp-pill span{display:none;}
+    .whatsapp-pill{padding:10px 14px;}
+  }
+
+  /* mobile nav drawer */
+  .mobile-nav{
+    position:fixed; inset:78px 0 0 0; background:var(--cream); z-index:49; padding:30px 24px;
+    display:flex; flex-direction:column; gap:22px; transform:translateX(100%); transition:transform .3s ease;
+  }
+  .mobile-nav.open{transform:translateX(0);}
+  .mobile-nav a{font-family:'Fraunces',serif; font-size:1.4rem; color:var(--burgundy-deep);}
+</style>
+</head>
+<body>
+
+<!-- ================= HEADER ================= -->
+<header>
+  <div class="container nav-wrap">
+    <a href="#home" class="brand">
+      <span class="brand-mark">M</span>
+      <span class="brand-name">Memories n Beyond<span>HANDMADE &amp; PERSONALIZED</span></span>
+    </a>
+    <nav class="links">
+      <a href="#home">Home</a>
+      <a href="#collection">Categories</a>
+      <a href="#custom">Custom Orders</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <a class="whatsapp-pill" target="_blank" rel="noopener" href="https://wa.me/919999999999?text=Hi%20Memories%20n%20Beyond%2C%20I%27d%20like%20to%20place%20an%20order.">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.27-1.38a9.9 9.9 0 0 0 4.77 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.85 9.85 0 0 0 12.04 2zm5.78 14.15c-.24.68-1.39 1.3-1.92 1.37-.49.07-1.1.1-1.78-.11-.41-.13-.94-.3-1.62-.6-2.85-1.23-4.71-4.1-4.85-4.29-.14-.19-1.15-1.53-1.15-2.92 0-1.39.73-2.07.99-2.35.26-.28.56-.35.75-.35.19 0 .38 0 .54.01.17.01.4-.07.63.48.24.58.81 2 .88 2.14.07.14.12.31.02.5-.1.19-.14.31-.28.48-.14.17-.29.37-.42.5-.14.14-.28.29-.12.56.16.28.71 1.17 1.52 1.9 1.04.94 1.93 1.23 2.2 1.37.28.14.44.12.6-.07.17-.19.71-.82.9-1.11.19-.28.38-.23.63-.14.26.09 1.63.77 1.91.91.28.14.47.21.53.33.07.12.07.68-.16 1.36z"/></svg>
+        <span>Order via WhatsApp</span>
+      </a>
+      <button class="menu-btn" id="menuBtn" aria-label="Menu">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="mobile-nav" id="mobileNav">
+    <a href="#home">Home</a>
+    <a href="#collection">Categories</a>
+    <a href="#custom">Custom Orders</a>
+    <a href="#reviews">Reviews</a>
+    <a href="#contact">Contact</a>
+  </div>
+</header>
+
+<a class="float-wa" target="_blank" rel="noopener" href="https://wa.me/919999999999?text=Hi%20Memories%20n%20Beyond%2C%20I%27d%20like%20to%20place%20an%20order." aria-label="Order via WhatsApp">
+  <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.27-1.38a9.9 9.9 0 0 0 4.77 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.85 9.85 0 0 0 12.04 2zm5.78 14.15c-.24.68-1.39 1.3-1.92 1.37-.49.07-1.1.1-1.78-.11-.41-.13-.94-.3-1.62-.6-2.85-1.23-4.71-4.1-4.85-4.29-.14-.19-1.15-1.53-1.15-2.92 0-1.39.73-2.07.99-2.35.26-.28.56-.35.75-.35.19 0 .38 0 .54.01.17.01.4-.07.63.48.24.58.81 2 .88 2.14.07.14.12.31.02.5-.1.19-.14.31-.28.48-.14.17-.29.37-.42.5-.14.14-.28.29-.12.56.16.28.71 1.17 1.52 1.9 1.04.94 1.93 1.23 2.2 1.37.28.14.44.12.6-.07.17-.19.71-.82.9-1.11.19-.28.38-.23.63-.14.26.09 1.63.77 1.91.91.28.14.47.21.53.33.07.12.07.68-.16 1.36z"/></svg>
+</a>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="home">
+  <div class="container hero-grid">
+    <div>
+      <div class="eyebrow-line"><span class="dash"></span> Handmade in India, for the people you love</div>
+      <h1>Turning Your Precious Moments Into Timeless Keepsakes.</h1>
+      <p class="lede">Send us your favourite photographs and a few words, and we'll turn them into a frame, a bouquet, or a keepsake box that's made to be kept — not scrolled past.</p>
+      <div class="hero-ctas">
+        <a href="#collection" class="btn-primary">Explore Collection</a>
+        <a href="https://wa.me/919999999999" target="_blank" rel="noopener" class="btn-ghost">Chat on WhatsApp</a>
+      </div>
+      <div class="trust-row">
+        <div class="trust-item"><div class="trust-num">100+</div><div class="trust-label">Orders Delivered</div></div>
+        <div class="trust-item"><div class="trust-num">PAN India</div><div class="trust-label">Shipping to every pincode</div></div>
+        <div class="trust-item"><div class="trust-num">100%</div><div class="trust-label">Handcrafted with Love</div></div>
+      </div>
+    </div>
+    <div class="stack" aria-hidden="true">
+      <div class="twine"></div>
+      <div class="polaroid p2"><div class="photo"></div><div class="cap">forever &amp; always</div></div>
+      <div class="polaroid p3"><div class="photo"></div><div class="cap">our little world</div></div>
+      <div class="polaroid p1"><div class="photo"></div><div class="cap">that summer, us</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRODUCT SHOWCASE ================= -->
+<section class="section" id="collection">
+  <div class="container">
+    <div class="section-head">
+      <h2>Every piece starts with your photograph</h2>
+      <p>Browse by what you're celebrating — each item is made to order, so sizes and finishes can flex around your gift.</p>
+    </div>
+    <div class="filters" id="filters">
+      <button class="filter-btn active" data-cat="all">All</button>
+      <button class="filter-btn" data-cat="frames">Custom Photo Frames</button>
+      <button class="filter-btn" data-cat="bouquets">Polaroid Bouquets</button>
+      <button class="filter-btn" data-cat="birthday">Birthday Specials</button>
+      <button class="filter-btn" data-cat="couple">Couple Keepsakes</button>
+    </div>
+    <div class="grid-products" id="productGrid"></div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="section section-alt" id="custom">
+  <div class="container">
+    <div class="section-head">
+      <h2>From your camera roll to their doorstep</h2>
+      <p>Three steps, and we handle the rest — printing, assembly, and packaging included.</p>
+    </div>
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-num">1</div>
+        <h3>Choose your gift</h3>
+        <p>Pick a frame, bouquet, or keepsake box that fits the occasion — or tell us what you have in mind.</p>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">2</div>
+        <h3>Send your photos &amp; custom text</h3>
+        <p>Share your pictures and the words you want engraved or printed, straight over WhatsApp.</p>
+        <div class="step-connector"></div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">3</div>
+        <h3>Delivered to your doorstep</h3>
+        <p>We craft, pack, and ship it to any address in India, tracked from our workshop to your door.</p>
+        <div class="step-connector"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVIEWS ================= -->
+<section class="section" id="reviews">
+  <div class="container">
+    <div class="section-head">
+      <h2>Customer love, unboxed</h2>
+      <p>Real notes from people who've gifted (and kept) something made by us.</p>
+    </div>
+    <div class="scroll-hint">Scroll to see more →</div>
+    <div class="review-scroller" id="reviewScroller"></div>
+  </div>
+</section>
+
+<!-- ================= CTA STRIP ================= -->
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="cta-strip">
+      <div>
+        <h2>Have something specific in mind?</h2>
+        <p>Tell us the story, the person, and the occasion — we'll turn it into a one-of-a-kind piece.</p>
+      </div>
+      <a href="https://wa.me/919999999999?text=Hi%2C%20I%27d%20like%20to%20discuss%20a%20custom%20order." target="_blank" rel="noopener" class="btn-primary">Start a Custom Order</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer id="contact">
+  <div class="container">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a href="#home" class="brand"><span class="brand-mark">M</span><span class="brand-name">Memories n Beyond</span></a>
+        <p>Handmade, personalized keepsakes crafted from your photographs — made in small batches, shipped across India.</p>
+        <div class="foot-social">
+          <a href="https://instagram.com/memories.n.beyond" target="_blank" rel="noopener" aria-label="Instagram">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="0.8" fill="currentColor" stroke="none"/></svg>
+          </a>
+          <a href="https://wa.me/919999999999" target="_blank" rel="noopener" aria-label="WhatsApp">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.27-1.38a9.9 9.9 0 0 0 4.77 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.85 9.85 0 0 0 12.04 2z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Shop</h4>
+        <a href="#collection">Custom Photo Frames</a>
+        <a href="#collection">Polaroid Bouquets</a>
+        <a href="#collection">Birthday Specials</a>
+        <a href="#collection">Couple Keepsakes</a>
+      </div>
+      <div class="foot-col">
+        <h4>Support</h4>
+        <a href="#">FAQs</a>
+        <a href="#">Shipping Policy</a>
+        <a href="#">Return &amp; Refund</a>
+        <a href="#custom">Track My Order</a>
+      </div>
+      <div class="foot-col">
+        <h4>Reach Us</h4>
+        <p>@memories.n.beyond</p>
+        <p>hello@memoriesnbeyond.in</p>
+        <p>+91 99999 99999</p>
+        <p>Shipping PAN India</p>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Memories n Beyond. All rights reserved.</span>
+      <span>Made with care, one photograph at a time.</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ================= MODAL ================= -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-card" id="modalCard"></div>
+</div>
+
+<script>
+  const products = [
+    {
+      id:1, cat:'frames', tag:'Custom Photo Frame',
+      title:'Moonlight Memory Frame', price:499,
+      gradient:'linear-gradient(150deg,#E8B8AE,#C98D89 55%,#8A4A47)',
+      details:[
+        'Upload 1 photograph in high resolution (min 1000px)',
+        'Custom text engraving, up to 40 characters',
+        'Available in 5x7in and 8x10in frame sizes',
+        'Matte or gloss print finish'
+      ]
+    },
+    {
+      id:2, cat:'frames', tag:'Custom Photo Frame',
+      title:'Vintage Wooden Frame Set', price:899,
+      gradient:'linear-gradient(150deg,#F0D6C8,#B98A4E 55%,#6E1F2B)',
+      details:[
+        'Upload up to 3 photographs for a triple-frame set',
+        'Personalized nameplate with date, up to 25 characters',
+        'Solid wood frame with antique finish',
+        'Free-standing or wall-mount options'
+      ]
+    },
+    {
+      id:3, cat:'bouquets', tag:'Polaroid Bouquet',
+      title:'Blush Polaroid Bouquet', price:649,
+      gradient:'linear-gradient(150deg,#F3E2D4,#EFC6C0 55%,#C98D89)',
+      details:[
+        'Upload 6–9 photographs for individual polaroid prints',
+        'Handmade paper flower stems in blush &amp; cream',
+        'Wrapped in kraft paper with a satin ribbon',
+        'Optional short note card, up to 60 characters'
+      ]
+    },
+    {
+      id:4, cat:'bouquets', tag:'Polaroid Bouquet',
+      title:'Rosewood Polaroid Bunch', price:799,
+      gradient:'linear-gradient(150deg,#E9C7C2,#A9645F 55%,#4A141D)',
+      details:[
+        'Upload up to 12 photographs, mixed portrait &amp; landscape',
+        'Dried rose accents between each polaroid stem',
+        'Comes in a rigid gift box, ready to hand over',
+        'Ribbon colour customizable on request'
+      ]
+    },
+    {
+      id:5, cat:'birthday', tag:'Birthday Special',
+      title:'Birthday Wish Jar', price:549,
+      gradient:'linear-gradient(150deg,#F6DEDA,#EFC6C0 50%,#B4884E)',
+      details:[
+        'Upload up to 10 photographs for mini keepsake cards',
+        'Each card can carry a short handwritten wish, 30 characters',
+        'Glass jar with a hand-tied twine bow',
+        'Best for 18th, 21st, and milestone birthdays'
+      ]
+    },
+    {
+      id:6, cat:'birthday', tag:'Birthday Special',
+      title:'Milestone Memory Box', price:1299,
+      gradient:'linear-gradient(150deg,#EFC6C0,#C98D89 50%,#6E1F2B)',
+      details:[
+        'Upload up to 20 photographs spanning the years',
+        'Compartments for small mementos alongside prints',
+        'Engraved wooden lid with name &amp; milestone age',
+        'Comes fully assembled in a gift-ready box'
+      ]
+    },
+    {
+      id:7, cat:'couple', tag:'Couple Keepsake',
+      title:'Us, In Every Season Frame', price:999,
+      gradient:'linear-gradient(150deg,#E8B8AE,#8A4A47 55%,#4A141D)',
+      details:[
+        'Upload 4 photographs, one for each season together',
+        'Custom text for a relationship date or shared quote',
+        'Four-panel frame in warm walnut finish',
+        'Available in tabletop or wall-hung format'
+      ]
+    },
+    {
+      id:8, cat:'couple', tag:'Couple Keepsake',
+      title:'Love Letter Keepsake Box', price:1199,
+      gradient:'linear-gradient(150deg,#F0D6C8,#C98D89 50%,#6E1F2B)',
+      details:[
+        'Upload up to 15 photographs for a layered flip-book',
+        'Space for a handwritten letter, up to 300 characters',
+        'Velvet-lined wooden box with brass clasp',
+        'A popular choice for anniversaries &amp; proposals'
+      ]
+    }
+  ];
+
+  const reviews = [
+    {name:'Ananya R.', city:'Bengaluru', stars:5, text:'The polaroid bouquet arrived exactly how I imagined it, maybe even better. My mother kept looking at it all evening.'},
+    {name:'Karthik S.', city:'Chennai', stars:5, text:'Ordered the couple frame for our anniversary. The packaging alone felt like a gift before we even opened it.'},
+    {name:'Priya M.', city:'Delhi', stars:5, text:'Customer support on WhatsApp was so patient with my last-minute photo changes. Delivered a day early too.'},
+    {name:'Rohit V.', city:'Pune', stars:5, text:'The memory box for my dad\\'s 60th had photos from decades ago. He didn\\'t say much, just held it for a while.'},
+    {name:'Sneha K.', city:'Mumbai', stars:5, text:'Second time ordering. The wooden frame set is sturdier and prettier in person than in the photos online.'},
+    {name:'Aditya J.', city:'Hyderabad', stars:5, text:'Sent a birthday wish jar as a surprise, and the recipient called me in tears. Worth every rupee.'}
+  ];
+
+  const grid = document.getElementById('productGrid');
+  function renderProducts(filter){
+    grid.innerHTML = '';
+    products.filter(p => filter === 'all' || p.cat === filter).forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'p-card';
+      card.innerHTML = `
+        <div class="p-visual" style="background:var(--blush);">
+          <div class="frame"><div class="inner" style="background:${p.gradient}"></div></div>
+          <div class="quick">Quick View · Details</div>
+        </div>
+        <div class="p-body">
+          <div class="p-tag">${p.tag}</div>
+          <div class="p-title">${p.title}</div>
+          <div class="p-price">Starting at <b>₹${p.price}</b></div>
+        </div>
+      `;
+      card.addEventListener('click', () => openModal(p));
+      grid.appendChild(card);
+    });
+  }
+  renderProducts('all');
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProducts(btn.dataset.cat);
+    });
+  });
+
+  const scroller = document.getElementById('reviewScroller');
+  reviews.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'r-card';
+    card.innerHTML = `
+      <div class="r-stars">${'★'.repeat(r.stars)}</div>
+      <div class="r-text">"${r.text}"</div>
+      <div class="r-who">
+        <div class="r-avatar">${r.name.charAt(0)}</div>
+        <div>
+          <div class="r-name">${r.name}</div>
+          <div class="r-city">${r.city}</div>
+        </div>
+      </div>
+    `;
+    scroller.appendChild(card);
+  });
+
+  const overlay = document.getElementById('modalOverlay');
+  const modalCard = document.getElementById('modalCard');
+  function openModal(p){
+    const waText = encodeURIComponent(`Hi! I'd like to customize the "${p.title}" (₹${p.price}).`);
+    modalCard.innerHTML = `
+      <button class="modal-close" id="modalClose" aria-label="Close">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg>
+      </button>
+      <div class="modal-visual">
+        <div class="frame"><div class="inner" style="background:${p.gradient}"></div></div>
+      </div>
+      <div class="modal-info">
+        <div class="p-tag">${p.tag}</div>
+        <h3>${p.title}</h3>
+        <div class="price">Starting at ₹${p.price}</div>
+        <ul>
+          ${p.details.map(d => `<li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg><span>${d}</span></li>`).join('')}
+        </ul>
+        <a class="modal-btn" target="_blank" rel="noopener" href="https://wa.me/919999999999?text=${waText}">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.46 1.32 4.96L2 22l5.27-1.38a9.9 9.9 0 0 0 4.77 1.22h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.85 9.85 0 0 0 12.04 2z"/></svg>
+          Customize on WhatsApp
+        </a>
+      </div>
+    `;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+  }
+  function closeModal(){
+    overlay.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  overlay.addEventListener('click', e => { if(e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileNav = document.getElementById('mobileNav');
+  menuBtn.addEventListener('click', () => mobileNav.classList.toggle('open'));
+  mobileNav.querySelectorAll('a').forEach(a => a.addEventListener('click', () => mobileNav.classList.remove('open')));
+</script>
+</body>
+</html>
