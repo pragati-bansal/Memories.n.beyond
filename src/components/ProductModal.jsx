@@ -24,6 +24,12 @@ export default function ProductModal({ product, onClose }) {
   const [uploadError, setUploadError] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
+  // Selected size & dynamic price
+  const [selectedSize, setSelectedSize] = useState(
+    product.selectedSize || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : null)
+  );
+  const currentPrice = selectedSize ? selectedSize.price : product.price;
+
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919999999999';
 
   // Keyboard close on Escape
@@ -104,7 +110,9 @@ export default function ProductModal({ product, onClose }) {
       // Construct formatted WhatsApp message
       const lines = [
         `🌸 *NEW CUSTOM ORDER REQUEST* 🌸`,
-        `*Product:* ${product.title} (₹${product.price})`,
+        `*Product:* ${product.title}`,
+        `*Selected Size/Option:* ${selectedSize ? (selectedSize.label || selectedSize.size) : 'Standard'}`,
+        `*Price:* ₹${currentPrice}`,
       ];
 
       if (customerName.trim()) {
@@ -238,14 +246,45 @@ export default function ProductModal({ product, onClose }) {
                 <h2 className="font-serif text-2xl sm:text-3xl font-medium text-burgundy-deep mb-2">
                   {product.title}
                 </h2>
-                <div className="flex items-baseline gap-2 mb-6">
+                <div className="flex items-baseline gap-2 mb-4">
                   <span className="font-serif text-2xl font-bold text-burgundy">
-                    ₹{product.price}
+                    ₹{currentPrice}
                   </span>
                   <span className="text-xs text-ink-soft font-semibold">
-                    (Includes personalization &amp; packaging)
+                    {selectedSize ? `(${selectedSize.label || selectedSize.size})` : '(Includes personalization & packaging)'}
                   </span>
                 </div>
+
+                {/* Size / Variant Options Picker */}
+                {product.sizes && product.sizes.length > 0 && (
+                  <div className="mb-6 bg-blush/30 p-3.5 rounded-2xl border border-burgundy/10">
+                    <span className="block text-xs font-bold text-burgundy-deep uppercase tracking-wider mb-2">
+                      Choose Size / Format:
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {product.sizes.map((s) => {
+                        const isSelected = selectedSize?.size === s.size;
+                        return (
+                          <button
+                            key={s.size}
+                            type="button"
+                            onClick={() => setSelectedSize(s)}
+                            className={`p-2.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+                              isSelected
+                                ? 'bg-burgundy text-cream border-burgundy shadow-sm'
+                                : 'bg-paper text-ink-soft border-burgundy/15 hover:border-rose/50 hover:bg-cream'
+                            }`}
+                          >
+                            <span className="text-xs font-semibold">{s.size}</span>
+                            <span className={`text-xs font-bold ${isSelected ? 'text-cream' : 'text-burgundy'}`}>
+                              ₹{s.price}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
 
                 {/* Customization Form */}
                 <form onSubmit={handleProceedToWhatsApp} className="space-y-4">

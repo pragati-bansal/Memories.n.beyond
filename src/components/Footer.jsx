@@ -14,12 +14,12 @@ export default function Footer() {
             <div className="flex items-center gap-3">
               <img
                 src={logoImg}
-                alt="Memories n Beyond"
-                className="w-11 h-11 rounded-xl object-cover shadow-sm border border-cream/20"
+                alt="memories n beyond"
+                className="w-12 h-12 rounded-full object-cover shadow-sm border border-cream/20"
               />
               <div>
-                <span className="font-serif text-2xl font-medium text-cream block leading-tight">
-                  Memories n Beyond
+                <span className="font-script text-2xl sm:text-3xl text-cream block leading-none pt-0.5 tracking-wide">
+                  memories n beyond
                 </span>
                 <span className="font-sans text-xs tracking-wide text-blush block font-medium">
                   Where feelings find forms

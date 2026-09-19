@@ -38,6 +38,8 @@ export default {
       fontFamily: {
         serif: ['Fraunces', 'serif'],
         sans: ['Manrope', 'sans-serif'],
+        script: ["'Alex Brush'", "'Great Vibes'", 'cursive'],
+        handwriting: ["'Caveat'", "'Dancing Script'", 'cursive'],
       },
       boxShadow: {
         'craft-sm': '0 4px 14px -4px rgba(74, 20, 29, 0.15)',

@@ -3,12 +3,22 @@ import { MessageCircle, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import logoImg from '../assets/logo.png';
 
-export default function Navbar() {
+export default function Navbar({ onNavigateHome, onNavigateCategories }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919999999999';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hi Memories n Beyond, I'd like to place an order."
   )}`;
+
+  const handleLinkClick = (e, href) => {
+    if (href === '#home' && onNavigateHome) {
+      e.preventDefault();
+      onNavigateHome();
+    } else if (href === '#collection' && onNavigateCategories) {
+      e.preventDefault();
+      onNavigateCategories();
+    }
+  };
 
   const navLinks = [
     { name: 'Home', href: '#home' },
@@ -22,15 +32,19 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 bg-cream/85 backdrop-blur-md border-b border-burgundy/10 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         {/* Brand Logo */}
-        <a href="#home" className="flex items-center gap-3 group">
+        <a
+          href="#home"
+          onClick={(e) => handleLinkClick(e, '#home')}
+          className="flex items-center gap-3 group"
+        >
           <img
             src={logoImg}
-            alt="Memories n Beyond"
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover shadow-craft-sm group-hover:scale-105 transition-transform border border-burgundy/10"
+            alt="memories n beyond"
+            className="w-12 h-12 sm:w-13 sm:h-13 rounded-full object-cover shadow-craft-sm group-hover:scale-105 transition-transform border-2 border-burgundy/15"
           />
           <div className="leading-tight">
-            <span className="font-serif text-xl sm:text-2xl font-medium text-burgundy-deep block tracking-tight">
-              Memories n Beyond
+            <span className="font-script text-2xl sm:text-3xl text-burgundy-deep block leading-none pt-0.5 tracking-wide">
+              memories n beyond
             </span>
             <span className="block font-sans text-[11px] sm:text-xs tracking-wide text-rose-deep font-semibold">
               Where feelings find forms
@@ -44,6 +58,7 @@ export default function Navbar() {
             <a
               key={link.name}
               href={link.href}
+              onClick={(e) => handleLinkClick(e, link.href)}
               className="text-sm font-semibold text-ink-soft hover:text-burgundy-deep relative py-1 transition-colors group"
             >
               {link.name}
@@ -91,7 +106,10 @@ export default function Navbar() {
                 <a
                   key={link.name}
                   href={link.href}
-                  onClick={() => setIsMobileMenuOpen(false)}
+                  onClick={(e) => {
+                    setIsMobileMenuOpen(false);
+                    handleLinkClick(e, link.href);
+                  }}
                   className="font-serif text-xl font-medium text-burgundy-deep hover:text-rose-deep transition-colors py-1"
                 >
                   {link.name}
