@@ -3,6 +3,7 @@ import giftBoxImg from '../assets/hero/gift-box.jpg';
 import polaroidBouquetImg from '../assets/hero/polaroid-bouquet.jpg';
 import lilyBouquetImg from '../assets/hero/pipe-cleaner-lily.jpg';
 import embroideredImg from '../assets/hero/embroidered-keepsake.jpg';
+import hamperBouquetImg from '../assets/hero/hamper-bouquet.jpg';
 
 export const initialProducts = [
   // ===================== 1. FRAMES =====================
@@ -174,6 +175,7 @@ export const initialProducts = [
     description: 'Black and gold heart wrapped luxury gift hamper boxes sealed with custom MB emblem. Packed with couple figurines, custom frames, personalized letters, and artisanal chocolates.',
     gradient: 'linear-gradient(150deg,#EFC6C0,#C98D89 50%,#6E1F2B)',
     images: [
+      hamperBouquetImg,
       giftBoxImg,
       'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80',
     ],

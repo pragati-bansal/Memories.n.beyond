@@ -33,7 +33,7 @@ export default function HeroSection() {
 
             {/* Main Heading */}
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-medium text-burgundy-deep leading-[1.12] tracking-tight">
-              gift that feels made{' '}
+              gifts that feels made{' '}
               <span className="italic font-normal text-rose-deep">specifically</span> for that person
             </h1>
 

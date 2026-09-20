@@ -1,8 +1,9 @@
 import React from 'react';
-import { ArrowRight, Sparkles, ShieldCheck, Truck, Eye } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import customFramesImg from '../assets/hero/custom-frames.jpg';
 import giftBoxImg from '../assets/hero/gift-box.jpg';
-import polaroidBouquetImg from '../assets/hero/polaroid-bouquet.jpg';
+import hamperBouquetImg from '../assets/hero/hamper-bouquet.jpg';
+import embroideredKeepsakeImg from '../assets/hero/embroidered-keepsake.jpg';
 
 export default function ProductGrid({ onNavigateToCategory }) {
   // 4 Big Category Definitions (Strictly NO prices mentioned here)
@@ -32,7 +33,7 @@ export default function ProductGrid({ onNavigateToCategory }) {
       title: 'Hampers',
       subtitle: 'Curated luxury keepsake boxes, explosion surprise boxes & themed gift sets sealed with gold foil elegance.',
       tag: 'Gift Hampers',
-      image: giftBoxImg,
+      image: hamperBouquetImg,
       highlights: ['Multiple Box Sizes & Configurations', 'Rigid Reusable Keepsake Boxes', 'Couple Figurines & Treats Included'],
       badge: 'Luxury Packaging',
       actionText: 'Explore Hampers & Sizes',
@@ -42,33 +43,10 @@ export default function ProductGrid({ onNavigateToCategory }) {
       title: 'Add ons',
       subtitle: 'Handmade forever flowers, polaroid memory bouquets, customized handkerchiefs & delicate keepsakes.',
       tag: 'Handmade Add-ons',
-      image: polaroidBouquetImg,
+      image: embroideredKeepsakeImg,
       highlights: ['Polaroid Memory Bouquets', 'Embroidered Keepsake Hankies', 'Pipe Cleaner Forever Lilies'],
       badge: 'Handcrafted',
       actionText: 'Explore Add-ons & Sizes',
-    },
-  ];
-
-  const craftPromises = [
-    {
-      icon: Sparkles,
-      title: '100% Bespoke Crafting',
-      desc: 'Each creation is customized by hand specifically around your personal photographs and words.',
-    },
-    {
-      icon: Eye,
-      title: 'WhatsApp Proof Approval',
-      desc: 'We preview your magazine spread and frame layouts on WhatsApp before we print or craft.',
-    },
-    {
-      icon: ShieldCheck,
-      title: 'Archival Museum Quality',
-      desc: 'Non-fading photo prints, shatter-resistant acrylic, and durable luxury rigid boxes.',
-    },
-    {
-      icon: Truck,
-      title: 'Safe PAN-India Shipping',
-      desc: 'Multi-layer bubble cushioning ensuring your gift arrives pristine and ready to surprise.',
     },
   ];
 
@@ -84,7 +62,7 @@ export default function ProductGrid({ onNavigateToCategory }) {
         </div>
 
         {/* 4 Big Category Sections (NO prices mentioned on these cards) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7 mb-14">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
           {mainCategories.map((cat, idx) => (
             <div
               key={cat.id}
@@ -159,44 +137,6 @@ export default function ProductGrid({ onNavigateToCategory }) {
             </div>
           ))}
         </div>
-
-        {/* Supportive Craft Promise Banner */}
-        <div className="bg-gradient-to-r from-paper via-cream-deep to-paper rounded-3xl border border-burgundy/15 p-6 sm:p-8 shadow-craft-soft">
-          <div className="text-center max-w-2xl mx-auto mb-8">
-            <span className="text-rose-deep text-xs font-bold uppercase tracking-widest block mb-1">
-              Handcrafted With Love &amp; Care
-            </span>
-            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-burgundy-deep">
-              How our 4 collections bring your memories to life
-            </h3>
-            <p className="text-xs sm:text-sm text-ink-soft mt-1">
-              Click into any collection above to view available sizes, layout dimensions, and prices.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {craftPromises.map((item, index) => {
-              const Icon = item.icon;
-              return (
-                <div
-                  key={index}
-                  className="bg-cream/70 rounded-2xl p-4 sm:p-5 border border-burgundy/10 flex flex-col justify-start hover:border-rose/50 transition-colors"
-                >
-                  <div className="w-9 h-9 rounded-xl bg-blush flex items-center justify-center text-burgundy mb-3 shadow-craft-sm">
-                    <Icon className="w-5 h-5" />
-                  </div>
-                  <h4 className="font-bold text-sm text-burgundy-deep mb-1 font-serif">
-                    {item.title}
-                  </h4>
-                  <p className="text-xs text-ink-soft leading-relaxed">
-                    {item.desc}
-                  </p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
       </div>
     </section>
   );

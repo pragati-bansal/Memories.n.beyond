@@ -13,6 +13,8 @@ import {
 import customFramesImg from '../assets/hero/custom-frames.jpg';
 import giftBoxImg from '../assets/hero/gift-box.jpg';
 import polaroidBouquetImg from '../assets/hero/polaroid-bouquet.jpg';
+import hamperBouquetImg from '../assets/hero/hamper-bouquet.jpg';
+import embroideredKeepsakeImg from '../assets/hero/embroidered-keepsake.jpg';
 
 const categoryMeta = {
   frames: {
@@ -59,7 +61,7 @@ const categoryMeta = {
     id: 'hampers',
     title: 'Curated Luxury Gift Hampers',
     tagline: 'Exquisite rigid gift boxes & explosion boxes loaded with handmade surprises, frames & figurines.',
-    image: giftBoxImg,
+    image: hamperBouquetImg,
     badge: 'Signature Keepsake Hampers',
     features: [
       'Signature Black & Gold MB Seal Packaging',
@@ -79,7 +81,7 @@ const categoryMeta = {
     id: 'addons',
     title: 'Handmade Add-ons & Keepsakes',
     tagline: 'Forever floral bouquets, polaroid arrangements & personalized embroidered treasures.',
-    image: polaroidBouquetImg,
+    image: embroideredKeepsakeImg,
     badge: 'Bespoke Artisan Add-ons',
     features: [
       'Real Polaroid Memory Bouquets',
