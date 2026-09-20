@@ -23,9 +23,9 @@ export default {
           deep: '#A9645F',
         },
         burgundy: {
-          light: '#881337',
-          DEFAULT: '#6E1F2B',
-          deep: '#4A141D',
+          light: '#BD163A',
+          DEFAULT: '#A10B2B',
+          deep: '#780820',
         },
         ink: {
           DEFAULT: '#3A2226',
@@ -33,7 +33,7 @@ export default {
         },
         paper: '#FFFDFB',
         gold: '#B4884E',
-        craftLine: 'rgba(110, 31, 43, 0.14)',
+        craftLine: 'rgba(161, 11, 43, 0.14)',
       },
       fontFamily: {
         serif: ['Fraunces', 'serif'],
@@ -43,10 +43,10 @@ export default {
         handwriting: ["'Caveat'", "'Dancing Script'", 'cursive'],
       },
       boxShadow: {
-        'craft-sm': '0 4px 14px -4px rgba(74, 20, 29, 0.15)',
-        'craft-soft': '0 10px 30px -18px rgba(74, 20, 29, 0.28)',
-        'craft-lg': '0 20px 50px -25px rgba(74, 20, 29, 0.35)',
-        'craft-modal': '0 40px 80px -30px rgba(74, 20, 29, 0.50)',
+        'craft-sm': '0 4px 14px -4px rgba(161, 11, 43, 0.15)',
+        'craft-soft': '0 10px 30px -18px rgba(161, 11, 43, 0.28)',
+        'craft-lg': '0 20px 50px -25px rgba(161, 11, 43, 0.35)',
+        'craft-modal': '0 40px 80px -30px rgba(161, 11, 43, 0.50)',
         'pink-glow': '0 10px 25px -5px rgba(251, 113, 133, 0.3)',
       },
       borderRadius: {

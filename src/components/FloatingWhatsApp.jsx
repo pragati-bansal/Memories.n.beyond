@@ -3,7 +3,7 @@ import { motion } from 'framer-motion';
 import { MessageCircle } from 'lucide-react';
 
 export default function FloatingWhatsApp() {
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919999999999';
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hi Memories n Beyond, I'd like to place an order."
   )}`;

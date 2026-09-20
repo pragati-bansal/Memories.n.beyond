@@ -30,7 +30,7 @@ export default function ProductModal({ product, onClose }) {
   );
   const currentPrice = selectedSize ? selectedSize.price : product.price;
 
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919999999999';
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
   // Keyboard close on Escape
   useEffect(() => {

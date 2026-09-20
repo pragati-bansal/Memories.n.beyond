@@ -5,7 +5,7 @@ import logoImg from '../assets/logo.png';
 
 export default function Navbar({ onNavigateHome, onNavigateCategories }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919999999999';
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hi Memories n Beyond, I'd like to place an order."
   )}`;
@@ -14,7 +14,7 @@ export default function Navbar({ onNavigateHome, onNavigateCategories }) {
     if (href === '#home' && onNavigateHome) {
       e.preventDefault();
       onNavigateHome();
-    } else if (href === '#collection' && onNavigateCategories) {
+    } else if ((href === '#collection' || href === '#category/frames') && onNavigateCategories) {
       e.preventDefault();
       onNavigateCategories();
     }
@@ -22,7 +22,7 @@ export default function Navbar({ onNavigateHome, onNavigateCategories }) {
 
   const navLinks = [
     { name: 'Home', href: '#home' },
-    { name: 'Categories', href: '#collection' },
+    { name: 'Categories', href: '#category/frames' },
     { name: 'How It Works', href: '#custom' },
     { name: 'Reviews', href: '#reviews' },
     { name: 'Contact', href: '#contact' },
@@ -42,11 +42,11 @@ export default function Navbar({ onNavigateHome, onNavigateCategories }) {
             alt="memories n beyond"
             className="w-12 h-12 sm:w-13 sm:h-13 rounded-full object-cover shadow-craft-sm group-hover:scale-105 transition-transform border-2 border-burgundy/15"
           />
-          <div className="leading-tight">
+          <div className="flex flex-col justify-center">
             <span className="font-script text-2xl sm:text-[32px] text-burgundy-deep block leading-none pt-1">
               memories n beyond
             </span>
-            <span className="block font-sans text-[11px] sm:text-xs tracking-wide text-rose-deep font-semibold">
+            <span className="block font-sans text-[11px] sm:text-xs tracking-wide text-rose-deep font-semibold mt-2 sm:mt-2.5">
               Where feelings find forms
             </span>
           </div>

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
-import ProductGrid from './components/ProductGrid';
 import HowItWorks from './components/HowItWorks';
 import ReviewSection from './components/ReviewSection';
 import CtaStrip from './components/CtaStrip';
@@ -24,6 +23,10 @@ export default function App() {
           setActiveCategory(cat);
           return;
         }
+      }
+      if (hash === '#collection') {
+        setActiveCategory('frames');
+        return;
       }
       setActiveCategory(null);
     };
@@ -48,16 +51,7 @@ export default function App() {
   };
 
   const navigateToCategoriesOverview = () => {
-    setActiveCategory(null);
-    window.location.hash = '#collection';
-    setTimeout(() => {
-      const el = document.getElementById('collection');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    }, 50);
+    navigateToCategory('frames');
   };
 
   return (
@@ -75,14 +69,13 @@ export default function App() {
           <CategoryPage
             categoryId={activeCategory}
             onSelectCategory={navigateToCategory}
-            onBackToHome={navigateToCategoriesOverview}
+            onBackToHome={navigateToHome}
             onSelectProduct={(product) => setSelectedProduct(product)}
           />
         ) : (
           /* Home Page Experience */
           <>
-            <HeroSection />
-            <ProductGrid onNavigateToCategory={navigateToCategory} />
+            <HeroSection onNavigateToCategory={navigateToCategory} />
             <HowItWorks />
             <ReviewSection />
             <CtaStrip />

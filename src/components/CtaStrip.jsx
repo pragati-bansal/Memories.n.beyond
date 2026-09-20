@@ -2,7 +2,7 @@ import React from 'react';
 import { MessageCircle, Sparkles } from 'lucide-react';
 
 export default function CtaStrip() {
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919999999999';
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
   const customOrderUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
     "Hi Memories n Beyond, I have a bespoke gift idea and would like to discuss a custom order."
   )}`;
@@ -10,7 +10,7 @@ export default function CtaStrip() {
   return (
     <section className="pb-20 sm:pb-28">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="relative rounded-3xl sm:rounded-4xl p-8 sm:p-14 bg-gradient-to-br from-burgundy-deep via-burgundy to-[#881337] text-cream shadow-craft-modal overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
+        <div className="relative rounded-3xl sm:rounded-4xl p-8 sm:p-14 bg-gradient-to-br from-burgundy via-[#BD163A] to-burgundy-deep text-cream shadow-craft-modal overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8">
           {/* Decorative floral/sparkle glow */}
           <div className="absolute top-0 right-0 w-80 h-80 bg-rose/20 rounded-full blur-3xl pointer-events-none" />
 

@@ -114,7 +114,7 @@ export default function CategoryPage({
 }) {
   const meta = categoryMeta[categoryId] || categoryMeta.frames;
   const products = initialProducts.filter((p) => p.category === categoryId);
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919999999999';
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
   // Smooth scroll to top when category changes
   useEffect(() => {
@@ -298,7 +298,7 @@ export default function CategoryPage({
 
       {/* Custom Dimension / WhatsApp Help Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-burgundy-deep text-cream p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-craft-modal">
+        <div className="rounded-3xl bg-burgundy text-cream p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-craft-modal">
           <div className="text-center md:text-left">
             <span className="text-xs font-bold uppercase tracking-widest text-blush block mb-1">
               Need a Custom Size or Bulk Order?

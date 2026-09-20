@@ -3,9 +3,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles, MessageCircle, Heart, Truck, Gift, ChevronDown, CheckCircle2 } from 'lucide-react';
 import heroGiftsPhoto from '../assets/hero-gifts-photo.jpg';
 
-export default function HeroSection() {
+export default function HeroSection({ onNavigateToCategory }) {
   const [isUnwrapped, setIsUnwrapped] = useState(false);
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919999999999';
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
+
+  const categoryPills = [
+    { id: 'frames', label: 'Frames' },
+    { id: 'magazines', label: 'Magazines' },
+    { id: 'hampers', label: 'Hampers' },
+    { id: 'addons', label: 'Add ons' },
+  ];
+
+  const handleCategoryClick = (catId) => {
+    if (onNavigateToCategory) {
+      onNavigateToCategory(catId);
+    } else {
+      window.location.hash = `#category/${catId}`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
 
   return (
     <section id="home" className="relative pt-10 pb-16 sm:pt-16 sm:pb-24 overflow-hidden">
@@ -25,10 +41,19 @@ export default function HeroSection() {
             transition={{ duration: 0.6, ease: 'easeOut' }}
             className="lg:col-span-6 xl:col-span-6 space-y-6"
           >
-            {/* Eyebrow badge */}
-            <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-blush/60 border border-rose/20 text-rose-deep text-xs sm:text-sm font-bold tracking-wide">
-              <Sparkles className="w-4 h-4 text-rose-deep" />
-              <span>Where feelings find forms</span>
+            {/* Category Navigation Buttons */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-1">
+              {categoryPills.map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => handleCategoryClick(cat.id)}
+                  className="group inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-paper/95 hover:bg-burgundy text-burgundy-deep hover:text-cream border border-burgundy/15 hover:border-burgundy text-xs sm:text-sm font-semibold transition-all duration-200 shadow-sm hover:shadow-craft-soft hover:-translate-y-0.5 cursor-pointer active:scale-95"
+                >
+                  <span>{cat.label}</span>
+                  <span className="text-xs text-rose-deep group-hover:text-cream/80 transition-colors">→</span>
+                </button>
+              ))}
             </div>
 
             {/* Main Heading */}
@@ -117,6 +142,17 @@ export default function HeroSection() {
                             <span className="text-[10px] px-1.5 py-0.5 bg-burgundy/10 text-burgundy font-bold rounded">₹0 FREE</span>
                           </div>
                         </div>
+
+                        {/* Perk 3 */}
+                        <div className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-paper/90 border border-rose/20 shadow-xs sm:col-span-2">
+                          <div className="w-6 h-6 rounded-full bg-blush/80 flex items-center justify-center text-burgundy shrink-0">
+                            <Gift className="w-3.5 h-3.5 text-burgundy" />
+                          </div>
+                          <div className="text-xs font-bold text-burgundy-deep flex items-center justify-between sm:justify-start gap-1.5 w-full">
+                            <span>Surprise Freebie on Every Order</span>
+                            <span className="text-[10px] px-1.5 py-0.5 bg-burgundy/10 text-burgundy font-bold rounded">₹0 FREE</span>
+                          </div>
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between pt-2 px-1 text-[11px] text-rose-deep font-semibold">
@@ -134,16 +170,10 @@ export default function HeroSection() {
             {/* CTAs */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
               <a
-                href="#collection"
-                className="bg-burgundy hover:bg-burgundy-deep text-cream px-8 py-4 rounded-full font-bold text-sm sm:text-base shadow-craft-soft hover:shadow-craft-lg hover:-translate-y-1 transition-all duration-300"
-              >
-                Explore Collection
-              </a>
-              <a
                 href={`https://wa.me/${whatsappNumber}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-7 py-4 rounded-full font-bold text-sm sm:text-base border-2 border-burgundy/80 text-burgundy-deep hover:bg-burgundy hover:text-cream transition-all duration-300"
+                className="inline-flex items-center gap-2.5 bg-burgundy hover:bg-burgundy-deep text-cream px-8 py-4 rounded-full font-bold text-sm sm:text-base shadow-craft-soft hover:shadow-craft-lg hover:-translate-y-1 transition-all duration-300"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span>Chat on WhatsApp</span>
@@ -216,22 +246,22 @@ export default function HeroSection() {
               </div>
 
               {/* Floating Maroon Outline Hearts */}
-              <div className="absolute top-5 left-[38%] pointer-events-none z-20 text-[#6E1F2B]">
+              <div className="absolute top-5 left-[38%] pointer-events-none z-20 text-[#A10B2B]">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               </div>
-              <div className="absolute top-[48%] left-1 sm:left-2 pointer-events-none z-20 text-[#6E1F2B]">
+              <div className="absolute top-[48%] left-1 sm:left-2 pointer-events-none z-20 text-[#A10B2B]">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               </div>
-              <div className="absolute top-1/3 -right-2 sm:-right-1 pointer-events-none z-20 text-[#6E1F2B]">
+              <div className="absolute top-1/3 -right-2 sm:-right-1 pointer-events-none z-20 text-[#A10B2B]">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               </div>
-              <div className="absolute -bottom-1 left-[45%] pointer-events-none z-20 text-[#6E1F2B]">
+              <div className="absolute -bottom-1 left-[45%] pointer-events-none z-20 text-[#A10B2B]">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
