@@ -43,7 +43,7 @@ export default function Navbar({ onNavigateHome, onNavigateCategories }) {
             className="w-12 h-12 sm:w-13 sm:h-13 rounded-full object-cover shadow-craft-sm group-hover:scale-105 transition-transform border-2 border-burgundy/15"
           />
           <div className="leading-tight">
-            <span className="font-script text-2xl sm:text-3xl text-burgundy-deep block leading-none pt-0.5 tracking-wide">
+            <span className="font-script text-2xl sm:text-[32px] text-burgundy-deep block leading-none pt-1">
               memories n beyond
             </span>
             <span className="block font-sans text-[11px] sm:text-xs tracking-wide text-rose-deep font-semibold">

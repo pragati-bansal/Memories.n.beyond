@@ -38,7 +38,8 @@ export default {
       fontFamily: {
         serif: ['Fraunces', 'serif'],
         sans: ['Manrope', 'sans-serif'],
-        script: ["'Alex Brush'", "'Great Vibes'", 'cursive'],
+        script: ["'Very Berry'", "'Alex Brush'", "'Great Vibes'", 'cursive'],
+        brand: ["'Very Berry'", "'Alex Brush'", 'cursive'],
         handwriting: ["'Caveat'", "'Dancing Script'", 'cursive'],
       },
       boxShadow: {

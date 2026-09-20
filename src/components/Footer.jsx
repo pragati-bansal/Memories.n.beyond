@@ -18,7 +18,7 @@ export default function Footer() {
                 className="w-12 h-12 rounded-full object-cover shadow-sm border border-cream/20"
               />
               <div>
-                <span className="font-script text-2xl sm:text-3xl text-cream block leading-none pt-0.5 tracking-wide">
+                <span className="font-script text-2xl sm:text-[32px] text-cream block leading-none pt-1">
                   memories n beyond
                 </span>
                 <span className="font-sans text-xs tracking-wide text-blush block font-medium">
