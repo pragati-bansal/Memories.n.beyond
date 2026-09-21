@@ -63,8 +63,28 @@ export default function ReviewSection() {
               className="flex-shrink-0 w-80 sm:w-96 bg-paper rounded-3xl p-7 border border-burgundy/10 shadow-craft-soft flex flex-col justify-between snap-start"
             >
               <div>
+                {/* Real Customer Unboxing Photo */}
+                {rev.image && (
+                  <div className="relative mb-5 rounded-2xl overflow-hidden aspect-[4/3] bg-blush/20 border border-burgundy/10 group shadow-xs">
+                    <img
+                      src={rev.image}
+                      alt={`${rev.name}'s keepsake`}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between pointer-events-none">
+                      <span className="px-2.5 py-1 rounded-full bg-cream/95 backdrop-blur-sm text-[11px] font-bold text-burgundy-deep shadow-sm">
+                        {rev.productName || 'Verified Unboxing'}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full bg-burgundy/85 backdrop-blur-sm text-[10px] font-bold text-cream">
+                        Verified Order ✓
+                      </span>
+                    </div>
+                  </div>
+                )}
+
                 {/* 5 Stars */}
-                <div className="flex items-center gap-1 mb-4 text-gold">
+                <div className="flex items-center gap-1 mb-3 text-gold">
                   {[...Array(rev.stars)].map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-gold" />
                   ))}

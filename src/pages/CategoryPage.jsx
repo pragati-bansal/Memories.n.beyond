@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { initialProducts } from '../data/initialProducts';
 import ProductCard from '../components/ProductCard';
 import {
@@ -20,21 +20,20 @@ const categoryMeta = {
   frames: {
     id: 'frames',
     title: 'Custom Frames Collection',
-    tagline: 'Timeless wooden & acrylic frames crafted to immortalize your most cherished moments.',
+    tagline: 'Timeless wooden & acrylic frames crafted to immortalize your most cherished moments across 10 signature handcrafted formats.',
     image: customFramesImg,
-    badge: 'Archival Photo Framing',
+    badge: '10 Signature Frame Styles',
     features: [
-      '4+ Custom Sizes (Mini to Gallery)',
-      'Tabletop Stand & Wall Mount Hooks',
-      'Ultra-HD Lab Photographic Printing',
-      'Free Name & Date Personalization',
+      '10 Bespoke Handcrafted Frame Formats',
+      'Pop-up, Scrapbook, Polaroid, Sticker & Grid Styles',
+      'Sturdy Tabletop Kickstand & Wall Mount Ready',
+      'Ultra-HD Archival Matte & Gloss Photographic Prints',
     ],
-    guideTitle: 'Frame Sizing & Placement Guide',
+    guideTitle: 'Frame Sizing & Format Guide',
     guideItems: [
-      { size: '4x6 in (Mini)', bestFor: 'Office Desks & Bedside Tables', details: 'Compact, intimate portrait frame with stand.' },
-      { size: '5x7 in (Classic)', bestFor: 'Living Room Consoles & Mantels', details: 'Our most popular couple gift size.' },
-      { size: '8x10 in (Portrait Grand)', bestFor: 'Feature Shelves & Wall Display', details: 'Perfect for family portraits & milestone celebrations.' },
-      { size: '12x18 in (Gallery Wall)', bestFor: 'Statement Wall Focal Point', details: 'Large-scale collage or dramatic single focal photo.' },
+      { size: '5x7 in (Classic Tabletop)', bestFor: 'Desks, Bedside Tables & Consoles', details: 'B&W Popup, Cutout Sticker, Instagram Feed, Quote & Scrapbook.' },
+      { size: 'A4 Dimension (8.3 x 11.7 in)', bestFor: 'Living Rooms & Milestone Displays', details: 'Birthday Boards, Memory Grids, Polaroid Popups & 3D Depth Popups.' },
+      { size: '18x24 in (Grand Showcase)', bestFor: 'Feature Living Room Wall', details: 'Massive gallery-scale birthday tribute with hero portrait and multi-photo timeline.' },
     ],
   },
   magazines: {
@@ -112,12 +111,18 @@ export default function CategoryPage({
   onBackToHome,
   onSelectProduct,
 }) {
+  const [frameFilter, setFrameFilter] = useState('all'); // 'all' | '5x7' | 'A4' | '18x24'
   const meta = categoryMeta[categoryId] || categoryMeta.frames;
-  const products = initialProducts.filter((p) => p.category === categoryId);
+  const categoryProducts = initialProducts.filter((p) => p.category === categoryId);
+  const products =
+    categoryId === 'frames' && frameFilter !== 'all'
+      ? categoryProducts.filter((p) => p.format === frameFilter)
+      : categoryProducts;
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
   // Smooth scroll to top when category changes
   useEffect(() => {
+    setFrameFilter('all');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [categoryId]);
 
@@ -226,19 +231,47 @@ export default function CategoryPage({
 
       {/* Catalog Grid Section with Size Selector & Prices */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-8 pb-4 border-b border-burgundy/10">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-4 border-b border-burgundy/10">
           <div>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-burgundy-deep">
-              Available Designs &amp; Formats
-            </h2>
-            <p className="text-xs sm:text-sm text-ink-soft mt-0.5">
-              Click on different size pills below each product to update prices and customize with your photos.
+            <div className="flex items-center gap-2">
+              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-burgundy-deep">
+                Available Designs &amp; Formats
+              </h2>
+              <span className="text-xs font-bold text-rose-deep bg-blush/60 px-2.5 py-0.5 rounded-full">
+                {products.length} {products.length === 1 ? 'Design' : 'Designs'}
+              </span>
+            </div>
+            <p className="text-xs sm:text-sm text-ink-soft mt-1">
+              Select any design below to customize with your photos, choose dimensions, and order directly on WhatsApp.
             </p>
           </div>
 
-          <span className="text-xs font-bold text-rose-deep bg-blush/60 px-3 py-1 rounded-full self-start sm:self-auto">
-            {products.length} Designs Ready to Personalize
-          </span>
+          {categoryId === 'frames' && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              {[
+                { id: 'all', label: 'All 10 Designs' },
+                { id: '5x7', label: '5x7 Formats (5)' },
+                { id: 'A4', label: 'A4 Formats (4)' },
+                { id: '18x24', label: '18x24 Special (1)' },
+              ].map((f) => {
+                const isActive = frameFilter === f.id;
+                return (
+                  <button
+                    key={f.id}
+                    type="button"
+                    onClick={() => setFrameFilter(f.id)}
+                    className={`text-xs px-3.5 py-1.5 rounded-full font-bold whitespace-nowrap transition-all ${
+                      isActive
+                        ? 'bg-burgundy text-cream shadow-craft-soft'
+                        : 'bg-paper text-ink-soft border border-burgundy/15 hover:border-burgundy/40 hover:text-burgundy-deep'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         {/* Product Cards Grid */}
