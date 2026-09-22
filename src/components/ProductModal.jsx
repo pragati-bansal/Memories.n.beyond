@@ -9,7 +9,6 @@ import {
   Sparkles,
   Loader2,
   Trash2,
-  Check,
 } from 'lucide-react';
 import { uploadCustomerPhoto, createOrderRecord } from '../lib/supabaseClient';
 
@@ -215,26 +214,6 @@ export default function ProductModal({ product, onClose }) {
                   </div>
                 )}
               </div>
-
-              {/* Product Key Points / Features */}
-              <div className="mt-6 pt-6 border-t border-burgundy/10 space-y-2.5">
-                <span className="text-xs font-bold text-rose-deep uppercase tracking-wider block">
-                  Crafted with Care
-                </span>
-                <ul className="text-xs text-ink-soft space-y-2">
-                  {(product.details || [
-                    'Personalized photo prints with archival inks',
-                    'Customizable engraving or printed gift note',
-                    'Safely bubble-wrapped in gift-ready craft packaging',
-                    'Shipped PAN India with live parcel tracking',
-                  ]).map((detail, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-burgundy shrink-0 mt-0.5" />
-                      <span>{detail}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
             </div>
 
             {/* Right Column: Customization Form & WhatsApp CTA */}
@@ -259,7 +238,7 @@ export default function ProductModal({ product, onClose }) {
                 {product.sizes && product.sizes.length > 0 && (
                   <div className="mb-6 bg-blush/30 p-3.5 rounded-2xl border border-burgundy/10">
                     <span className="block text-xs font-bold text-burgundy-deep uppercase tracking-wider mb-2">
-                      Choose Size / Format:
+                      Available in:
                     </span>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {product.sizes.map((s) => {

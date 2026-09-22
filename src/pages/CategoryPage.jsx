@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { initialProducts } from '../data/initialProducts';
 import ProductCard from '../components/ProductCard';
 import {
   ArrowLeft,
-  Sparkles,
   ShieldCheck,
-  CheckCircle2,
   Info,
   HelpCircle,
   MessageCircle,
@@ -31,9 +29,8 @@ const categoryMeta = {
     ],
     guideTitle: 'Frame Sizing & Format Guide',
     guideItems: [
-      { size: '5x7 in (Classic Tabletop)', bestFor: 'Desks, Bedside Tables & Consoles', details: 'B&W Popup, Cutout Sticker, Instagram Feed, Quote & Scrapbook.' },
-      { size: 'A4 Dimension (8.3 x 11.7 in)', bestFor: 'Living Rooms & Milestone Displays', details: 'Birthday Boards, Memory Grids, Polaroid Popups & 3D Depth Popups.' },
-      { size: '18x24 in (Grand Showcase)', bestFor: 'Feature Living Room Wall', details: 'Massive gallery-scale birthday tribute with hero portrait and multi-photo timeline.' },
+      { size: '5x7 in (Classic Tabletop)', bestFor: 'Desks, Bedside Tables & Consoles', details: 'Our most popular tabletop size for couples and friends (₹399).' },
+      { size: 'A4 Dimension (8.3 x 11.7 in)', bestFor: 'Living Rooms & Milestone Displays', details: 'Spacious wall or desk format with elevated presence (₹499).' },
     ],
   },
   magazines: {
@@ -111,18 +108,12 @@ export default function CategoryPage({
   onBackToHome,
   onSelectProduct,
 }) {
-  const [frameFilter, setFrameFilter] = useState('all'); // 'all' | '5x7' | 'A4' | '18x24'
   const meta = categoryMeta[categoryId] || categoryMeta.frames;
-  const categoryProducts = initialProducts.filter((p) => p.category === categoryId);
-  const products =
-    categoryId === 'frames' && frameFilter !== 'all'
-      ? categoryProducts.filter((p) => p.format === frameFilter)
-      : categoryProducts;
+  const products = initialProducts.filter((p) => p.category === categoryId);
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
   // Smooth scroll to top when category changes
   useEffect(() => {
-    setFrameFilter('all');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [categoryId]);
 
@@ -180,101 +171,37 @@ export default function CategoryPage({
         </div>
       </div>
 
-      {/* Category Hero Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 sm:pt-12 mb-12 sm:mb-16">
-        <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-paper via-blush/30 to-cream-deep border border-burgundy/15 shadow-craft-modal p-6 sm:p-10 lg:p-12 flex flex-col lg:flex-row items-center gap-8">
-          {/* Left Text */}
-          <div className="flex-1 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-burgundy/10 text-burgundy mb-4">
-              <Sparkles className="w-3.5 h-3.5 text-rose-deep" />
-              <span>{meta.badge}</span>
-            </div>
-
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-bold text-burgundy-deep mb-4 leading-tight">
-              {meta.title}
-            </h1>
-
-            <p className="text-sm sm:text-base text-ink-soft max-w-xl leading-relaxed mb-6">
-              {meta.tagline}
-            </p>
-
-            {/* Feature Pills */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-w-lg mb-6">
-              {meta.features.map((feat, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs font-medium text-ink-soft">
-                  <CheckCircle2 className="w-4 h-4 text-burgundy flex-shrink-0" />
-                  <span>{feat}</span>
-                </div>
-              ))}
-            </div>
-
-            <p className="text-xs text-rose-deep font-semibold">
-              Select any design below, pick your desired size, and see exact prices accordingly.
+      {/* Custom Dimension / WhatsApp Help Banner (Sabse Upar) */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 mb-8 sm:mb-10">
+        <div className="rounded-3xl bg-burgundy text-cream p-6 sm:p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-craft-modal">
+          <div className="text-center md:text-left">
+            <span className="text-xs font-bold uppercase tracking-widest text-blush block mb-1">
+              Need a Custom Size or Bulk Order?
+            </span>
+            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-cream mb-2">
+              Have a custom dimension or special vision?
+            </h3>
+            <p className="text-xs sm:text-sm text-cream/80 max-w-xl">
+              Our artisans can craft custom multi-frame layouts, custom magazine page counts, or corporate gift hampers tailored exactly to your requirement.
             </p>
           </div>
 
-          {/* Right Visual Image */}
-          <div className="w-full lg:w-80 h-64 sm:h-72 lg:h-80 rounded-2xl overflow-hidden shadow-craft-lg border-4 border-paper flex-shrink-0 relative group">
-            <img
-              src={meta.image}
-              alt={meta.title}
-              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-burgundy-deep/60 via-transparent to-transparent flex items-end p-4">
-              <span className="text-xs text-cream font-bold drop-shadow-sm">
-                100% Handcrafted to Order
-              </span>
-            </div>
-          </div>
+          <a
+            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
+              `Hi Memories n Beyond! I'm looking at your ${meta.title} and want to discuss custom sizing/requirements.`
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex-shrink-0 inline-flex items-center gap-2.5 bg-cream hover:bg-white text-burgundy-deep font-bold px-6 py-3.5 rounded-full shadow-lg transition-all hover:scale-105 text-sm"
+          >
+            <MessageCircle className="w-4 h-4 text-burgundy" />
+            <span>Chat with Artisan on WhatsApp</span>
+          </a>
         </div>
       </div>
 
-      {/* Catalog Grid Section with Size Selector & Prices */}
+      {/* Product Cards Grid */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-4 border-b border-burgundy/10">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-serif text-2xl sm:text-3xl font-bold text-burgundy-deep">
-                Available Designs &amp; Formats
-              </h2>
-              <span className="text-xs font-bold text-rose-deep bg-blush/60 px-2.5 py-0.5 rounded-full">
-                {products.length} {products.length === 1 ? 'Design' : 'Designs'}
-              </span>
-            </div>
-            <p className="text-xs sm:text-sm text-ink-soft mt-1">
-              Select any design below to customize with your photos, choose dimensions, and order directly on WhatsApp.
-            </p>
-          </div>
-
-          {categoryId === 'frames' && (
-            <div className="flex flex-wrap items-center gap-1.5">
-              {[
-                { id: 'all', label: 'All 10 Designs' },
-                { id: '5x7', label: '5x7 Formats (5)' },
-                { id: 'A4', label: 'A4 Formats (4)' },
-                { id: '18x24', label: '18x24 Special (1)' },
-              ].map((f) => {
-                const isActive = frameFilter === f.id;
-                return (
-                  <button
-                    key={f.id}
-                    type="button"
-                    onClick={() => setFrameFilter(f.id)}
-                    className={`text-xs px-3.5 py-1.5 rounded-full font-bold whitespace-nowrap transition-all ${
-                      isActive
-                        ? 'bg-burgundy text-cream shadow-craft-soft'
-                        : 'bg-paper text-ink-soft border border-burgundy/15 hover:border-burgundy/40 hover:text-burgundy-deep'
-                    }`}
-                  >
-                    {f.label}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Product Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
           {products.map((product) => (
             <ProductCard
@@ -326,35 +253,6 @@ export default function CategoryPage({
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* Custom Dimension / WhatsApp Help Banner */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-burgundy text-cream p-8 sm:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-craft-modal">
-          <div className="text-center md:text-left">
-            <span className="text-xs font-bold uppercase tracking-widest text-blush block mb-1">
-              Need a Custom Size or Bulk Order?
-            </span>
-            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-cream mb-2">
-              Have a custom dimension or special vision?
-            </h3>
-            <p className="text-xs sm:text-sm text-cream/80 max-w-xl">
-              Our artisans can craft custom multi-frame layouts, custom magazine page counts, or corporate gift hampers tailored exactly to your requirement.
-            </p>
-          </div>
-
-          <a
-            href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(
-              `Hi Memories n Beyond! I'm looking at your ${meta.title} and want to discuss custom sizing/requirements.`
-            )}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex-shrink-0 inline-flex items-center gap-2.5 bg-cream hover:bg-white text-burgundy-deep font-bold px-6 py-3.5 rounded-full shadow-lg transition-all hover:scale-105 text-sm"
-          >
-            <MessageCircle className="w-4 h-4 text-burgundy" />
-            <span>Chat with Artisan on WhatsApp</span>
-          </a>
         </div>
       </div>
     </div>

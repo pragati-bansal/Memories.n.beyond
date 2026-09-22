@@ -76,7 +76,7 @@ export default function ProductCard({ product, onSelect }) {
           {hasSizes && (
             <div className="mb-4" onClick={(e) => e.stopPropagation()}>
               <span className="text-[10px] font-bold uppercase tracking-wider text-ink-soft block mb-1.5">
-                Select Size / Option:
+                Available in:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {product.sizes.map((s, idx) => {

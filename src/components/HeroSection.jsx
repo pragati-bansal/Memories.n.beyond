@@ -59,12 +59,12 @@ export default function HeroSection({ onNavigateToCategory }) {
             {/* Main Heading */}
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-medium text-burgundy-deep leading-[1.12] tracking-tight">
               gifts that feels made{' '}
-              <span className="italic font-normal text-rose-deep">specifically</span> for that person
+              <span className="italic font-normal text-rose-deep">specifically</span> for you
             </h1>
 
             {/* Lede paragraph */}
             <p className="text-base sm:text-lg text-ink-soft max-w-xl leading-relaxed">
-              I help people turn memories into gifts their loved ones actually keep without spending hours searching for the perfect present
+              We help people turn memories into gifts their loved ones actually keep without spending hours searching for the perfect present
             </p>
 
             {/* Interactive "A Little Extra Love" Unwrap Card */}
