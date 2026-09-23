@@ -15,6 +15,7 @@ import {
   Zap,
   ShieldCheck,
   ArrowRight,
+  Palette,
 } from 'lucide-react';
 import { uploadCustomerPhoto, createOrderRecord } from '../lib/supabaseClient';
 
@@ -277,6 +278,11 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                         <Tag className="w-3.5 h-3.5 text-rose-deep shrink-0" />
                         <span>Get exclusive offers for your next purchase</span>
                       </div>
+
+                      <div className="flex items-start gap-2 pt-1.5 border-t border-burgundy/10">
+                        <Palette className="w-3.5 h-3.5 text-rose-deep shrink-0 mt-0.5" />
+                        <span className="leading-snug">You can customise every text, design, colour in the existing template as per your choice</span>
+                      </div>
                     </div>
                   </div>
 
@@ -353,6 +359,14 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                     </div>
                   </div>
                 )}
+
+                {/* 100% Template Customization Choice Notice */}
+                <div className="mb-4 p-3 rounded-2xl bg-blush/40 border border-burgundy/15 flex items-start gap-2.5 text-xs text-burgundy-deep shadow-xs">
+                  <Palette className="w-4 h-4 text-burgundy shrink-0 mt-0.5" />
+                  <span className="leading-relaxed font-medium">
+                    You can customise every text, design, colour in the existing template as per your choice.
+                  </span>
+                </div>
 
                 {/* Customization Form */}
                 <form onSubmit={handleProceedToWhatsApp} className="space-y-4">
