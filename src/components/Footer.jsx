@@ -376,47 +376,51 @@ export default function Footer() {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-5"
+                    className="space-y-4"
                   >
                     <div className="bg-blush/30 p-4 rounded-2xl border border-blush">
                       <h4 className="font-serif text-lg font-bold text-burgundy-deep mb-1">
-                        Cancellation &amp; Modification Policy
+                        Cancellation Policy
                       </h4>
                       <p className="text-xs text-ink-soft">
-                        Fair, straightforward guidelines for personalized, custom-crafted items.
+                        At Memories n Beyond, every order is prepared with care, especially our customized and personalized products.
                       </p>
                     </div>
 
-                    <div className="space-y-3">
-                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1.5">
+                    <div className="space-y-2.5">
+                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1">
                         <div className="font-semibold text-xs text-burgundy-deep flex items-center gap-1.5">
                           <span className="w-2 h-2 rounded-full bg-burgundy" />
-                          12-Hour Modification &amp; Cancellation Window
+                          <span>Within 3 Days (Before Processing)</span>
                         </div>
-                        <p className="text-xs">
-                          Because all keepsakes are custom designed with your personal photographs, orders can be cancelled or edited (photos, text, dates) within <strong>12 hours</strong> of placing your order.
+                        <p className="text-xs text-ink-soft">
+                          Orders can be cancelled only within <strong>3 days</strong> of placing the order, and only if the order has not yet been processed.
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1.5">
+                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1">
                         <div className="font-semibold text-xs text-burgundy-deep flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-burgundy" />
-                          Before Production (100% Refund)
+                          <span className="w-2 h-2 rounded-full bg-rose-deep" />
+                          <span>Processed Orders</span>
                         </div>
-                        <p className="text-xs">
-                          If you cancel before custom layout designing and photo printing has begun, you will receive a <strong>100% full refund</strong> immediately via UPI / original payment method.
+                        <p className="text-xs text-ink-soft">
+                          Once an order has been processed, cancellation will <strong>not be accepted</strong>.
                         </p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1.5">
-                        <div className="font-semibold text-xs text-burgundy-deep flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-burgundy" />
-                          After Crafting Has Begun
+                      <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 space-y-1 text-amber-950">
+                        <div className="font-semibold text-xs flex items-center gap-1.5 text-amber-900">
+                          <span className="w-2 h-2 rounded-full bg-amber-600" />
+                          <span>After 3 Days</span>
                         </div>
                         <p className="text-xs">
-                          Once printing, photo cutting, or wood framing is underway, cancellations cannot be processed since custom personalized materials cannot be reused. However, we are always happy to help you adjust captions or delivery address via WhatsApp.
+                          After 3 days of placing the order, <strong>no cancellation requests will be accepted</strong>, irrespective of the order status.
                         </p>
                       </div>
+
+                      <p className="text-[11px] text-center font-medium text-rose-deep pt-1">
+                        ✨ By placing an order, you acknowledge and agree to the above policy.
+                      </p>
                     </div>
                   </motion.div>
                 )}
@@ -426,52 +430,48 @@ export default function Footer() {
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="space-y-5"
+                    className="space-y-4"
                   >
                     <div className="bg-blush/30 p-4 rounded-2xl border border-blush">
                       <h4 className="font-serif text-lg font-bold text-burgundy-deep mb-1">
-                        Shipping &amp; Return Policy
+                        Returns &amp; Replacement Policy
                       </h4>
                       <p className="text-xs text-ink-soft">
-                        PAN-India safe transit guarantee &amp; free damage replacement.
+                        Fair, straightforward guidelines for our handmade keepsakes.
                       </p>
                     </div>
 
-                    <div className="space-y-3">
-                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1.5">
-                        <div className="font-semibold text-xs text-burgundy-deep flex items-center gap-1.5">
-                          <Truck className="w-3.5 h-3.5 text-burgundy" />
-                          Delivery Timelines (All Over India)
+                    <div className="space-y-2.5">
+                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10">
+                        <p className="text-xs text-burgundy-deep font-medium">
+                          • Returns/replacements are accepted only within <strong>7 days</strong> of delivery.
+                        </p>
+                      </div>
+
+                      {/* Video Requirement Notice */}
+                      <div className="p-3.5 rounded-xl bg-rose-50/80 border border-rose-300 space-y-1.5">
+                        <div className="text-xs font-bold text-burgundy">
+                          ⚠️ No unboxing video = No return/replacement.
                         </div>
-                        <ul className="text-xs space-y-1 list-disc list-inside text-ink-soft">
-                          <li><strong>Crafting Time:</strong> 2 to 3 business days for printing &amp; finishing.</li>
-                          <li><strong>Shipping Transit:</strong> 4 to 7 business days via Bluedart, Delhivery &amp; DTDC.</li>
-                          <li><strong>Urgent Orders:</strong> Need it urgently for an anniversary or birthday? WhatsApp us for expedited priority dispatch.</li>
+                        <ul className="text-xs text-burgundy-deep/90 space-y-1 list-disc list-inside">
+                          <li>A clear, continuous, and unedited unboxing video is mandatory for any return/replacement request.</li>
+                          <li>The unboxing video must be one continuous recording from the unopened package until the product is fully revealed.</li>
+                          <li>Videos with cuts, edits, pauses, or multiple clips will not be considered valid, regardless of the length of the video.</li>
+                          <li>The video must clearly show the package, shipping label, and product.</li>
                         </ul>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1.5">
-                        <div className="font-semibold text-xs text-burgundy-deep flex items-center gap-1.5">
-                          <ShieldCheck className="w-3.5 h-3.5 text-burgundy" />
-                          Zero-Breakage Packaging Guarantee
-                        </div>
-                        <p className="text-xs">
-                          All fragile glass frames, magazine booklets, and hampers are wrapped in multiple layers of shock-absorbent bubble wrap, corner protectors, and heavy-duty corrugated outer boxes to ensure they arrive in pristine condition.
-                        </p>
+                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1.5 text-xs text-ink-soft">
+                        <p>• <strong>No monetary refunds</strong> will be provided. If the issue is verified and approved, only a <strong>replacement</strong> of the product will be offered.</p>
+                        <p>• Customized/personalized products are <strong>not eligible</strong> for return or replacement due to change of mind, personal preference, or incorrect details provided by the customer.</p>
+                        <p>• In case of a damaged, defective, or incorrect product, contact us within 7 days with your order details, unboxing video, and clear photos/videos of the issue.</p>
+                        <p>• Please keep the original product and packaging safely until your request has been reviewed and resolved.</p>
+                        <p>• All replacement requests are subject to verification and approval by Memories n Beyond.</p>
                       </div>
 
-                      <div className="p-3.5 rounded-xl bg-cream border border-burgundy/10 space-y-1.5">
-                        <div className="font-semibold text-xs text-burgundy-deep flex items-center gap-1.5">
-                          <RotateCcw className="w-3.5 h-3.5 text-burgundy" />
-                          100% Free Replacement in Case of Transit Damage
-                        </div>
-                        <p className="text-xs">
-                          Since personalized products are custom printed with your photos, general returns for change of mind are not accepted. However, if your package arrives broken or damaged during transit:
-                        </p>
-                        <p className="text-xs font-medium text-burgundy pt-1">
-                          👉 Record a continuous parcel unboxing video and message us on WhatsApp within 48 hours of delivery. We will immediately craft &amp; ship a brand-new replacement at zero extra cost.
-                        </p>
-                      </div>
+                      <p className="text-[11px] text-center font-medium text-rose-deep pt-1">
+                        ✨ By placing an order, you acknowledge and agree to the above policy.
+                      </p>
                     </div>
                   </motion.div>
                 )}

@@ -8,10 +8,12 @@ import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ProductModal from './components/ProductModal';
 import CategoryPage from './pages/CategoryPage';
+import PolicyPage from './pages/PolicyPage';
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null); // 'frames' | 'magazines' | 'hampers' | 'addons' | null
+  const [isPolicyView, setIsPolicyView] = useState(false);
 
   // Synchronize with URL hash routing for direct links & browser back button
   useEffect(() => {
@@ -21,14 +23,27 @@ export default function App() {
         const cat = hash.replace('#category/', '').trim().toLowerCase();
         if (['frames', 'magazines', 'hampers', 'addons'].includes(cat)) {
           setActiveCategory(cat);
+          setIsPolicyView(false);
           return;
         }
       }
       if (hash === '#collection') {
         setActiveCategory('frames');
+        setIsPolicyView(false);
+        return;
+      }
+      if (
+        hash === '#policy/cancellation' ||
+        hash === '#cancellation-policy' ||
+        hash === '#policy' ||
+        hash === '#return-policy'
+      ) {
+        setIsPolicyView(true);
+        setActiveCategory(null);
         return;
       }
       setActiveCategory(null);
+      setIsPolicyView(false);
     };
 
     // Check on mount
@@ -39,12 +54,14 @@ export default function App() {
   }, []);
 
   const navigateToCategory = (catId) => {
+    setIsPolicyView(false);
     setActiveCategory(catId);
     window.location.hash = `#category/${catId}`;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const navigateToHome = () => {
+    setIsPolicyView(false);
     setActiveCategory(null);
     window.location.hash = '#home';
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -52,6 +69,13 @@ export default function App() {
 
   const navigateToCategoriesOverview = () => {
     navigateToCategory('frames');
+  };
+
+  const openCancellationPolicy = () => {
+    setSelectedProduct(null);
+    setIsPolicyView(true);
+    window.location.hash = '#policy/cancellation';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -64,7 +88,19 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-grow">
-        {activeCategory ? (
+        {isPolicyView ? (
+          /* Dedicated Detailed Return & Cancellation Policy Section */
+          <PolicyPage
+            onBack={() => {
+              if (activeCategory) {
+                navigateToCategory(activeCategory);
+              } else {
+                navigateToHome();
+              }
+            }}
+            onNavigateCategories={navigateToCategoriesOverview}
+          />
+        ) : activeCategory ? (
           /* Dedicated Full Web Page for the chosen Category */
           <CategoryPage
             categoryId={activeCategory}
@@ -94,6 +130,7 @@ export default function App() {
         <ProductModal
           product={selectedProduct}
           onClose={() => setSelectedProduct(null)}
+          onOpenCancellationPolicy={openCancellationPolicy}
         />
       )}
     </div>

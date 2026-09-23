@@ -67,15 +67,43 @@ export const initialProducts = [
     ],
   },
   {
-    id: 'frame-4x4-mini-cutout',
+    id: 'frame-4x4-heart-cutout',
     category: 'frames',
     tag: '4x4 Mini Cutout',
-    title: '4x4 Mini Cutout Frame',
+    title: '4x4 Retro Heart Cutout Frame',
     price: 299,
-    description: 'Pocket-sized charm featuring your custom photo cutout over an aesthetic radiating heart background in a sleek 4x4 black frame.',
+    description: 'Pocket-sized charm featuring your custom photo cutout over a green radiating heart background in a sleek 4x4 tabletop black frame.',
     gradient: 'linear-gradient(150deg,#D8F3DC,#95D5B2 55%,#2D6A4F)',
     images: [
       frameImages.miniSquare,
+    ],
+    sizes: [
+      { size: '4x4', label: '4x4 in (Tabletop Mini)', price: 299 },
+    ],
+    customization_options: {
+      requires_photo: true,
+      max_photos: 1,
+      requires_text: true,
+      text_placeholder: 'Custom caption, name or special date (optional)',
+      requires_date: false,
+    },
+    details: [
+      'Compact 4x4 inch square desktop & tabletop frame',
+      'Precision handcrafted silhouette cutout with clean white outline',
+      'Trendy retro radiating heart aesthetic background in sage green',
+      'High-definition archival photo print with protective front',
+      'Sturdy kickstand easel ready for desks, consoles & nightstands',
+    ],
+  },
+  {
+    id: 'frame-4x4-aesthetic-cutout',
+    category: 'frames',
+    tag: '4x4 Mini Cutout',
+    title: '4x4 Aesthetic Heart Silhouette Frame',
+    price: 299,
+    description: 'Chic aesthetic portrait cutout paired with mesmerizing concentric heart contours in a portable 4x4 desktop frame.',
+    gradient: 'linear-gradient(150deg,#E8F5E9,#A5D6A7 55%,#1B4332)',
+    images: [
       frameImages.miniSquare2,
     ],
     sizes: [
@@ -90,10 +118,10 @@ export const initialProducts = [
     },
     details: [
       'Compact 4x4 inch square desktop & tabletop frame',
-      'Precision handcrafted silhouette cutout with clean border',
-      'Trendy radiating heart aesthetic background in sage green',
-      'High-definition archival photo print with protective front',
-      'Sturdy kickstand easel ready for desks, consoles & nightstands',
+      'Artisan crafted photo cutout with concentric heart tunnel backdrop',
+      'Minimalist modern dark frame with crystal-clear shield',
+      'Archival matte finish print that never fades',
+      'Ideal keepsake gift for besties, partners & birthday surprises',
     ],
   },
   {

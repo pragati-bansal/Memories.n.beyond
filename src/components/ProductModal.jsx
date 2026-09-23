@@ -9,10 +9,16 @@ import {
   Sparkles,
   Loader2,
   Trash2,
+  Truck,
+  Gift,
+  Tag,
+  Zap,
+  ShieldCheck,
+  ArrowRight,
 } from 'lucide-react';
 import { uploadCustomerPhoto, createOrderRecord } from '../lib/supabaseClient';
 
-export default function ProductModal({ product, onClose }) {
+export default function ProductModal({ product, onClose, onOpenCancellationPolicy }) {
   const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [customText, setCustomText] = useState('');
@@ -213,6 +219,89 @@ export default function ProductModal({ product, onClose }) {
                     ))}
                   </div>
                 )}
+
+                {/* Delivery & Customer Perks (Strictly NO 'Crafted with Care') */}
+                <div className="pt-3 border-t border-burgundy/15 space-y-2.5">
+                  {/* Shipping & Delivery Timelines */}
+                  <div className="bg-paper/95 rounded-2xl p-3 border border-burgundy/10 shadow-xs space-y-2">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-rose-deep flex items-center gap-1.5">
+                      <Truck className="w-3.5 h-3.5 text-burgundy" />
+                      <span>Shipping &amp; Delivery</span>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs text-burgundy-deep">
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
+                        <span className="font-semibold text-emerald-800">Free shipping</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-rose-deep shrink-0" />
+                        <span>Delivery within 10-14 days</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-burgundy shrink-0" />
+                        <span>Delivery within Meerut : <strong>5 days</strong></span>
+                      </div>
+
+                      <div className="flex items-start gap-2 pt-0.5">
+                        <Zap className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                        <div className="text-[11px] text-ink leading-snug">
+                          <span className="font-bold text-burgundy">Next day delivery : 200/- extra</span>
+                          <span className="text-ink-soft block text-[10px]">(Applicable on Meerut residents only)</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Order Perks & Referral Rewards */}
+                  <div className="bg-paper/95 rounded-2xl p-3 border border-burgundy/10 shadow-xs space-y-2">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-rose-deep flex items-center gap-1.5">
+                      <Gift className="w-3.5 h-3.5 text-burgundy" />
+                      <span>Order Perks &amp; Rewards</span>
+                    </div>
+
+                    <div className="space-y-1.5 text-xs text-burgundy-deep">
+                      <div className="flex items-center gap-2">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                        <span className="font-semibold text-burgundy-deep">Free gift wrapping</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                        <span>Unlock your own referral code</span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <Tag className="w-3.5 h-3.5 text-rose-deep shrink-0" />
+                        <span>Get exclusive offers for your next purchase</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Return and Cancellation Policy Interactive Trigger */}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (onOpenCancellationPolicy) {
+                        onOpenCancellationPolicy();
+                      } else {
+                        window.location.hash = '#policy/cancellation';
+                      }
+                    }}
+                    className="w-full bg-cream hover:bg-paper border border-burgundy/20 hover:border-burgundy/40 text-burgundy-deep p-3 rounded-2xl text-xs font-bold transition-all shadow-xs flex items-center justify-between group cursor-pointer hover:shadow-craft-soft"
+                  >
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="w-4 h-4 text-burgundy group-hover:scale-110 transition-transform" />
+                      <span>Return and Cancellation Policy</span>
+                    </div>
+                    <span className="text-[11px] text-rose-deep group-hover:translate-x-1 transition-transform flex items-center gap-1">
+                      <span>View Policy</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </span>
+                  </button>
+                </div>
               </div>
             </div>
 
