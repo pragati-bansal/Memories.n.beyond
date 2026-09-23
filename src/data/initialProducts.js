@@ -67,6 +67,36 @@ export const initialProducts = [
     ],
   },
   {
+    id: 'frame-4x4-mini-cutout',
+    category: 'frames',
+    tag: '4x4 Mini Cutout',
+    title: '4x4 Mini Cutout Frame',
+    price: 299,
+    description: 'Pocket-sized charm featuring your custom photo cutout over an aesthetic radiating heart background in a sleek 4x4 black frame.',
+    gradient: 'linear-gradient(150deg,#D8F3DC,#95D5B2 55%,#2D6A4F)',
+    images: [
+      frameImages.miniSquare,
+      frameImages.miniSquare2,
+    ],
+    sizes: [
+      { size: '4x4', label: '4x4 in (Tabletop Mini)', price: 299 },
+    ],
+    customization_options: {
+      requires_photo: true,
+      max_photos: 1,
+      requires_text: true,
+      text_placeholder: 'Custom caption, name or special date (optional)',
+      requires_date: false,
+    },
+    details: [
+      'Compact 4x4 inch square desktop & tabletop frame',
+      'Precision handcrafted silhouette cutout with clean border',
+      'Trendy radiating heart aesthetic background in sage green',
+      'High-definition archival photo print with protective front',
+      'Sturdy kickstand easel ready for desks, consoles & nightstands',
+    ],
+  },
+  {
     id: 'frame-instagram-layout',
     category: 'frames',
     tag: 'Instagram Layout',
@@ -130,9 +160,10 @@ export const initialProducts = [
     tag: 'Scrapbook',
     title: 'Scrapbook Frame',
     price: 399,
-    description: 'Vintage scrapbook aesthetic with textured kraft paper layers, washi tape trims, postage stamps, and mini memory photo arrangements.',
-    gradient: 'linear-gradient(150deg,#F7EDE2,#DDA15E 55%,#283618)',
+    description: 'Vintage scrapbook aesthetic with torn-paper layers, heartfelt quotes, delicate purple bows, and cherished memory snapshots.',
+    gradient: 'linear-gradient(150deg,#E8E8F8,#C5C3EE 55%,#5E548E)',
     images: [
+      frameImages.scrapbook2,
       frameImages.scrapbook,
     ],
     sizes: [
@@ -143,7 +174,7 @@ export const initialProducts = [
       requires_photo: true,
       max_photos: 6,
       requires_text: true,
-      text_placeholder: 'Key dates, locations, travel memories & notes',
+      text_placeholder: 'Occasion (e.g. Father\'s Day), custom caption or special note',
       requires_date: true,
     },
     details: [

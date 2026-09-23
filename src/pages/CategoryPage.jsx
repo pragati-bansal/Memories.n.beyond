@@ -18,17 +18,18 @@ const categoryMeta = {
   frames: {
     id: 'frames',
     title: 'Custom Frames Collection',
-    tagline: 'Timeless wooden & acrylic frames crafted to immortalize your most cherished moments across 10 signature handcrafted formats.',
+    tagline: 'Timeless wooden & acrylic frames crafted to immortalize your most cherished moments across 11 signature handcrafted formats.',
     image: customFramesImg,
-    badge: '10 Signature Frame Styles',
+    badge: '11 Signature Frame Styles',
     features: [
-      '10 Bespoke Handcrafted Frame Formats',
-      'Pop-up, Scrapbook, Polaroid, Sticker & Grid Styles',
+      '11 Bespoke Handcrafted Frame Formats',
+      '4x4 Mini, Pop-up, Scrapbook, Polaroid, Sticker & Grid Styles',
       'Sturdy Tabletop Kickstand & Wall Mount Ready',
       'Ultra-HD Archival Matte & Gloss Photographic Prints',
     ],
     guideTitle: 'Frame Sizing & Format Guide',
     guideItems: [
+      { size: '4x4 in (Mini Square Tabletop)', bestFor: 'Workstations, Desks & Nightstands', details: 'Compact square cutout frame with radiating retro heart aesthetic (₹299).' },
       { size: '5x7 in (Classic Tabletop)', bestFor: 'Desks, Bedside Tables & Consoles', details: 'Our most popular tabletop size for couples and friends (₹399).' },
       { size: 'A4 Dimension (8.3 x 11.7 in)', bestFor: 'Living Rooms & Milestone Displays', details: 'Spacious wall or desk format with elevated presence (₹499).' },
     ],
@@ -172,16 +173,16 @@ export default function CategoryPage({
       </div>
 
       {/* Custom Dimension / WhatsApp Help Banner (Sabse Upar) */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 mb-8 sm:mb-10">
-        <div className="rounded-3xl bg-burgundy text-cream p-6 sm:p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-craft-modal">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 pt-4 sm:pt-8 mb-6 sm:mb-10">
+        <div className="rounded-2xl sm:rounded-3xl bg-burgundy text-cream p-4 sm:p-8 md:p-10 flex flex-col md:flex-row items-center justify-between gap-4 sm:gap-6 shadow-craft-modal">
           <div className="text-center md:text-left">
-            <span className="text-xs font-bold uppercase tracking-widest text-blush block mb-1">
+            <span className="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-blush block mb-1">
               Need a Custom Size or Bulk Order?
             </span>
-            <h3 className="font-serif text-2xl sm:text-3xl font-bold text-cream mb-2">
+            <h3 className="font-serif text-lg sm:text-2xl md:text-3xl font-bold text-cream mb-1.5 sm:mb-2">
               Have a custom dimension or special vision?
             </h3>
-            <p className="text-xs sm:text-sm text-cream/80 max-w-xl">
+            <p className="text-[11px] sm:text-sm text-cream/80 max-w-xl">
               Our artisans can craft custom multi-frame layouts, custom magazine page counts, or corporate gift hampers tailored exactly to your requirement.
             </p>
           </div>
@@ -192,17 +193,17 @@ export default function CategoryPage({
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex-shrink-0 inline-flex items-center gap-2.5 bg-cream hover:bg-white text-burgundy-deep font-bold px-6 py-3.5 rounded-full shadow-lg transition-all hover:scale-105 text-sm"
+            className="flex-shrink-0 inline-flex items-center gap-2 bg-cream hover:bg-white text-burgundy-deep font-bold px-4 sm:px-6 py-2.5 sm:py-3.5 rounded-full shadow-lg transition-all hover:scale-105 text-xs sm:text-sm"
           >
-            <MessageCircle className="w-4 h-4 text-burgundy" />
+            <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-burgundy" />
             <span>Chat with Artisan on WhatsApp</span>
           </a>
         </div>
       </div>
 
-      {/* Product Cards Grid */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-7">
+      {/* Product Cards Grid: 2 columns on mobile (Meesho / Myntra style) */}
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 mb-20">
+        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-7">
           {products.map((product) => (
             <ProductCard
               key={product.id || product.slug}
