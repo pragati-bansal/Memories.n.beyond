@@ -65,7 +65,7 @@ export default function ProductCard({ product, onSelect }) {
           <span className="text-[9px] sm:text-[11px] uppercase tracking-wider font-bold text-rose-deep block mb-0.5 sm:mb-1 truncate">
             {product.tag || 'Handmade Keepsake'}
           </span>
-          <h3 className="font-serif text-xs sm:text-lg font-bold sm:font-medium text-burgundy-deep mb-1 sm:mb-2 line-clamp-1 group-hover:text-rose-deep transition-colors">
+          <h3 className="font-serif text-xs sm:text-lg font-bold sm:font-medium text-burgundy-deep mb-1 sm:mb-2 line-clamp-2 group-hover:text-rose-deep transition-colors">
             {product.title}
           </h3>
           <p className="text-[10px] sm:text-xs text-ink-soft line-clamp-1 sm:line-clamp-2 mb-2 sm:mb-3 leading-snug sm:leading-relaxed">

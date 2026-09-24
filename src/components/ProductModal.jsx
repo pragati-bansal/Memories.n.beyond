@@ -280,22 +280,6 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                   </div>
                 )}
 
-                {/* Product Highlights / Features */}
-                {product.details && product.details.length > 0 && (
-                  <div className="bg-cream/60 p-4 rounded-2xl border border-burgundy/10 space-y-2">
-                    <span className="block text-xs font-bold text-burgundy-deep uppercase tracking-wider mb-1">
-                      Product Highlights:
-                    </span>
-                    <ul className="space-y-1.5">
-                      {product.details.map((detail, idx) => (
-                        <li key={idx} className="flex items-start gap-2 text-xs text-ink-soft">
-                          <CheckCircle2 className="w-3.5 h-3.5 text-rose-deep shrink-0 mt-0.5" />
-                          <span>{detail}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
 
                 {/* Customization Details Callout */}
                 <div className="p-4 rounded-2xl bg-gradient-to-r from-blush/50 via-blush/30 to-cream border border-burgundy/15 flex items-start gap-3 text-xs text-burgundy-deep shadow-xs">

@@ -4,8 +4,6 @@ import ProductCard from '../components/ProductCard';
 import {
   ArrowLeft,
   ShieldCheck,
-  Info,
-  HelpCircle,
   MessageCircle,
 } from 'lucide-react';
 import customFramesImg from '../assets/hero/custom-frames.jpg';
@@ -251,49 +249,6 @@ export default function CategoryPage({
               onSelect={onSelectProduct}
             />
           ))}
-        </div>
-      </div>
-
-      {/* Size, Dimension & Material Guide */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="bg-paper rounded-3xl border border-burgundy/15 p-6 sm:p-10 shadow-craft-soft">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-2xl bg-blush flex items-center justify-center text-burgundy shadow-sm">
-              <Info className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-serif text-2xl font-bold text-burgundy-deep">
-                {meta.guideTitle}
-              </h3>
-              <p className="text-xs text-ink-soft">
-                Everything you need to know about dimensions, formats and best placement.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {meta.guideItems.map((item, index) => (
-              <div
-                key={index}
-                className="bg-cream/50 rounded-2xl p-5 border border-burgundy/10 flex flex-col justify-between"
-              >
-                <div>
-                  <span className="text-[10px] uppercase font-bold tracking-wider text-rose-deep block mb-1">
-                    Option {index + 1}
-                  </span>
-                  <h4 className="font-serif font-bold text-lg text-burgundy-deep mb-1">
-                    {item.size}
-                  </h4>
-                  <div className="inline-block px-2 py-0.5 rounded text-[11px] font-semibold bg-blush/80 text-burgundy mb-3">
-                    {item.bestFor}
-                  </div>
-                  <p className="text-xs text-ink-soft leading-relaxed">
-                    {item.details}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </div>

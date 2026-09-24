@@ -72,8 +72,8 @@ export const initialProducts = [
   {
     id: 'frame-4x4-heart-cutout',
     category: 'frames',
-    tag: '4x4 Mini Cutout',
-    title: '4x4 Retro Heart Cutout Frame',
+    tag: '4x4 Mini Popup',
+    title: '4x4 Retro Heart Popup Frame',
     price: 299,
     description: 'Pocket-sized charm featuring your custom photo cutout over a green radiating heart background in a sleek 4x4 tabletop black frame.',
     gradient: 'linear-gradient(150deg,#D8F3DC,#95D5B2 55%,#2D6A4F)',
@@ -101,8 +101,8 @@ export const initialProducts = [
   {
     id: 'frame-4x4-aesthetic-cutout',
     category: 'frames',
-    tag: '4x4 Mini Cutout',
-    title: '4x4 Aesthetic Heart Silhouette Frame',
+    tag: '4x4 Mini Popup',
+    title: '4x4 Aesthetic Heart Popup Frame',
     price: 299,
     description: 'Chic aesthetic portrait cutout paired with mesmerizing concentric heart contours in a portable 4x4 desktop frame.',
     gradient: 'linear-gradient(150deg,#E8F5E9,#A5D6A7 55%,#1B4332)',
@@ -251,14 +251,13 @@ export const initialProducts = [
     category: 'frames',
     tag: 'Birthday Special',
     title: 'Birthday Special Milestone Frame',
-    price: 399,
+    price: 499,
     description: 'An expansive centerpiece statement frame honoring milestones with hero portrait, custom message and multi-photo timeline.',
     gradient: 'linear-gradient(150deg,#FFE5D9,#D88373 55%,#6E1F2B)',
     images: [
       frameImages.birthdaySpecial,
     ],
     sizes: [
-      { size: '5x7', label: '5x7 in (Tabletop)', price: 399 },
       { size: 'A4', label: 'A4 Size (8.3 x 11.7 in)', price: 499 },
       { size: '18x24', label: '18x24 in (Grand Showcase)', price: 1499 },
     ],
