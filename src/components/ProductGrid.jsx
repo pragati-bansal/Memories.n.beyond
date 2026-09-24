@@ -48,6 +48,16 @@ export default function ProductGrid({ onNavigateToCategory }) {
       badge: 'Handcrafted',
       actionText: 'Explore Add-ons & Sizes',
     },
+    {
+      id: 'general',
+      title: 'Generalised Gifts',
+      subtitle: 'Pre-curated celebration combos seamlessly uniting custom frames, luxury keepsake hampers, and artisan add-ons.',
+      tag: 'Curated Combos',
+      image: hamperBouquetImg,
+      highlights: ['Hampers + Frames + Add-ons', 'Pre-wrapped Ready to Gift', 'Wax-Sealed Greeting Cards'],
+      badge: 'All-In-One',
+      actionText: 'Explore Gift Combos',
+    },
   ];
 
   return (
@@ -61,8 +71,8 @@ export default function ProductGrid({ onNavigateToCategory }) {
           </h2>
         </div>
 
-        {/* 4 Big Category Sections (NO prices mentioned on these cards) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-7">
+        {/* 5 Big Category Sections (NO prices mentioned on these cards) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 sm:gap-6">
           {mainCategories.map((cat, idx) => (
             <div
               key={cat.id}

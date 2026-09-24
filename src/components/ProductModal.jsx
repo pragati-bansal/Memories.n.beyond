@@ -2,13 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
-  Upload,
   CheckCircle2,
-  Calendar,
   MessageCircle,
   Sparkles,
-  Loader2,
-  Trash2,
   Truck,
   Gift,
   Tag,
@@ -16,26 +12,28 @@ import {
   ShieldCheck,
   ArrowRight,
   Palette,
+  ExternalLink,
 } from 'lucide-react';
-import { uploadCustomerPhoto, createOrderRecord } from '../lib/supabaseClient';
 
 export default function ProductModal({ product, onClose, onOpenCancellationPolicy }) {
-  const [customerName, setCustomerName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [customText, setCustomText] = useState('');
-  const [eventDate, setEventDate] = useState('');
-  const [uploadedFiles, setUploadedFiles] = useState([]); // [{ name, url, file }]
-  const [isUploading, setIsUploading] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [uploadError, setUploadError] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // Selected size & dynamic price
   const [selectedSize, setSelectedSize] = useState(
-    product.selectedSize || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : null)
+    product?.selectedSize || (product?.sizes && product?.sizes.length > 0 ? product.sizes[0] : null)
   );
-  const currentPrice = selectedSize ? selectedSize.price : product.price;
 
+  // Update selected size when product changes
+  useEffect(() => {
+    if (product) {
+      setSelectedSize(
+        product.selectedSize || (product.sizes && product.sizes.length > 0 ? product.sizes[0] : null)
+      );
+      setActiveImageIndex(0);
+    }
+  }, [product]);
+
+  const currentPrice = selectedSize ? selectedSize.price : product?.price;
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
   // Keyboard close on Escape
@@ -54,103 +52,22 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
       ? product.images
       : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
 
-  const customOpts = product.customization_options || {
-    requires_photo: true,
-    max_photos: 5,
-    requires_text: true,
-    text_placeholder: 'Custom text or name',
-    requires_date: false,
-  };
+  // Direct WhatsApp Inquiry / Order Action
+  const handleProceedToWhatsApp = () => {
+    const sizeInfo = selectedSize ? ` (${selectedSize.label || selectedSize.size})` : '';
+    const messageLines = [
+      `🌸 *PRODUCT INQUIRY — Memories n Beyond* 🌸`,
+      `*Product:* ${product.title}`,
+      `*Selected Option / Size:* ${selectedSize ? (selectedSize.label || selectedSize.size) : 'Standard'}`,
+      `*Price:* ₹${currentPrice}`,
+      ``,
+      `Hi! I saw this in your catalogue and would love to know more / place an order with personalization. Please guide me with the details!`,
+    ];
 
-  // Handle Multi-file Upload to Supabase Storage
-  const handleFileUpload = async (e) => {
-    const files = Array.from(e.target.files);
-    if (!files.length) return;
+    const messageText = messageLines.join('\n');
+    const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageText)}`;
 
-    setIsUploading(true);
-    setUploadError('');
-
-    try {
-      const uploadPromises = files.map(async (file) => {
-        const publicUrl = await uploadCustomerPhoto(file);
-        return {
-          name: file.name,
-          url: publicUrl,
-        };
-      });
-
-      const newUploaded = await Promise.all(uploadPromises);
-      setUploadedFiles((prev) => [...prev, ...newUploaded]);
-    } catch (err) {
-      console.error('File upload failed:', err);
-      setUploadError('Failed to upload some images. Please check Supabase storage permissions or try again.');
-    } finally {
-      setIsUploading(false);
-      e.target.value = '';
-    }
-  };
-
-  const handleRemovePhoto = (index) => {
-    setUploadedFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // Build WhatsApp Message & Record in Supabase
-  const handleProceedToWhatsApp = async (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const uploadedUrls = uploadedFiles.map((f) => f.url);
-
-      // Save order to Supabase orders table
-      await createOrderRecord({
-        customer_name: customerName.trim() || 'Valued Customer',
-        phone_number: phoneNumber.trim() || 'Not Provided',
-        product_id: product.id && product.id.length > 10 ? product.id : null,
-        custom_notes: customText.trim(),
-        event_date: eventDate || null,
-        uploaded_images: uploadedUrls,
-        order_status: 'pending',
-      });
-
-      // Construct formatted WhatsApp message
-      const lines = [
-        `🌸 *NEW CUSTOM ORDER REQUEST* 🌸`,
-        `*Product:* ${product.title}`,
-        `*Selected Size/Option:* ${selectedSize ? (selectedSize.label || selectedSize.size) : 'Standard'}`,
-        `*Price:* ₹${currentPrice}`,
-      ];
-
-      if (customerName.trim()) {
-        lines.push(`*Name:* ${customerName.trim()}`);
-      }
-      if (phoneNumber.trim()) {
-        lines.push(`*Phone:* ${phoneNumber.trim()}`);
-      }
-      if (customText.trim()) {
-        lines.push(`*Custom Text/Notes:* "${customText.trim()}"`);
-      }
-      if (eventDate) {
-        lines.push(`*Occasion/Event Date:* ${eventDate}`);
-      }
-      if (uploadedUrls.length > 0) {
-        lines.push(`*Customer Photos (${uploadedUrls.length}):*`);
-        uploadedUrls.forEach((url, i) => lines.push(`  ${i + 1}. ${url}`));
-      }
-
-      lines.push(`\nPlease confirm my order details and share next steps. Thank you!`);
-
-      const messageText = lines.join('\n');
-      const waUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(messageText)}`;
-
-      // Open WhatsApp chat in new window
-      window.open(waUrl, '_blank', 'noopener,noreferrer');
-      onClose();
-    } catch (error) {
-      console.error('Error proceeding with order:', error);
-    } finally {
-      setIsSubmitting(false);
-    }
+    window.open(waUrl, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -221,7 +138,7 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                   </div>
                 )}
 
-                {/* Delivery & Customer Perks (Strictly NO 'Crafted with Care') */}
+                {/* Delivery & Shipping Info */}
                 <div className="pt-3 border-t border-burgundy/15 space-y-2.5">
                   {/* Shipping & Delivery Timelines */}
                   <div className="bg-paper/95 rounded-2xl p-3 border border-burgundy/10 shadow-xs space-y-2">
@@ -278,15 +195,10 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                         <Tag className="w-3.5 h-3.5 text-rose-deep shrink-0" />
                         <span>Get exclusive offers for your next purchase</span>
                       </div>
-
-                      <div className="flex items-start gap-2 pt-1.5 border-t border-burgundy/10">
-                        <Palette className="w-3.5 h-3.5 text-rose-deep shrink-0 mt-0.5" />
-                        <span className="leading-snug">You can customise every text, design, colour in the existing template as per your choice</span>
-                      </div>
                     </div>
                   </div>
 
-                  {/* Return and Cancellation Policy Interactive Trigger */}
+                  {/* Return and Cancellation Policy Trigger */}
                   <button
                     type="button"
                     onClick={() => {
@@ -311,31 +223,39 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
               </div>
             </div>
 
-            {/* Right Column: Customization Form & WhatsApp CTA */}
+            {/* Right Column: Catalogue Product Details & Direct WhatsApp Inquire */}
             <div className="md:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-bold text-rose-deep uppercase tracking-wider block mb-1">
-                  {product.tag || 'Personalized Gift'}
-                </span>
-                <h2 className="font-serif text-2xl sm:text-3xl font-medium text-burgundy-deep mb-2">
-                  {product.title}
-                </h2>
-                <div className="flex items-baseline gap-2 mb-4">
-                  <span className="font-serif text-2xl font-bold text-burgundy">
-                    ₹{currentPrice}
+              <div className="space-y-5">
+                {/* Header info */}
+                <div>
+                  <span className="text-xs font-bold text-rose-deep uppercase tracking-wider block mb-1">
+                    {product.tag || 'Personalized Gift'}
                   </span>
-                  <span className="text-xs text-ink-soft font-semibold">
-                    {selectedSize ? `(${selectedSize.label || selectedSize.size})` : '(Includes personalization & packaging)'}
-                  </span>
+                  <h2 className="font-serif text-2xl sm:text-3xl font-medium text-burgundy-deep mb-2">
+                    {product.title}
+                  </h2>
+                  <div className="flex items-baseline gap-2 mb-3">
+                    <span className="font-serif text-2xl sm:text-3xl font-bold text-burgundy">
+                      ₹{currentPrice}
+                    </span>
+                    <span className="text-xs text-ink-soft font-semibold">
+                      {selectedSize ? `(${selectedSize.label || selectedSize.size})` : '(Includes personalization & packaging)'}
+                    </span>
+                  </div>
+                  {product.description && (
+                    <p className="text-sm text-ink-soft leading-relaxed">
+                      {product.description}
+                    </p>
+                  )}
                 </div>
 
                 {/* Size / Variant Options Picker */}
                 {product.sizes && product.sizes.length > 0 && (
-                  <div className="mb-6 bg-blush/30 p-3.5 rounded-2xl border border-burgundy/10">
-                    <span className="block text-xs font-bold text-burgundy-deep uppercase tracking-wider mb-2">
-                      Available in:
+                  <div className="bg-blush/30 p-4 rounded-2xl border border-burgundy/10">
+                    <span className="block text-xs font-bold text-burgundy-deep uppercase tracking-wider mb-2.5">
+                      Choose Size / Format:
                     </span>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                       {product.sizes.map((s) => {
                         const isSelected = selectedSize?.size === s.size;
                         return (
@@ -343,13 +263,13 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                             key={s.size}
                             type="button"
                             onClick={() => setSelectedSize(s)}
-                            className={`p-2.5 rounded-xl border text-left transition-all flex items-center justify-between ${
+                            className={`p-3 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
                               isSelected
-                                ? 'bg-burgundy text-cream border-burgundy shadow-sm'
+                                ? 'bg-burgundy text-cream border-burgundy shadow-sm ring-2 ring-burgundy/20'
                                 : 'bg-paper text-ink-soft border-burgundy/15 hover:border-rose/50 hover:bg-cream'
                             }`}
                           >
-                            <span className="text-xs font-semibold">{s.size}</span>
+                            <span className="text-xs font-semibold">{s.label || s.size}</span>
                             <span className={`text-xs font-bold ${isSelected ? 'text-cream' : 'text-burgundy'}`}>
                               ₹{s.price}
                             </span>
@@ -360,171 +280,49 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                   </div>
                 )}
 
-                {/* 100% Template Customization Choice Notice */}
-                <div className="mb-4 p-3 rounded-2xl bg-blush/40 border border-burgundy/15 flex items-start gap-2.5 text-xs text-burgundy-deep shadow-xs">
-                  <Palette className="w-4 h-4 text-burgundy shrink-0 mt-0.5" />
-                  <span className="leading-relaxed font-medium">
-                    You can customise every text, design, colour in the existing template as per your choice.
-                  </span>
+                {/* Product Highlights / Features */}
+                {product.details && product.details.length > 0 && (
+                  <div className="bg-cream/60 p-4 rounded-2xl border border-burgundy/10 space-y-2">
+                    <span className="block text-xs font-bold text-burgundy-deep uppercase tracking-wider mb-1">
+                      Product Highlights:
+                    </span>
+                    <ul className="space-y-1.5">
+                      {product.details.map((detail, idx) => (
+                        <li key={idx} className="flex items-start gap-2 text-xs text-ink-soft">
+                          <CheckCircle2 className="w-3.5 h-3.5 text-rose-deep shrink-0 mt-0.5" />
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                {/* Customization Details Callout */}
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-blush/50 via-blush/30 to-cream border border-burgundy/15 flex items-start gap-3 text-xs text-burgundy-deep shadow-xs">
+                  <Palette className="w-5 h-5 text-burgundy shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block text-burgundy mb-0.5">100% Customisable on WhatsApp</span>
+                    <span className="text-ink-soft leading-relaxed">
+                      You can customise photos, names, dates, quotes, and colours for this template directly with us over WhatsApp.
+                    </span>
+                  </div>
                 </div>
+              </div>
 
-                {/* Customization Form */}
-                <form onSubmit={handleProceedToWhatsApp} className="space-y-4">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {/* Customer Name */}
-                    <div>
-                      <label className="block text-xs font-bold text-ink-soft mb-1">
-                        Your Name
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. Maya Sharma"
-                        value={customerName}
-                        onChange={(e) => setCustomerName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-burgundy/15 bg-cream/50 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy"
-                      />
-                    </div>
-
-                    {/* Phone Number */}
-                    <div>
-                      <label className="block text-xs font-bold text-ink-soft mb-1">
-                        WhatsApp Phone
-                      </label>
-                      <input
-                        type="tel"
-                        placeholder="e.g. 9876543210"
-                        value={phoneNumber}
-                        onChange={(e) => setPhoneNumber(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-burgundy/15 bg-cream/50 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Custom Text / Engraving */}
-                  <div>
-                    <label className="block text-xs font-bold text-ink-soft mb-1">
-                      Custom Text / Engraving / Wish
-                    </label>
-                    <textarea
-                      rows={2}
-                      placeholder={customOpts.text_placeholder || 'Enter names, anniversary date, or personal quote...'}
-                      value={customText}
-                      onChange={(e) => setCustomText(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-burgundy/15 bg-cream/50 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy resize-none"
-                    />
-                  </div>
-
-                  {/* Occasion Date (if applicable) */}
-                  <div>
-                    <label className="block text-xs font-bold text-ink-soft mb-1">
-                      Event / Occasion Date (Optional)
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="date"
-                        value={eventDate}
-                        onChange={(e) => setEventDate(e.target.value)}
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-burgundy/15 bg-cream/50 text-ink text-sm focus:outline-none focus:ring-2 focus:ring-burgundy/30 focus:border-burgundy"
-                      />
-                      <Calendar className="w-4 h-4 text-ink-soft/60 absolute right-3.5 top-3 pointer-events-none" />
-                    </div>
-                  </div>
-
-                  {/* Supabase Photo Uploader */}
-                  <div className="pt-2">
-                    <label className="block text-xs font-bold text-ink-soft mb-1.5 flex items-center justify-between">
-                      <span>Upload Your Photos</span>
-                      <span className="text-[11px] text-rose-deep font-normal">
-                        Direct Supabase Storage
-                      </span>
-                    </label>
-
-                    <label className="border-2 border-dashed border-burgundy/20 hover:border-burgundy/50 bg-cream/40 rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-colors group">
-                      <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleFileUpload}
-                        disabled={isUploading}
-                        className="hidden"
-                      />
-                      {isUploading ? (
-                        <div className="flex items-center gap-2 text-burgundy text-xs font-semibold py-2">
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          <span>Uploading to Supabase...</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-3 text-center sm:text-left">
-                          <div className="w-10 h-10 rounded-full bg-blush flex items-center justify-center text-burgundy group-hover:scale-110 transition-transform">
-                            <Upload className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <span className="text-xs font-bold text-burgundy block">
-                              Click to choose photos from device
-                            </span>
-                            <span className="text-[11px] text-ink-soft">
-                              PNG, JPG, HEIC up to 15MB each
-                            </span>
-                          </div>
-                        </div>
-                      )}
-                    </label>
-
-                    {uploadError && (
-                      <p className="text-xs text-rose-deep mt-1.5">{uploadError}</p>
-                    )}
-
-                    {/* Uploaded Photos Thumbnails List */}
-                    {uploadedFiles.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {uploadedFiles.map((file, idx) => (
-                          <div
-                            key={idx}
-                            className="relative group w-14 h-14 rounded-lg overflow-hidden border border-burgundy/15 shadow-sm"
-                          >
-                            <img
-                              src={file.url}
-                              alt={file.name}
-                              className="w-full h-full object-cover"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => handleRemovePhoto(idx)}
-                              className="absolute inset-0 bg-burgundy-deep/70 text-cream opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity"
-                              aria-label="Remove image"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Submit Button to WhatsApp */}
-                  <div className="pt-4">
-                    <button
-                      type="submit"
-                      disabled={isSubmitting}
-                      className="w-full bg-burgundy hover:bg-burgundy-deep text-cream py-3.5 px-6 rounded-2xl font-bold text-sm shadow-craft-soft hover:shadow-craft-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2.5 disabled:opacity-75"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Preparing WhatsApp Checkout...</span>
-                        </>
-                      ) : (
-                        <>
-                          <MessageCircle className="w-4 h-4" />
-                          <span>Order &amp; Customize on WhatsApp</span>
-                        </>
-                      )}
-                    </button>
-                    <p className="text-[11px] text-center text-ink-soft/80 mt-2">
-                      No online payment required now. Review details &amp; finalize delivery on WhatsApp!
-                    </p>
-                  </div>
-                </form>
+              {/* Direct WhatsApp CTA Section */}
+              <div className="pt-6 mt-4 border-t border-burgundy/10">
+                <button
+                  type="button"
+                  onClick={handleProceedToWhatsApp}
+                  className="w-full bg-[#25D366] hover:bg-[#1EBE5D] text-white py-4 px-6 rounded-2xl font-bold text-sm sm:text-base shadow-craft-soft hover:shadow-craft-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-3 cursor-pointer group"
+                >
+                  <MessageCircle className="w-5 h-5 group-hover:scale-110 transition-transform" />
+                  <span>Order &amp; Inquire on WhatsApp</span>
+                  <ExternalLink className="w-4 h-4 opacity-80" />
+                </button>
+                <p className="text-[11px] text-center text-ink-soft mt-2.5">
+                  Tap to chat directly on WhatsApp to personalize &amp; place your order.
+                </p>
               </div>
             </div>
           </div>

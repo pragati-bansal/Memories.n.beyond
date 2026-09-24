@@ -5,6 +5,9 @@ import polaroidBouquetImg from '../assets/hero/polaroid-bouquet.jpg';
 import lilyBouquetImg from '../assets/hero/pipe-cleaner-lily.jpg';
 import embroideredImg from '../assets/hero/embroidered-keepsake.jpg';
 import hamperBouquetImg from '../assets/hero/hamper-bouquet.jpg';
+import heroGiftsPhoto from '../assets/hero-gifts-photo.jpg';
+import foreverFlowerBouquetImg from '../assets/hero/forever-flower-bouquet.png';
+import pinkLilyBouquetImg from '../assets/hero/pink-lily-forever-bouquet.png';
 
 export const initialProducts = [
   // ===================== 1. FRAMES (10 CATEGORIES) =====================
@@ -125,6 +128,35 @@ export const initialProducts = [
     ],
   },
   {
+    id: 'frame-popup-with-text',
+    category: 'frames',
+    tag: '4x4 Popup',
+    title: 'Popup with Text Frame',
+    price: 299,
+    description: 'Layered 3D photo cutout with custom heartfelt message bubbles, aesthetic bow, and a dreamy blue glowing heart backdrop in a 4x4 tabletop frame.',
+    gradient: 'linear-gradient(150deg,#E0F2FE,#38BDF8 55%,#0284C7)',
+    images: [
+      frameImages.popupWithText,
+    ],
+    sizes: [
+      { size: '4x4', label: '4x4 in (Tabletop Mini)', price: 299 },
+    ],
+    customization_options: {
+      requires_photo: true,
+      max_photos: 1,
+      requires_text: true,
+      text_placeholder: 'Custom caption, text bubble or names (e.g. "I love you", "my whole heart")',
+      requires_date: false,
+    },
+    details: [
+      'Exclusively available in 4x4 inch compact square tabletop format',
+      'Layered 3D photo popup cutout with clean outline',
+      'Custom text bubbles, nicknames & aesthetic bow accents',
+      'Radiant glowing heart gradient background in sky blue',
+      'Includes sturdy kickstand easel for desks, nightstands & workstations',
+    ],
+  },
+  {
     id: 'frame-instagram-layout',
     category: 'frames',
     tag: 'Instagram Layout',
@@ -188,9 +220,10 @@ export const initialProducts = [
     tag: 'Scrapbook',
     title: 'Scrapbook Frame',
     price: 399,
-    description: 'Vintage scrapbook aesthetic with torn-paper layers, heartfelt quotes, delicate purple bows, and cherished memory snapshots.',
-    gradient: 'linear-gradient(150deg,#E8E8F8,#C5C3EE 55%,#5E548E)',
+    description: 'Artisan scrapbook collage featuring real polaroid photo print, custom Spotify lyrics card, textured fabric swatch & floral embellishments in a classic frame.',
+    gradient: 'linear-gradient(150deg,#FCE7F3,#F472B6 55%,#9D174D)',
     images: [
+      frameImages.scrapbookSpotify,
       frameImages.scrapbook2,
       frameImages.scrapbook,
     ],
@@ -200,16 +233,17 @@ export const initialProducts = [
     ],
     customization_options: {
       requires_photo: true,
-      max_photos: 6,
+      max_photos: 4,
       requires_text: true,
-      text_placeholder: 'Occasion (e.g. Father\'s Day), custom caption or special note',
+      text_placeholder: 'Song title, artist name, favorite lyrics & custom note',
       requires_date: true,
     },
     details: [
-      'Hand-torn aesthetic paper borders and vintage elements',
-      'Collage arrangement fitting 3 to 6 mini photos',
-      'Solid wooden framing with antique textured finish',
-      'Perfect keepsake for trips, anniversaries, and best friends',
+      'Available in 5x7 in Tabletop and A4 Size formats',
+      'Personalized with your favorite photo styled as an authentic polaroid',
+      'Custom Spotify song card with track title, artist name & heartfelt lyrics',
+      'Pink woven burlap backdrop, gingham fabric accents & hand-cut floral charms',
+      'Includes sturdy tabletop kickstand and wall mounting hardware',
     ],
   },
   {
@@ -298,6 +332,37 @@ export const initialProducts = [
       'Sleek contemporary framing in obsidian black or warm oak',
       'Premium thick mount board with bevelled precision',
       'Easy photo upload with WhatsApp digital preview check',
+    ],
+  },
+  {
+    id: 'frame-family-grid-collage',
+    category: 'frames',
+    tag: 'Grid Collage',
+    title: 'Family "This is Us" Grid Collage Frame',
+    price: 399,
+    description: 'Grand multi-photo story collage showcasing 10 to 16 cherished family snapshots paired with elegant typography script ("family this is us").',
+    gradient: 'linear-gradient(150deg,#FFF3E0,#FFE0B2 55%,#5D4037)',
+    images: [
+      frameImages.familyGridCollage,
+    ],
+    sizes: [
+      { size: '5x7', label: '5x7 in (Tabletop)', price: 399 },
+      { size: 'A4', label: 'A4 Size (8.3 x 11.7 in)', price: 499 },
+      { size: '18x24', label: '18x24 in (Grand Showcase)', price: 1499 },
+    ],
+    customization_options: {
+      requires_photo: true,
+      max_photos: 16,
+      requires_text: true,
+      text_placeholder: 'Custom header/surname (e.g. "family this is us" or "The Sharmas")',
+      requires_date: true,
+    },
+    details: [
+      'Available in 5x7 in Tabletop, A4 Size, and 18x24 in Grand Statement format',
+      'Curated collage layout accommodating up to 16 family memories',
+      'Custom calligraphy title: "family this is us" or personalized family name',
+      'Ultra-HD archival photographic print with anti-glare protective cover',
+      'Includes tabletop easel for small sizes & heavy-duty wall hangers for 18x24',
     ],
   },
   {
@@ -602,6 +667,68 @@ export const initialProducts = [
       'High-detail hand-painted polymer resin figurines',
       'Cork-stoppered glass jar with miniature rolled parchment notes',
       'Great companion addition for gift hampers and desk setups',
+    ],
+  },
+
+  // ===================== 5. GENERALISED GIFTS =====================
+  {
+    id: 'gift-forever-bloom-bouquet',
+    category: 'general',
+    tag: 'Handmade Forever Bouquet',
+    title: 'Handcrafted Lavender Forever Floral Bouquet',
+    price: 350,
+    description: 'Bespoke handcrafted velvet pipe-cleaner floral bouquet featuring blooming purple lilies, tulip bud, cute heart stem, personalized occasion greeting card & luxury satin bow wrapping.',
+    gradient: 'linear-gradient(150deg,#F3E8FF,#E9D5FF 50%,#7E22CE)',
+    images: [
+      foreverFlowerBouquetImg,
+    ],
+    sizes: [
+      { size: 'Standard Bouquet', label: 'Classic 3-Flower Bouquet + Heart + Card', price: 350 },
+      { size: 'Deluxe Bouquet', label: 'Deluxe 5-Flower Bloom Bouquet + Fairy Lights', price: 599 },
+    ],
+    customization_options: {
+      requires_photo: false,
+      max_photos: 0,
+      requires_text: true,
+      text_placeholder: 'Occasion & custom card message (e.g. "Happy Birthday Samiksha")',
+      requires_date: false,
+    },
+    details: [
+      '100% artisan handcrafted velvet pipe-cleaner flowers that never wilt or fade',
+      'Includes 2 blooming lilies, 1 tulip bud & signature velvet heart stem',
+      'Personalized handwritten greeting card (e.g. Happy Birthday / Anniversary)',
+      'Wrapped in premium matte blush pink wrapping with gold borders & red satin bow',
+      'Perfect standalone thoughtful gift or companion piece with frames & hampers',
+    ],
+  },
+  {
+    id: 'gift-pink-forever-bouquet',
+    category: 'general',
+    tag: 'Handmade Forever Bouquet',
+    title: 'Handcrafted Pink Blossom Forever Floral Bouquet',
+    price: 350,
+    description: 'Artisan handcrafted velvet pipe-cleaner floral arrangement featuring 2 vibrant pink lilies, delicate tulip bud, mini blossom flower & satin bow gift wrap.',
+    gradient: 'linear-gradient(150deg,#FDF2F8,#FCE7F3 50%,#DB2777)',
+    images: [
+      pinkLilyBouquetImg,
+    ],
+    sizes: [
+      { size: 'Standard Bouquet', label: 'Classic Pink Lily Bloom Bouquet + Card', price: 350 },
+      { size: 'Deluxe Bouquet', label: 'Deluxe Grand Pink Bouquet + Fairy Lights', price: 599 },
+    ],
+    customization_options: {
+      requires_photo: false,
+      max_photos: 0,
+      requires_text: true,
+      text_placeholder: 'Occasion & custom card message',
+      requires_date: false,
+    },
+    details: [
+      '100% handcrafted velvety pink petals with realistic pollen stems',
+      'Includes 2 blooming lilies, 1 upright tulip bud & 1 mini blossom flower',
+      'Wrapped in elegant layered white & gold-trimmed waterproof paper',
+      'Tied with a vibrant crimson satin ribbon bow',
+      'Everlasting keepsake flowers that stay fresh and vibrant forever',
     ],
   },
 ];

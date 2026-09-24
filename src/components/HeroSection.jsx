@@ -12,6 +12,7 @@ export default function HeroSection({ onNavigateToCategory }) {
     { id: 'magazines', label: 'Magazines' },
     { id: 'hampers', label: 'Hampers' },
     { id: 'addons', label: 'Add ons' },
+    { id: 'general', label: 'Generalised Gifts' },
   ];
 
   const handleCategoryClick = (catId) => {

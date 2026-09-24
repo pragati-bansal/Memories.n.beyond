@@ -11,6 +11,9 @@ import polaroidPopupImg from './frame-polaroid-popup.png';
 import popup3dImg from './frame-3d-popup.png';
 import miniSquareImg from './frame-mini-square.png';
 import miniSquareImg2 from './frame-mini-square-2.png';
+import popupWithTextImg from './frame-popup-with-text.png';
+import familyGridCollageImg from './frame-family-grid-collage.png';
+import scrapbookSpotifyImg from './frame-scrapbook-spotify.png';
 
 // Image registry for Frame Categories.
 export const frameImages = {
@@ -20,6 +23,7 @@ export const frameImages = {
   quote: quoteImg,
   scrapbook: scrapbookImg,
   scrapbook2: scrapbook2Img,
+  scrapbookSpotify: scrapbookSpotifyImg,
   birthdaySpecial: birthdaySpecialImg,
   a4BirthdayBoard: birthdayBoardImg,
   a4MemoryGrid: memoryGridImg,
@@ -27,4 +31,6 @@ export const frameImages = {
   a4Popup: popup3dImg,
   miniSquare: miniSquareImg,
   miniSquare2: miniSquareImg2,
+  popupWithText: popupWithTextImg,
+  familyGridCollage: familyGridCollageImg,
 };

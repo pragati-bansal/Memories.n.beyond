@@ -7,12 +7,13 @@ import CtaStrip from './components/CtaStrip';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ProductModal from './components/ProductModal';
+import GeneralGiftsSection from './components/GeneralGiftsSection';
 import CategoryPage from './pages/CategoryPage';
 import PolicyPage from './pages/PolicyPage';
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [activeCategory, setActiveCategory] = useState(null); // 'frames' | 'magazines' | 'hampers' | 'addons' | null
+  const [activeCategory, setActiveCategory] = useState(null); // 'frames' | 'magazines' | 'hampers' | 'addons' | 'general' | null
   const [isPolicyView, setIsPolicyView] = useState(false);
 
   // Synchronize with URL hash routing for direct links & browser back button
@@ -21,7 +22,7 @@ export default function App() {
       const hash = window.location.hash;
       if (hash.startsWith('#category/')) {
         const cat = hash.replace('#category/', '').trim().toLowerCase();
-        if (['frames', 'magazines', 'hampers', 'addons'].includes(cat)) {
+        if (['frames', 'magazines', 'hampers', 'addons', 'general'].includes(cat)) {
           setActiveCategory(cat);
           setIsPolicyView(false);
           return;
@@ -112,6 +113,10 @@ export default function App() {
           /* Home Page Experience */
           <>
             <HeroSection onNavigateToCategory={navigateToCategory} />
+            <GeneralGiftsSection
+              onSelectProduct={(product) => setSelectedProduct(product)}
+              onNavigateToCategory={navigateToCategory}
+            />
             <HowItWorks />
             <ReviewSection />
             <CtaStrip />

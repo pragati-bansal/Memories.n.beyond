@@ -55,7 +55,7 @@ export default function ProductCard({ product, onSelect }) {
         {/* Hover Quick View Ribbon (Desktop) */}
         <div className="hidden sm:flex absolute inset-x-0 bottom-0 py-3 bg-gradient-to-t from-burgundy-deep/90 to-transparent text-cream items-center justify-center gap-1.5 text-xs font-bold tracking-wide transform translate-y-full group-hover:translate-y-0 transition-transform duration-300">
           <Eye className="w-3.5 h-3.5" />
-          <span>Customize &amp; Order</span>
+          <span>View Details</span>
         </div>
       </div>
 
@@ -116,7 +116,7 @@ export default function ProductCard({ product, onSelect }) {
             type="button"
             className="text-[9px] sm:text-xs font-bold bg-burgundy/10 hover:bg-burgundy hover:text-cream text-burgundy px-2 sm:px-3.5 py-1 sm:py-2 rounded-full transition-all inline-flex items-center gap-0.5 sm:gap-1 whitespace-nowrap"
           >
-            <span>Customize</span>
+            <span>View Details</span>
             <span className="hidden sm:inline">&rarr;</span>
           </button>
         </div>
