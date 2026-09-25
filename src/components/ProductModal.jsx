@@ -149,10 +149,10 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                       </div>
                       <div className="space-y-1 text-xs text-burgundy-deep">
                         <p className="font-semibold text-burgundy leading-snug">
-                          Yeh add-on item sirf kisi main product (Frame, Hamper ya Magazine) ke saath pair karke order kiya ja sakta hai.
+                          This add-on item can only be ordered when paired with a main product (Frame, Hamper, or Magazine).
                         </p>
                         <p className="text-[11px] text-ink-soft leading-snug">
-                          Ye akele (standalone) order ke liye available nahi hai.
+                          It is not available for standalone purchase.
                         </p>
                       </div>
                     </div>

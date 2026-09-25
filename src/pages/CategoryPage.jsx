@@ -39,9 +39,9 @@ const categoryMeta = {
   hampers: {
     id: 'hampers',
     title: 'Curated Luxury Gift Hampers',
-    tagline: 'Exquisite rigid gift boxes & explosion boxes loaded with handmade surprises, frames & figurines.',
+    tagline: 'Bespoke handcrafted hamper bouquets & polaroid memory arrangements loaded with personalized surprises.',
     image: hamperBouquetImg,
-    badge: 'Signature Keepsake Hampers',
+    badge: 'Signature Keepsake Bouquets',
   },
   addons: {
     id: 'addons',

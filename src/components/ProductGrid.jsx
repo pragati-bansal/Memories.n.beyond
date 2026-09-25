@@ -31,11 +31,11 @@ export default function ProductGrid({ onNavigateToCategory }) {
     {
       id: 'hampers',
       title: 'Hampers',
-      subtitle: 'Curated luxury keepsake boxes, explosion surprise boxes & themed gift sets sealed with gold foil elegance.',
+      subtitle: 'Bespoke celebration hamper bouquets and polaroid memory arrangements loaded with heartfelt surprises.',
       tag: 'Gift Hampers',
       image: hamperBouquetImg,
-      highlights: ['Multiple Box Sizes & Configurations', 'Rigid Reusable Keepsake Boxes', 'Couple Figurines & Treats Included'],
-      badge: 'Luxury Packaging',
+      highlights: ['Custom Newspaper & Korean Wrap Styles', 'Personalized Polaroid Photo Prints', 'Includes Favorite Treats, Fairy Lights & Notes'],
+      badge: 'Signature Hampers',
       actionText: 'Explore Hampers & Sizes',
     },
     {
