@@ -627,36 +627,6 @@ export const initialProducts = [
       'Hand-stitched embroidery thread with heart motif',
     ],
   },
-  {
-    id: 'a4',
-    category: 'addons',
-    tag: 'Add-on Keepsake',
-    title: 'Couple Miniature Figurine & Wish Jar Set',
-    price: 299,
-    description: 'Charming romantic couple figurines and mini glass wish jars with rolled notes to complete any gift setup. Placed lovingly inside hampers or alongside photo frames.',
-    gradient: 'linear-gradient(150deg,#F6DEDA,#EFC6C0 50%,#B4884E)',
-    images: [
-      'https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=800&auto=format&fit=crop&q=80',
-      giftBoxImg,
-    ],
-    sizes: [
-      { size: 'Couple Figurine', label: 'Hand-painted Couple Figurine', price: 299 },
-      { size: 'Wish Jar with Scroll', label: 'Glass Wish Jar with 10 Rolled Notes', price: 449 },
-      { size: 'Figurine + Jar Duo', label: 'Complete Figurine & Wish Jar Combo', price: 649 },
-    ],
-    customization_options: {
-      requires_photo: true,
-      max_photos: 5,
-      requires_text: true,
-      text_placeholder: 'Wishes or personal notes to roll inside the jar',
-      requires_date: false,
-    },
-    details: [
-      'High-detail hand-painted polymer resin figurines',
-      'Cork-stoppered glass jar with miniature rolled parchment notes',
-      'Great companion addition for gift hampers and desk setups',
-    ],
-  },
 
   // ===================== 5. GENERALISED GIFTS =====================
   {
