@@ -17,7 +17,7 @@ export const initialProducts = [
     tag: 'B&W Pop-up',
     title: 'B&W Pop-up Frame',
     price: 399,
-    description: 'Monochrome minimalist elegance with 3D pop-up photo cutouts layered over a textured black & white backdrop.',
+    description: 'Monochrome minimalist elegance with 3D pop-up photo cutouts, waterproof archival matte prints, and a protective acrylic glass shield.',
     gradient: 'linear-gradient(150deg,#2B2D42,#8D99AE 55%,#EDF2F4)',
     images: [
       frameImages.bwPopup,
@@ -46,7 +46,7 @@ export const initialProducts = [
     tag: 'Cutout Sticker',
     title: 'Cutout Sticker Frame',
     price: 399,
-    description: 'Playful customized photo cutout surrounded by vibrant aesthetic stickers, cute hand-drawn doodles, and personalized stickers.',
+    description: 'Playful customized photo cutout with waterproof gloss vinyl stickers, aesthetic doodles, and protective clear acrylic glass.',
     gradient: 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)',
     images: [
       frameImages.cutoutSticker,
@@ -75,7 +75,7 @@ export const initialProducts = [
     tag: '4x4 Mini Popup',
     title: '4x4 Retro Heart Popup Frame',
     price: 299,
-    description: 'Pocket-sized charm featuring your custom photo cutout over a green radiating heart background in a sleek 4x4 tabletop black frame.',
+    description: 'Pocket-sized charm featuring precision photo cutout, waterproof archival matte print, and green radiating retro heart backdrop in a 4x4 tabletop black frame.',
     gradient: 'linear-gradient(150deg,#D8F3DC,#95D5B2 55%,#2D6A4F)',
     images: [
       frameImages.miniSquare,
@@ -104,7 +104,7 @@ export const initialProducts = [
     tag: '4x4 Mini Popup',
     title: '4x4 Aesthetic Heart Popup Frame',
     price: 299,
-    description: 'Chic aesthetic portrait cutout paired with mesmerizing concentric heart contours in a portable 4x4 desktop frame.',
+    description: 'Chic portrait cutout with waterproof archival print and concentric heart contours in a sleek 4x4 desktop frame with protective shield.',
     gradient: 'linear-gradient(150deg,#E8F5E9,#A5D6A7 55%,#1B4332)',
     images: [
       frameImages.miniSquare2,
@@ -133,7 +133,7 @@ export const initialProducts = [
     tag: '4x4 Popup',
     title: 'Popup with Text Frame',
     price: 299,
-    description: 'Layered 3D photo cutout with custom heartfelt message bubbles, aesthetic bow, and a dreamy blue glowing heart backdrop in a 4x4 tabletop frame.',
+    description: 'Layered 3D photo cutout with waterproof print, custom message bubbles, aesthetic bow, and a dreamy blue glowing heart backdrop in a 4x4 tabletop frame.',
     gradient: 'linear-gradient(150deg,#E0F2FE,#38BDF8 55%,#0284C7)',
     images: [
       frameImages.popupWithText,
@@ -162,7 +162,7 @@ export const initialProducts = [
     tag: 'Instagram Layout',
     title: 'Instagram Layout Frame',
     price: 399,
-    description: 'Recreate your most iconic social moment with Instagram UI elements, custom handle, song playback badge, like counter, and caption.',
+    description: 'Recreate your iconic social moments with Instagram UI elements, custom song badge, like counter, and waterproof ultra-HD lab prints.',
     gradient: 'linear-gradient(150deg,#FDF2F8,#E0A96D 55%,#833AB4)',
     images: [
       frameImages.instagramLayout,
@@ -191,7 +191,7 @@ export const initialProducts = [
     tag: 'Quote Frame',
     title: 'Quote Frame',
     price: 399,
-    description: 'A delicate blend of evocative typography, heartfelt quotes, and cherished portraits to make words and memories timeless.',
+    description: 'Evocative typography, heartfelt quotes, and cherished portraits paired with waterproof non-glare archival protective glass front.',
     gradient: 'linear-gradient(150deg,#FAF0CA,#EE964B 55%,#6E1F2B)',
     images: [
       frameImages.quote,
@@ -220,7 +220,7 @@ export const initialProducts = [
     tag: 'Scrapbook',
     title: 'Scrapbook Frame',
     price: 399,
-    description: 'Artisan scrapbook collage featuring real polaroid photo print, custom Spotify lyrics card, textured fabric swatch & floral embellishments in a classic frame.',
+    description: 'Artisan scrapbook collage featuring real waterproof polaroid photo prints, custom Spotify lyrics card, textured fabric swatch & floral charms in a classic frame.',
     gradient: 'linear-gradient(150deg,#FCE7F3,#F472B6 55%,#9D174D)',
     images: [
       frameImages.scrapbookSpotify,
@@ -252,7 +252,7 @@ export const initialProducts = [
     tag: 'Birthday Special',
     title: 'Birthday Special Milestone Frame',
     price: 499,
-    description: 'An expansive centerpiece statement frame honoring milestones with hero portrait, custom message and multi-photo timeline.',
+    description: 'Expansive gallery statement frame honoring milestones with waterproof multi-photo timeline prints, hero portrait, and personalized tribute message.',
     gradient: 'linear-gradient(150deg,#FFE5D9,#D88373 55%,#6E1F2B)',
     images: [
       frameImages.birthdaySpecial,
@@ -281,7 +281,7 @@ export const initialProducts = [
     tag: 'Birthday Board',
     title: 'Birthday Board Frame',
     price: 399,
-    description: 'Charming milestone board displaying key life achievements, favorite foods, songs, hobbies, inside jokes, and a joyful birthday portrait.',
+    description: 'Charming milestone board displaying life achievements, favorite memories, and birthday portraits with waterproof anti-reflective matte print.',
     gradient: 'linear-gradient(150deg,#E8ECE9,#7BAE7F 55%,#2A4736)',
     images: [
       frameImages.a4BirthdayBoard,
@@ -310,7 +310,7 @@ export const initialProducts = [
     tag: 'Memory Grid',
     title: 'Memory Grid Frame',
     price: 399,
-    description: 'A clean, modern geometric grid featuring 9 to 16 curated snapshots with elegant museum borders and personalized center title or year plaque.',
+    description: 'Clean modern grid of 9 to 16 curated snapshots with waterproof archival lab prints, precision borders, and personalized title plaque.',
     gradient: 'linear-gradient(150deg,#F0EFEB,#D6CCC2 55%,#4A4E69)',
     images: [
       frameImages.a4MemoryGrid,
@@ -339,7 +339,7 @@ export const initialProducts = [
     tag: 'Grid Collage',
     title: 'Family "This is Us" Grid Collage Frame',
     price: 399,
-    description: 'Grand multi-photo story collage showcasing 10 to 16 cherished family snapshots paired with elegant typography script ("family this is us").',
+    description: 'Grand family multi-photo story collage showcasing 10 to 16 snapshots with waterproof archival print and elegant typography in a classic frame.',
     gradient: 'linear-gradient(150deg,#FFF3E0,#FFE0B2 55%,#5D4037)',
     images: [
       frameImages.familyGridCollage,
@@ -370,7 +370,7 @@ export const initialProducts = [
     tag: 'Polaroid Pop-up',
     title: 'Polaroid Pop-up Frame',
     price: 399,
-    description: '3D dimensional frame with floating polaroid prints suspended with miniature pegs and warm drop shadows, creating an eye-catching depth.',
+    description: '3D dimensional shadow-box frame with suspended waterproof polaroid photo prints, miniature pegs, and warm depth effects.',
     gradient: 'linear-gradient(150deg,#FBE0E0,#E29578 55%,#832161)',
     images: [
       frameImages.a4PolaroidPopup,
@@ -399,7 +399,7 @@ export const initialProducts = [
     tag: '3D Pop-up',
     title: '3D Pop-up Frame',
     price: 399,
-    description: 'Intricately handcrafted multi-layered pop-up frame that brings your memories to life with breathtaking foreground depth and scenery.',
+    description: 'Multi-layered 3D pop-up frame with waterproof HD cutouts, dramatic dimensional elevation, and deep wooden shadow-box construction.',
     gradient: 'linear-gradient(150deg,#FDE2E4,#C5DEDD 55%,#3D5A80)',
     images: [
       frameImages.a4Popup,
@@ -430,7 +430,7 @@ export const initialProducts = [
     tag: 'Personalized Magazine',
     title: 'Vogue & Celebrity Memory Magazine Issue',
     price: 499,
-    description: 'Make your loved one the cover star! Complete with custom headline, inside articles, romantic love stories, funny horoscopes, and glossy photo spreads.',
+    description: 'Personalized celebrity magazine printed on 250 GSM high-gloss waterproof-coated art paper with custom headlines, stories, and editorial photo spreads.',
     gradient: 'linear-gradient(150deg,#FDF2F8,#EFC6C0 55%,#881337)',
     images: [
       'https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80',
@@ -462,7 +462,7 @@ export const initialProducts = [
     tag: 'Anniversary Edition',
     title: 'Our Love Story — Special Anniversary Magazine',
     price: 899,
-    description: 'A glossy tribute to your relationship journey. Includes your first date story, memorable trips, inside jokes, and full-page high-definition photograph layouts.',
+    description: 'Glossy relationship tribute magazine printed on thick waterproof-coated satin stock with story timelines, inside jokes, and full-page HD photograph spreads.',
     gradient: 'linear-gradient(150deg,#FBEFE8,#C98D89 55%,#4A141D)',
     images: [
       'https://images.unsplash.com/photo-1512820790803-83ca734da794?w=800&auto=format&fit=crop&q=80',
@@ -494,7 +494,7 @@ export const initialProducts = [
     tag: 'Luxury Gift Hamper',
     title: 'Signature MB Heart Keepsake Hamper',
     price: 999,
-    description: 'Black and gold heart wrapped luxury gift hamper boxes sealed with custom MB emblem. Packed with couple figurines, custom frames, personalized letters, and artisanal chocolates.',
+    description: 'Luxury rigid keepsake gift hamper box sealed with authentic MB gold seal emblem. Crafted with waterproof premium packaging, personalized frame, couple figurines, custom letter & artisanal chocolates.',
     gradient: 'linear-gradient(150deg,#EFC6C0,#C98D89 50%,#6E1F2B)',
     images: [
       hamperBouquetImg,
@@ -526,7 +526,7 @@ export const initialProducts = [
     tag: 'Surprise Box',
     title: 'Milestone Memory Surprise Explosion Box',
     price: 1199,
-    description: 'A multi-layered explosion keepsake box that blossoms open with cascading photos, pull-out love letters, and a center gift surprise compartment.',
+    description: 'Handcrafted multi-layered explosion keepsake box with waterproof laminated photo cards, interactive secret pockets, pull-out love letters, and center surprise compartment.',
     gradient: 'linear-gradient(150deg,#F6DEDA,#EFC6C0 50%,#B4884E)',
     images: [
       'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80',
@@ -557,7 +557,7 @@ export const initialProducts = [
     tag: 'Add-on Keepsake',
     title: 'Polaroid Memory Photo Bouquet',
     price: 599,
-    description: 'A stunning bouquet arrangement of your real polaroid memories wrapped in luxury waterproof paper, adorned with butterfly motifs, fairy lights, and a satin bow.',
+    description: 'Artisan bouquet featuring authentic waterproof polaroid photo prints wrapped in luxury Korean waterproof paper, butterfly motifs, warm fairy lights, and a satin bow.',
     gradient: 'linear-gradient(150deg,#E9C7C2,#A9645F 55%,#4A141D)',
     images: [
       polaroidBouquetImg,
@@ -586,7 +586,7 @@ export const initialProducts = [
     tag: 'Add-on Keepsake',
     title: 'Timeless Lily',
     price: 150,
-    description: 'Intricately handcrafted pipe-cleaner lily flower in soft blush pink with realistic stamen, deep green leaves, and gold-trimmed wrapping. A flower that never withers.',
+    description: 'Intricately handcrafted pipe-cleaner lily flower in soft blush pink with realistic stamen, deep green leaves, and gold-trimmed waterproof wrapping. A flower that never withers.',
     gradient: 'linear-gradient(150deg,#F7E1E3,#EFC6C0 55%,#C98D89)',
     images: [
       lilyBouquetImg,
@@ -610,7 +610,7 @@ export const initialProducts = [
     tag: 'Add-on Keepsake',
     title: 'Embroidered Handkerchief',
     price: 199,
-    description: 'Fine white cotton handkerchief with hand-embroidered romantic lettering ("Hi Handsome ❤️" or custom text) and red heart stitching. An intimate, sentimental gift.',
+    description: 'Fine 100% breathable cotton handkerchief with hand-embroidered romantic lettering ("Hi Handsome ❤️" or custom text) and red heart stitching. An intimate, sentimental keepsake.',
     gradient: 'linear-gradient(150deg,#FBF6F2,#E8B8AE 55%,#8A4A47)',
     images: [
       embroideredImg,
@@ -633,7 +633,7 @@ export const initialProducts = [
     tag: 'Add-on Keepsake',
     title: 'Couple Miniature Figurine & Wish Jar Set',
     price: 299,
-    description: 'Charming romantic couple figurines and mini wish jars to complete any gift setup. Placed lovingly inside hampers or alongside photo frames.',
+    description: 'Charming romantic couple figurines and mini glass wish jars with rolled notes to complete any gift setup. Placed lovingly inside hampers or alongside photo frames.',
     gradient: 'linear-gradient(150deg,#F6DEDA,#EFC6C0 50%,#B4884E)',
     images: [
       'https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=800&auto=format&fit=crop&q=80',
@@ -665,7 +665,7 @@ export const initialProducts = [
     tag: 'Handmade Forever Bouquet',
     title: 'Timeless Lily Bouquet',
     price: 349,
-    description: 'Bespoke handcrafted velvet pipe-cleaner floral bouquet featuring blooming purple lilies, bud, cute heart stem, personalized occasion greeting card & luxury satin bow wrapping.',
+    description: 'Bespoke handcrafted velvet pipe-cleaner floral bouquet featuring blooming purple lilies, bud, cute heart stem, waterproof premium wrapping, occasion greeting card & luxury satin bow.',
     gradient: 'linear-gradient(150deg,#F3E8FF,#E9D5FF 50%,#7E22CE)',
     images: [
       foreverFlowerBouquetImg,
@@ -694,7 +694,7 @@ export const initialProducts = [
     tag: 'Handmade Forever Bouquet',
     title: 'Timeless Lily Bouquet',
     price: 399,
-    description: 'Artisan handcrafted velvet pipe-cleaner floral arrangement featuring 3 vibrant pink lilies, delicate bud, cute heart stem & satin bow gift wrap.',
+    description: 'Artisan handcrafted velvet pipe-cleaner floral arrangement featuring 3 vibrant pink lilies, delicate bud, cute heart stem, luxury waterproof gift wrapping & crimson satin ribbon bow.',
     gradient: 'linear-gradient(150deg,#FDF2F8,#FCE7F3 50%,#DB2777)',
     images: [
       pinkLilyBouquetImg,
