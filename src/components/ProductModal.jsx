@@ -140,38 +140,55 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
 
                 {/* Delivery & Shipping Info */}
                 <div className="pt-3 border-t border-burgundy/15 space-y-2.5">
-                  {/* Shipping & Delivery Timelines */}
-                  <div className="bg-paper/95 rounded-2xl p-3 border border-burgundy/10 shadow-xs space-y-2">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-rose-deep flex items-center gap-1.5">
-                      <Truck className="w-3.5 h-3.5 text-burgundy" />
-                      <span>Shipping &amp; Delivery</span>
+                  {/* Shipping & Delivery OR Add-On Exclusive Notice */}
+                  {product.category === 'addons' ? (
+                    <div className="bg-paper/95 rounded-2xl p-3.5 border-2 border-dashed border-burgundy/30 shadow-xs space-y-2">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-burgundy flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-burgundy shrink-0" />
+                        <span>Add-On Exclusive Keepsake</span>
+                      </div>
+                      <div className="space-y-1 text-xs text-burgundy-deep">
+                        <p className="font-semibold text-burgundy leading-snug">
+                          Yeh add-on item sirf kisi main product (Frame, Hamper ya Magazine) ke saath pair karke order kiya ja sakta hai.
+                        </p>
+                        <p className="text-[11px] text-ink-soft leading-snug">
+                          Ye akele (standalone) order ke liye available nahi hai.
+                        </p>
+                      </div>
                     </div>
-
-                    <div className="space-y-1.5 text-xs text-burgundy-deep">
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
-                        <span className="font-semibold text-emerald-800">Free shipping</span>
+                  ) : (
+                    <div className="bg-paper/95 rounded-2xl p-3 border border-burgundy/10 shadow-xs space-y-2">
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-rose-deep flex items-center gap-1.5">
+                        <Truck className="w-3.5 h-3.5 text-burgundy" />
+                        <span>Shipping &amp; Delivery</span>
                       </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-rose-deep shrink-0" />
-                        <span>Delivery within 10-14 days</span>
-                      </div>
+                      <div className="space-y-1.5 text-xs text-burgundy-deep">
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0" />
+                          <span className="font-semibold text-emerald-800">Free shipping</span>
+                        </div>
 
-                      <div className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-burgundy shrink-0" />
-                        <span>Delivery within Meerut : <strong>5 days</strong></span>
-                      </div>
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-rose-deep shrink-0" />
+                          <span>Delivery within 10-14 days</span>
+                        </div>
 
-                      <div className="flex items-start gap-2 pt-0.5">
-                        <Zap className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
-                        <div className="text-[11px] text-ink leading-snug">
-                          <span className="font-bold text-burgundy">Next day delivery : 200/- extra</span>
-                          <span className="text-ink-soft block text-[10px]">(Applicable on Meerut residents only)</span>
+                        <div className="flex items-center gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-burgundy shrink-0" />
+                          <span>Delivery within Meerut : <strong>5 days</strong></span>
+                        </div>
+
+                        <div className="flex items-start gap-2 pt-0.5">
+                          <Zap className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />
+                          <div className="text-[11px] text-ink leading-snug">
+                            <span className="font-bold text-burgundy">Next day delivery : 200/- extra</span>
+                            <span className="text-ink-soft block text-[10px]">(Applicable on Meerut residents only)</span>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  )}
 
                   {/* Order Perks & Referral Rewards */}
                   <div className="bg-paper/95 rounded-2xl p-3 border border-burgundy/10 shadow-xs space-y-2">
@@ -238,9 +255,6 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                     <span className="font-serif text-2xl sm:text-3xl font-bold text-burgundy">
                       ₹{currentPrice}
                     </span>
-                    <span className="text-xs text-ink-soft font-semibold">
-                      {selectedSize ? `(${selectedSize.label || selectedSize.size})` : '(Includes personalization & packaging)'}
-                    </span>
                   </div>
                   {product.description && (
                     <p className="text-sm text-ink-soft leading-relaxed">
@@ -280,6 +294,22 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                   </div>
                 )}
 
+                {/* Product Highlights */}
+                {product.details && product.details.length > 0 && (
+                  <div className="space-y-2.5">
+                    <span className="block text-xs font-bold text-burgundy-deep uppercase tracking-wider">
+                      Product Highlights:
+                    </span>
+                    <ul className="space-y-2">
+                      {product.details.map((detail, idx) => (
+                        <li key={idx} className="flex items-start gap-2.5 text-xs text-ink-soft leading-relaxed">
+                          <CheckCircle2 className="w-4 h-4 text-rose-deep shrink-0 mt-0.5" />
+                          <span>{detail}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
 
                 {/* Customization Details Callout */}
                 <div className="p-4 rounded-2xl bg-gradient-to-r from-blush/50 via-blush/30 to-cream border border-burgundy/15 flex items-start gap-3 text-xs text-burgundy-deep shadow-xs">

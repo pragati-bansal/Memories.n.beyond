@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   ShieldCheck,
   MessageCircle,
+  Info,
 } from 'lucide-react';
 import customFramesImg from '../assets/hero/custom-frames.jpg';
 import giftBoxImg from '../assets/hero/gift-box.jpg';
@@ -13,6 +14,13 @@ import hamperBouquetImg from '../assets/hero/hamper-bouquet.jpg';
 import embroideredKeepsakeImg from '../assets/hero/embroidered-keepsake.jpg';
 import foreverFlowerBouquetImg from '../assets/hero/forever-flower-bouquet.png';
 
+const frameGuideItems = [
+  { size: '4x4 in (Mini Square Tabletop)', bestFor: 'Workstations, Desks & Nightstands', details: 'Compact square cutout frame with radiating retro heart aesthetic (₹299).' },
+  { size: '5x7 in (Classic Tabletop)', bestFor: 'Desks, Bedside Tables & Consoles', details: 'Our most popular tabletop size for couples and friends (₹399).' },
+  { size: 'A4 Dimension (8.3 x 11.7 in)', bestFor: 'Living Rooms & Milestone Displays', details: 'Spacious wall or desk format with elevated presence (₹499).' },
+  { size: '18x24 in (Grand Showcase)', bestFor: 'Living Room Centerpieces & Large Families', details: 'Grand statement wall piece accommodating large multi-photo family collages (₹1499).' },
+];
+
 const categoryMeta = {
   frames: {
     id: 'frames',
@@ -20,19 +28,6 @@ const categoryMeta = {
     tagline: 'Timeless wooden & acrylic frames crafted to immortalize your most cherished moments across 12 signature handcrafted formats.',
     image: customFramesImg,
     badge: '12 Signature Frame Styles',
-    features: [
-      '12 Bespoke Handcrafted Frame Formats',
-      '4x4 Mini, Pop-up with Text, Scrapbook, Polaroid, Sticker & Grid Styles',
-      'Sturdy Tabletop Kickstand & Wall Mount Ready',
-      'Ultra-HD Archival Matte & Gloss Photographic Prints',
-    ],
-    guideTitle: 'Frame Sizing & Format Guide',
-    guideItems: [
-      { size: '4x4 in (Mini Square Tabletop)', bestFor: 'Workstations, Desks & Nightstands', details: 'Compact square cutout frame with radiating retro heart aesthetic (₹299).' },
-      { size: '5x7 in (Classic Tabletop)', bestFor: 'Desks, Bedside Tables & Consoles', details: 'Our most popular tabletop size for couples and friends (₹399).' },
-      { size: 'A4 Dimension (8.3 x 11.7 in)', bestFor: 'Living Rooms & Milestone Displays', details: 'Spacious wall or desk format with elevated presence (₹499).' },
-      { size: '18x24 in (Grand Showcase)', bestFor: 'Living Room Centerpieces & Large Families', details: 'Grand statement wall piece accommodating large multi-photo family collages (₹1499).' },
-    ],
   },
   magazines: {
     id: 'magazines',
@@ -40,19 +35,6 @@ const categoryMeta = {
     tagline: 'Make your loved one the cover star with bespoke editorial spreads, love stories & glossy covers.',
     image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?w=800&auto=format&fit=crop&q=80',
     badge: 'Editorial Keepsake Issues',
-    features: [
-      'Vogue / Forbes / Storybook Themes',
-      'High-Gloss 250 GSM Art Paper',
-      'Digital WhatsApp Proof Before Printing',
-      'Custom Articles, Captions & Horoscopes',
-    ],
-    guideTitle: 'Magazine Editions & Page Options',
-    guideItems: [
-      { size: 'A4 Poster Cover', bestFor: 'Framed Wall Keepsake', details: 'Single-sheet glossy high-impact magazine cover print.' },
-      { size: '4-Page Edition', bestFor: 'Birthdays & Quick Celebrations', details: 'Cover, 2 inside story spreads & back collage.' },
-      { size: '8-Page Storybook', bestFor: 'Anniversaries & Relationship Milestones', details: 'Complete narrative timeline with photo spreads.' },
-      { size: '12-16 Page Deluxe', bestFor: 'Weddings & Lifetime Journeys', details: 'Hardbound magazine book with premium luxury feel.' },
-    ],
   },
   hampers: {
     id: 'hampers',
@@ -60,19 +42,6 @@ const categoryMeta = {
     tagline: 'Exquisite rigid gift boxes & explosion boxes loaded with handmade surprises, frames & figurines.',
     image: hamperBouquetImg,
     badge: 'Signature Keepsake Hampers',
-    features: [
-      'Signature Black & Gold MB Seal Packaging',
-      'Includes Couple Figurines & Custom Frames',
-      'Interactive Multi-Layer Explosion Boxes',
-      'Durable Rigid Boxes for Lifelong Storage',
-    ],
-    guideTitle: 'Hamper Tiers & Box Dimensions',
-    guideItems: [
-      { size: 'Mini Hamper', bestFor: 'Thoughtful Surprise Gifts', details: 'Keepsake box with figurine, mini photo frame & card.' },
-      { size: 'Couple Luxe Box', bestFor: 'Anniversaries & Special Days', details: 'Figurines + 5x7 frame + embroidered hanky + chocolates.' },
-      { size: 'Grand Royal Hamper', bestFor: 'Weddings & Grand Milestones', details: 'Complete luxury ensemble with bouquet, large frame & treats.' },
-      { size: 'Explosion Surprise Box', bestFor: 'Unboxing Delight', details: 'Cascading photo layers, secret notes & center trinket.' },
-    ],
   },
   addons: {
     id: 'addons',
@@ -80,19 +49,6 @@ const categoryMeta = {
     tagline: 'Forever floral bouquets, polaroid arrangements & personalized embroidered treasures.',
     image: embroideredKeepsakeImg,
     badge: 'Bespoke Artisan Add-ons',
-    features: [
-      'Real Polaroid Memory Bouquets',
-      'Custom Embroidered Handkerchiefs',
-      'Handcrafted Pipe-Cleaner Forever Lilies',
-      'Warm Fairy Lights & Butterfly Accents',
-    ],
-    guideTitle: 'Add-on Details & Customizations',
-    guideItems: [
-      { size: '6 Photos Bouquet', bestFor: 'Mini Memory Surprise', details: '6 polaroid prints wrapped in waterproof Korean paper.' },
-      { size: '9-12 Photos Bouquet', bestFor: 'Full Visual Memory Walk', details: 'Adorned with delicate butterfly accents & fairy lights.' },
-      { size: 'Embroidered Hanky', bestFor: 'Sentimental Keepsake for Him/Her', details: 'Premium cotton with bespoke love message in red/gold.' },
-      { size: 'Pipe Cleaner Lilies', bestFor: 'Forever Floral Decor', details: 'Artisan hand-twisted pastel petals that never fade.' },
-    ],
   },
   general: {
     id: 'general',
@@ -100,18 +56,6 @@ const categoryMeta = {
     tagline: 'Artisan velvet pipe-cleaner floral bouquets that never fade, tied with luxury satin ribbons and handwritten greeting cards.',
     image: foreverFlowerBouquetImg,
     badge: 'Artisan Forever Floral Sets',
-    features: [
-      '100% Handcrafted Velvet Pipe-Cleaner Flowers',
-      'Never Wilts or Fades — Stays Fresh Forever',
-      'Includes Personalized Handwritten Greeting Card',
-      'Wrapped in Luxury Waterproof Matte Paper with Satin Ribbon Bow',
-    ],
-    guideTitle: 'Forever Bouquet Options & Styles',
-    guideItems: [
-      { size: 'Lavender Forever Bouquet', bestFor: 'Birthdays, Besties & Sentimental Gifts', details: 'Handcrafted Velvet Lilies + Tulip Bud + Heart Stem + Handwritten Card (₹350).' },
-      { size: 'Pink Blossom Forever Bouquet', bestFor: 'Romantic Celebrations & Anniversaries', details: '2 Pink Blooming Lilies + Tulip Bud + Mini Blossom Flower + Satin Bow (₹350).' },
-      { size: 'Deluxe Fairy Light Edition', bestFor: 'Evening Surprises & Special Moments', details: 'Deluxe Bouquet with warm micro-LED fairy lights and battery pack (₹599).' },
-    ],
   },
 };
 
@@ -240,7 +184,7 @@ export default function CategoryPage({
       </div>
 
       {/* Product Cards Grid: 2 columns on mobile (Meesho / Myntra style) */}
-      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 mb-20">
+      <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 mb-16 sm:mb-20">
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-7">
           {products.map((product) => (
             <ProductCard
@@ -251,6 +195,51 @@ export default function CategoryPage({
           ))}
         </div>
       </div>
+
+      {/* Frame Sizing & Format Guide - STRICTLY ONLY FOR FRAMES SECTION */}
+      {categoryId === 'frames' && (
+        <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 mb-20">
+          <div className="bg-paper rounded-2xl sm:rounded-3xl border border-burgundy/15 p-5 sm:p-8 shadow-craft-soft">
+            <div className="flex items-start gap-3 mb-6 sm:mb-8">
+              <div className="w-9 h-9 rounded-full bg-blush flex items-center justify-center text-burgundy shrink-0 mt-0.5 shadow-xs">
+                <Info className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="font-serif text-xl sm:text-2xl font-bold text-burgundy-deep">
+                  Frame Sizing &amp; Format Guide
+                </h3>
+                <p className="text-xs sm:text-sm text-ink-soft mt-0.5">
+                  Everything you need to know about dimensions, formats and best placement.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {frameGuideItems.map((item, idx) => (
+                <div
+                  key={idx}
+                  className="bg-cream/60 hover:bg-cream rounded-2xl p-4 sm:p-5 border border-burgundy/10 flex flex-col justify-between transition-all"
+                >
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-rose-deep block mb-1">
+                      Option {idx + 1}
+                    </span>
+                    <h4 className="font-serif text-base font-bold text-burgundy-deep mb-2">
+                      {item.size}
+                    </h4>
+                    <span className="inline-block text-[11px] font-semibold text-burgundy bg-blush/80 px-2.5 py-0.5 rounded-full mb-3">
+                      {item.bestFor}
+                    </span>
+                    <p className="text-xs text-ink-soft leading-relaxed">
+                      {item.details}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -561,7 +561,6 @@ export const initialProducts = [
     gradient: 'linear-gradient(150deg,#E9C7C2,#A9645F 55%,#4A141D)',
     images: [
       polaroidBouquetImg,
-      'https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=800&auto=format&fit=crop&q=80',
     ],
     sizes: [
       { size: '6 Photos', label: 'Mini Bouquet (6 Polaroid Photos)', price: 599 },
@@ -585,17 +584,12 @@ export const initialProducts = [
     id: 'a2',
     category: 'addons',
     tag: 'Add-on Keepsake',
-    title: 'Everlasting Handmade Lily Flower Bouquet',
-    price: 349,
+    title: 'Timeless Lily',
+    price: 150,
     description: 'Intricately handcrafted pipe-cleaner lily flower in soft blush pink with realistic stamen, deep green leaves, and gold-trimmed wrapping. A flower that never withers.',
     gradient: 'linear-gradient(150deg,#F7E1E3,#EFC6C0 55%,#C98D89)',
     images: [
       lilyBouquetImg,
-    ],
-    sizes: [
-      { size: 'Single Stem', label: 'Single Lily Stem Bouquet', price: 349 },
-      { size: '3-Stem Bunch', label: '3-Stem Full Lily Bloom Bouquet', price: 749 },
-      { size: '5-Stem Deluxe', label: '5-Stem Grand Lily Arrangement', price: 1199 },
     ],
     customization_options: {
       requires_photo: false,
@@ -614,16 +608,12 @@ export const initialProducts = [
     id: 'a3',
     category: 'addons',
     tag: 'Add-on Keepsake',
-    title: 'Embroidered Keepsake Handkerchief',
-    price: 399,
+    title: 'Embroidered Handkerchief',
+    price: 199,
     description: 'Fine white cotton handkerchief with hand-embroidered romantic lettering ("Hi Handsome ❤️" or custom text) and red heart stitching. An intimate, sentimental gift.',
     gradient: 'linear-gradient(150deg,#FBF6F2,#E8B8AE 55%,#8A4A47)',
     images: [
       embroideredImg,
-    ],
-    sizes: [
-      { size: 'Single Piece', label: 'Single Custom Embroidered Handkerchief', price: 399 },
-      { size: 'Couple Set (2 Pcs)', label: 'His & Hers Couple Pair (2 Handkerchiefs)', price: 699 },
     ],
     customization_options: {
       requires_photo: false,
@@ -635,7 +625,6 @@ export const initialProducts = [
     details: [
       '100% breathable fine cotton with stitched borders',
       'Hand-stitched embroidery thread with heart motif',
-      'Folded neatly in wax-sealed translucent parchment envelope',
     ],
   },
   {
@@ -674,16 +663,16 @@ export const initialProducts = [
     id: 'gift-forever-bloom-bouquet',
     category: 'general',
     tag: 'Handmade Forever Bouquet',
-    title: 'Handcrafted Lavender Forever Floral Bouquet',
-    price: 350,
-    description: 'Bespoke handcrafted velvet pipe-cleaner floral bouquet featuring blooming purple lilies, tulip bud, cute heart stem, personalized occasion greeting card & luxury satin bow wrapping.',
+    title: 'Timeless Lily Bouquet',
+    price: 349,
+    description: 'Bespoke handcrafted velvet pipe-cleaner floral bouquet featuring blooming purple lilies, bud, cute heart stem, personalized occasion greeting card & luxury satin bow wrapping.',
     gradient: 'linear-gradient(150deg,#F3E8FF,#E9D5FF 50%,#7E22CE)',
     images: [
       foreverFlowerBouquetImg,
     ],
     sizes: [
-      { size: 'Standard Bouquet', label: 'Classic 3-Flower Bouquet + Heart + Card', price: 350 },
-      { size: 'Deluxe Bouquet', label: 'Deluxe 5-Flower Bloom Bouquet + Fairy Lights', price: 599 },
+      { size: '2 lilies + 1 bud + 1 heart', label: '2 lilies + 1 bud + 1 heart', price: 349 },
+      { size: '2 lilies + 1 bud + 1 heart + 1 card', label: '2 lilies + 1 bud + 1 heart + 1 card', price: 399 },
     ],
     customization_options: {
       requires_photo: false,
@@ -694,9 +683,8 @@ export const initialProducts = [
     },
     details: [
       '100% artisan handcrafted velvet pipe-cleaner flowers that never wilt or fade',
-      'Includes 2 blooming lilies, 1 tulip bud & signature velvet heart stem',
+      'Includes 2 blooming lilies, 1 bud & signature velvet heart stem',
       'Personalized handwritten greeting card (e.g. Happy Birthday / Anniversary)',
-      'Wrapped in premium matte blush pink wrapping with gold borders & red satin bow',
       'Perfect standalone thoughtful gift or companion piece with frames & hampers',
     ],
   },
@@ -704,16 +692,16 @@ export const initialProducts = [
     id: 'gift-pink-forever-bouquet',
     category: 'general',
     tag: 'Handmade Forever Bouquet',
-    title: 'Handcrafted Pink Blossom Forever Floral Bouquet',
-    price: 350,
-    description: 'Artisan handcrafted velvet pipe-cleaner floral arrangement featuring 2 vibrant pink lilies, delicate tulip bud, mini blossom flower & satin bow gift wrap.',
+    title: 'Timeless Lily Bouquet',
+    price: 399,
+    description: 'Artisan handcrafted velvet pipe-cleaner floral arrangement featuring 3 vibrant pink lilies, delicate bud, cute heart stem & satin bow gift wrap.',
     gradient: 'linear-gradient(150deg,#FDF2F8,#FCE7F3 50%,#DB2777)',
     images: [
       pinkLilyBouquetImg,
     ],
     sizes: [
-      { size: 'Standard Bouquet', label: 'Classic Pink Lily Bloom Bouquet + Card', price: 350 },
-      { size: 'Deluxe Bouquet', label: 'Deluxe Grand Pink Bouquet + Fairy Lights', price: 599 },
+      { size: '3 lilies + 1 bud + 1 heart', label: '3 lilies + 1 bud + 1 heart', price: 399 },
+      { size: '3 lilies + 1 bud + 1 heart + 1 card', label: '3 lilies + 1 bud + 1 heart + 1 card', price: 449 },
     ],
     customization_options: {
       requires_photo: false,
@@ -724,9 +712,8 @@ export const initialProducts = [
     },
     details: [
       '100% handcrafted velvety pink petals with realistic pollen stems',
-      'Includes 2 blooming lilies, 1 upright tulip bud & 1 mini blossom flower',
-      'Wrapped in elegant layered white & gold-trimmed waterproof paper',
-      'Tied with a vibrant crimson satin ribbon bow',
+      'Includes 3 blooming lilies, 1 bud & signature velvet heart stem',
+      'Personalized handwritten greeting card (e.g. Happy Birthday / Anniversary)',
       'Everlasting keepsake flowers that stay fresh and vibrant forever',
     ],
   },

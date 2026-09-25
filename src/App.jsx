@@ -7,7 +7,6 @@ import CtaStrip from './components/CtaStrip';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ProductModal from './components/ProductModal';
-import GeneralGiftsSection from './components/GeneralGiftsSection';
 import CategoryPage from './pages/CategoryPage';
 import PolicyPage from './pages/PolicyPage';
 
@@ -113,10 +112,6 @@ export default function App() {
           /* Home Page Experience */
           <>
             <HeroSection onNavigateToCategory={navigateToCategory} />
-            <GeneralGiftsSection
-              onSelectProduct={(product) => setSelectedProduct(product)}
-              onNavigateToCategory={navigateToCategory}
-            />
             <HowItWorks />
             <ReviewSection />
             <CtaStrip />
