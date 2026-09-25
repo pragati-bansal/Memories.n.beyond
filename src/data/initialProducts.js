@@ -8,6 +8,7 @@ import hamperBouquetImg from '../assets/hero/hamper-bouquet.jpg';
 import heroGiftsPhoto from '../assets/hero-gifts-photo.jpg';
 import foreverFlowerBouquetImg from '../assets/hero/forever-flower-bouquet.png';
 import pinkLilyBouquetImg from '../assets/hero/pink-lily-forever-bouquet.png';
+import clayGoodiesImg from '../assets/hero/clay-goodies.png';
 
 export const initialProducts = [
   // ===================== 1. FRAMES (10 CATEGORIES) =====================
@@ -73,7 +74,7 @@ export const initialProducts = [
     id: 'frame-4x4-heart-cutout',
     category: 'frames',
     tag: '4x4 Mini Popup',
-    title: '4x4 Retro Heart Popup Frame',
+    title: 'Popup Frame',
     price: 299,
     description: 'Pocket-sized charm featuring precision photo cutout, waterproof archival matte print, and green radiating retro heart backdrop in a 4x4 tabletop black frame.',
     gradient: 'linear-gradient(150deg,#D8F3DC,#95D5B2 55%,#2D6A4F)',
@@ -102,7 +103,7 @@ export const initialProducts = [
     id: 'frame-4x4-aesthetic-cutout',
     category: 'frames',
     tag: '4x4 Mini Popup',
-    title: '4x4 Aesthetic Heart Popup Frame',
+    title: 'Popup Frame',
     price: 299,
     description: 'Chic portrait cutout with waterproof archival print and concentric heart contours in a sleek 4x4 desktop frame with protective shield.',
     gradient: 'linear-gradient(150deg,#E8F5E9,#A5D6A7 55%,#1B4332)',
@@ -587,6 +588,30 @@ export const initialProducts = [
     details: [
       '100% breathable fine cotton with stitched borders',
       'Hand-stitched embroidery thread with heart motif',
+    ],
+  },
+  {
+    id: 'addon-clay-goodies',
+    category: 'addons',
+    tag: 'Add-on Keepsake',
+    title: 'Clay Goodies',
+    price: 60,
+    description: 'Adorable miniature handcrafted clay figurine lovingly sculpted with smooth air-dry clay. Perfect as a pocket charm or sweet companion keepsake to elevate any gift setup.',
+    gradient: 'linear-gradient(150deg,#EFEBE9,#D7CCC8 55%,#5D4037)',
+    images: [
+      clayGoodiesImg,
+    ],
+    customization_options: {
+      requires_photo: false,
+      max_photos: 0,
+      requires_text: true,
+      text_placeholder: 'Character / color preference or special request (optional)',
+      requires_date: false,
+    },
+    details: [
+      '100% artisan handcrafted lightweight clay figurine',
+      'Intricately detailed with expressive hand-sculpted features',
+      'Perfect miniature companion keepsake for gift frames & hampers',
     ],
   },
 
