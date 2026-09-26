@@ -9,57 +9,47 @@ import { supabase, isSupabaseConfigured } from './lib/supabaseClient.js';
 import './index.css';
 
 /**
- * Routing strategy — purely pathname-based, zero cross-route redirects:
+ * AdminRoute — handles session verification and renders the admin dashboard or login page.
  *
- *   /admin   → AdminRoute (see below) — handles both login and dashboard in one place
- *   *        → public App
- *
- * AdminRoute renders:
- *   - A loading spinner while the Supabase session check is in flight
- *   - <AdminLoginPage>  when unauthenticated  (no redirect to another URL)
- *   - <AdminModal>      when authenticated    (no redirect to another URL)
- *
- * Because both states live at the same pathname (/admin), there are no
- * cross-route redirects and therefore no redirect loops.
+ * Rules:
+ * - loading state explicitly initialized to true
+ * - session state explicitly initialized to null
+ * - Checks supabase.auth.getSession() on mount and sets up onAuthStateChange listener
+ * - Shows loading spinner while loading is true
+ * - If session is null after loading, explicitly renders <AdminLoginPage />
+ * - Only renders the admin dashboard (<AdminModal />) if session exists
  */
-
-// ---------------------------------------------------------------------------
-// AdminRoute — single-page auth gate + dashboard for /admin
-// ---------------------------------------------------------------------------
 function AdminRoute() {
-  // 'loading' | 'authenticated' | 'unauthenticated'
-  const [authStatus, setAuthStatus] = useState('loading');
+  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(null);
 
   useEffect(() => {
-    // If Supabase isn't configured, skip straight to the login form.
     if (!supabase || !isSupabaseConfigured) {
-      setAuthStatus('unauthenticated');
+      setSession(null);
+      setLoading(false);
       return;
     }
 
-    // Verify the session with the Supabase Auth server.
-    // getUser() makes a live network request to validate the JWT — unlike
-    // getSession() which only reads the locally cached token and can't detect
-    // revoked or expired sessions until the next refresh cycle.
-    supabase.auth.getUser().then(({ data: { user }, error }) => {
-      // Treat any error (network failure, invalid/expired token, etc.)
-      // as unauthenticated — show the login form, never the dashboard.
-      setAuthStatus(user && !error ? 'authenticated' : 'unauthenticated');
+    // Retrieve active session on mount
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    }).catch(() => {
+      setSession(null);
+      setLoading(false);
     });
 
-    // Keep auth status in sync with session changes.
-    // We only need to react to SIGNED_IN and SIGNED_OUT — not every
-    // intermediate null-session tick — to avoid spurious state flips.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN') setAuthStatus('authenticated');
-      if (event === 'SIGNED_OUT') setAuthStatus('unauthenticated');
+    // Listen for auth state transitions (sign in, sign out, token refresh)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  // --- Loading ---
-  if (authStatus === 'loading') {
+  // 1. While loading is true, return a clean loading spinner
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#1a0a0a] flex items-center justify-center">
         <svg className="w-8 h-8 animate-spin text-[#e8a0a8]" fill="none" viewBox="0 0 24 24">
@@ -70,28 +60,28 @@ function AdminRoute() {
     );
   }
 
-  // --- Unauthenticated: show login form inline, same URL, no redirect ---
-  if (authStatus === 'unauthenticated') {
+  // 2. If session is null after loading, explicitly render AdminLoginPage
+  if (!session) {
     return (
       <AdminLoginPage
         onLoginSuccess={() => {
-          // Auth state listener above will flip status to 'authenticated'
-          // automatically after Supabase fires SIGNED_IN — no manual
-          // navigation needed.
-          setAuthStatus('authenticated');
+          if (!supabase || !isSupabaseConfigured) return;
+          supabase.auth.getSession().then(({ data: { session } }) => {
+            setSession(session);
+          });
         }}
       />
     );
   }
 
-  // --- Authenticated: show the admin dashboard ---
+  // 3. Only render the admin dashboard if session exists
   return (
     <ProductProvider>
       <AdminModal
         isOpen
         onClose={() => {
-          // Sign out and return to the public home page
           supabase?.auth.signOut().finally(() => {
+            setSession(null);
             window.location.href = '/';
           });
         }}
@@ -103,7 +93,11 @@ function AdminRoute() {
 // ---------------------------------------------------------------------------
 // Root render
 // ---------------------------------------------------------------------------
-const isAdminPath = window.location.pathname === '/admin';
+const isAdminPath =
+  window.location.pathname === '/admin' ||
+  window.location.pathname === '/admin-login' ||
+  window.location.hash === '#admin' ||
+  window.location.hash.startsWith('#admin');
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
