@@ -13,23 +13,12 @@ import {
   Sparkles,
   CheckCircle2,
   Package,
-  Lock,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
-import AdminModal from './AdminModal';
 
-export default function Footer({ onOpenAdmin }) {
+export default function Footer() {
   const [activePolicy, setActivePolicy] = useState(null); // 'about' | 'cancellation' | 'shipping' | null
-  const [localAdminOpen, setLocalAdminOpen] = useState(false);
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
-
-  const handleAdminClick = () => {
-    if (onOpenAdmin) {
-      onOpenAdmin();
-    } else {
-      setLocalAdminOpen(true);
-    }
-  };
 
   // Close modal on Escape key
   useEffect(() => {
@@ -243,16 +232,6 @@ export default function Footer({ onOpenAdmin }) {
               className="hover:text-cream transition-colors cursor-pointer"
             >
               Shipping &amp; Return Policy
-            </button>
-            <span>•</span>
-            <button
-              type="button"
-              onClick={handleAdminClick}
-              className="inline-flex items-center gap-1 text-cream/40 hover:text-cream/90 transition-colors cursor-pointer group"
-              title="Admin Portal"
-            >
-              <Lock className="w-3 h-3 text-cream/40 group-hover:text-cream/90 transition-colors" />
-              <span>Admin</span>
             </button>
           </div>
         </div>
@@ -522,12 +501,6 @@ export default function Footer({ onOpenAdmin }) {
           </div>
         )}
       </AnimatePresence>
-
-      {/* Discreet Admin Portal Modal */}
-      <AdminModal
-        isOpen={localAdminOpen}
-        onClose={() => setLocalAdminOpen(false)}
-      />
     </footer>
   );
 }

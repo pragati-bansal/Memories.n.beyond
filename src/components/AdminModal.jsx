@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Lock,
   Unlock,
   Plus,
   Trash2,
@@ -10,7 +9,6 @@ import {
   Upload,
   Image as ImageIcon,
   Check,
-  AlertCircle,
   Sparkles,
   Package,
   Layers,
@@ -26,7 +24,7 @@ import {
   Star,
 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
-import { uploadCustomerPhoto } from '../lib/supabaseClient';
+import { supabase, uploadCustomerPhoto } from '../lib/supabaseClient';
 import { logger } from '../lib/logger';
 import { newProductSubmissionSchema, getFirstZodErrorMessage } from '../lib/validation';
 import ImageWithFallback from './ImageWithFallback';
@@ -50,8 +48,6 @@ const PRESET_SIZES = [
 // Category based image limit helper: Magazines allows 15 images; all others allow 5 images
 const getImageLimit = (categoryId) => (categoryId === 'magazines' ? 15 : 5);
 
-// Admin Passcode: change here or set VITE_ADMIN_PIN in your .env file
-const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'admin123';
 
 export default function AdminModal({ isOpen, onClose }) {
   const {
@@ -61,36 +57,6 @@ export default function AdminModal({ isOpen, onClose }) {
     deleteProduct,
     resetToOriginalProducts,
   } = useProducts();
-
-  // Auth State & Rate Limiting
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [pinInput, setPinInput] = useState('');
-  const [pinError, setPinError] = useState('');
-  const [failedAttempts, setFailedAttempts] = useState(() => {
-    return Number(sessionStorage.getItem('mnb_admin_failed_attempts') || 0);
-  });
-  const [lockoutTimer, setLockoutTimer] = useState(0);
-
-  // Check and update lockout countdown
-  useEffect(() => {
-    const lockoutEnd = Number(sessionStorage.getItem('mnb_admin_lockout_until') || 0);
-    const now = Date.now();
-    if (lockoutEnd > now) {
-      setLockoutTimer(Math.ceil((lockoutEnd - now) / 1000));
-    }
-
-    const interval = setInterval(() => {
-      const activeLockout = Number(sessionStorage.getItem('mnb_admin_lockout_until') || 0);
-      const remaining = Math.ceil((activeLockout - Date.now()) / 1000);
-      if (remaining > 0) {
-        setLockoutTimer(remaining);
-      } else {
-        setLockoutTimer(0);
-      }
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   // Navigation State: 'list' | 'form' | 'settings'
   const [activeTab, setActiveTab] = useState('list');
@@ -136,36 +102,6 @@ export default function AdminModal({ isOpen, onClose }) {
     setTimeout(() => {
       setFeedbackMsg({ text: '', type: 'success' });
     }, 3200);
-  };
-
-  // PIN authentication handler with Rate Limiting (max 5 attempts -> 30s cooldown)
-  const handlePinSubmit = (e) => {
-    e.preventDefault();
-    if (lockoutTimer > 0) return;
-
-    if (pinInput.trim() === ADMIN_PIN) {
-      setIsAuthenticated(true);
-      setPinError('');
-      setPinInput('');
-      setFailedAttempts(0);
-      sessionStorage.removeItem('mnb_admin_failed_attempts');
-      sessionStorage.removeItem('mnb_admin_lockout_until');
-    } else {
-      const nextAttempts = failedAttempts + 1;
-      setFailedAttempts(nextAttempts);
-      sessionStorage.setItem('mnb_admin_failed_attempts', String(nextAttempts));
-
-      if (nextAttempts >= 5) {
-        const cooldownMs = nextAttempts >= 10 ? 60000 : 30000;
-        const lockoutUntil = Date.now() + cooldownMs;
-        sessionStorage.setItem('mnb_admin_lockout_until', String(lockoutUntil));
-        setLockoutTimer(Math.ceil(cooldownMs / 1000));
-        setPinError(`Too many failed attempts. Locked out for ${Math.ceil(cooldownMs / 1000)} seconds.`);
-      } else {
-        const remaining = 5 - nextAttempts;
-        setPinError(`Incorrect PIN. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining before temporary lockout.`);
-      }
-    }
   };
 
   // Reset form to empty values for "Add New Product"
@@ -480,10 +416,10 @@ export default function AdminModal({ isOpen, onClose }) {
     showToast('🔄 Catalogue reset to original 12+ factory products.', 'info');
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setPinInput('');
-    setPinError('');
+  // Sign out via Supabase and redirect to home
+  const handleLogout = async () => {
+    if (supabase) await supabase.auth.signOut();
+    window.location.href = '/';
   };
 
   // Filtered product list for manager view
@@ -523,37 +459,31 @@ export default function AdminModal({ isOpen, onClose }) {
           <div className="px-6 py-4 bg-cream-deep/70 border-b border-burgundy/10 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-full bg-blush flex items-center justify-center text-burgundy shadow-xs">
-                {isAuthenticated ? <Unlock className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+                <Unlock className="w-4 h-4" />
               </div>
               <div>
                 <h3 className="font-serif text-lg font-bold text-burgundy-deep flex items-center gap-2">
                   <span>Memories n Beyond Admin</span>
-                  {isAuthenticated && (
-                    <span className="text-[10px] uppercase font-bold tracking-wider bg-burgundy text-cream px-2 py-0.5 rounded-full">
-                      Product Editor
-                    </span>
-                  )}
+                  <span className="text-[10px] uppercase font-bold tracking-wider bg-burgundy text-cream px-2 py-0.5 rounded-full">
+                    Product Editor
+                  </span>
                 </h3>
                 <p className="text-xs text-ink-soft">
-                  {isAuthenticated
-                    ? 'Full control: Edit, delete, add products & update pricing across entire store'
-                    : 'Restricted administrative access'}
+                  Full control: Edit, delete, add products &amp; update pricing across entire store
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-2">
-              {isAuthenticated && (
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  title="Log out"
-                  className="p-2 rounded-full hover:bg-blush text-ink-soft hover:text-burgundy transition-colors text-xs font-semibold flex items-center gap-1"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="hidden sm:inline">Logout</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleLogout}
+                title="Log out"
+                className="p-2 rounded-full hover:bg-blush text-ink-soft hover:text-burgundy transition-colors text-xs font-semibold flex items-center gap-1"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
               <button
                 type="button"
                 onClick={onClose}
@@ -565,68 +495,8 @@ export default function AdminModal({ isOpen, onClose }) {
             </div>
           </div>
 
-          {/* Body Content */}
-          {!isAuthenticated ? (
-            /* =================== PIN ENTRY SCREEN =================== */
-            <div className="p-8 sm:p-12 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 rounded-3xl bg-blush/80 border border-burgundy/15 flex items-center justify-center text-burgundy mb-5 shadow-craft-soft">
-                <Lock className="w-8 h-8" />
-              </div>
-
-              <h4 className="font-serif text-2xl font-bold text-burgundy-deep mb-2">
-                Enter Admin Passcode
-              </h4>
-              <p className="text-xs sm:text-sm text-ink-soft max-w-sm mb-6">
-                Please enter your administrative PIN to unlock full catalogue management (edit, delete, add products).
-              </p>
-
-              <form onSubmit={handlePinSubmit} className="w-full max-w-xs space-y-4">
-                <div>
-                  <input
-                    type="password"
-                    autoFocus
-                    disabled={lockoutTimer > 0}
-                    placeholder={lockoutTimer > 0 ? `Locked (${lockoutTimer}s)` : "Enter Admin PIN"}
-                    value={pinInput}
-                    onChange={(e) => {
-                      setPinInput(e.target.value);
-                      setPinError('');
-                    }}
-                    className={`w-full text-center tracking-widest text-lg font-bold px-4 py-3 rounded-2xl border outline-none text-burgundy-deep transition-all shadow-inner ${
-                      lockoutTimer > 0
-                        ? 'bg-cream/40 border-rose-300 opacity-60 cursor-not-allowed text-rose-deep'
-                        : 'bg-cream border border-burgundy/20 focus:border-burgundy focus:ring-2 focus:ring-blush-deep/30'
-                    }`}
-                  />
-                  {pinError && (
-                    <div className="flex items-center gap-1.5 text-xs text-rose-deep font-semibold justify-center mt-2 text-center">
-                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                      <span>{pinError}</span>
-                    </div>
-                  )}
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={lockoutTimer > 0}
-                  className={`w-full py-3 rounded-2xl font-bold text-sm shadow-craft-soft transition-all flex items-center justify-center gap-2 ${
-                    lockoutTimer > 0
-                      ? 'bg-burgundy/50 text-cream/70 cursor-not-allowed'
-                      : 'bg-burgundy hover:bg-burgundy-deep text-cream hover:shadow-craft-lg cursor-pointer'
-                  }`}
-                >
-                  <Unlock className="w-4 h-4" />
-                  <span>
-                    {lockoutTimer > 0
-                      ? `Locked (Retry in ${lockoutTimer}s)`
-                      : 'Unlock Admin Panel'}
-                  </span>
-                </button>
-              </form>
-            </div>
-          ) : (
-            /* =================== AUTHENTICATED DASHBOARD =================== */
-            <div className="flex-1 overflow-y-auto">
+          {/* Dashboard Body */}
+          <div className="flex-1 overflow-y-auto">
               {/* Navigation Tabs Bar */}
               <div className="px-6 pt-3 border-b border-burgundy/10 bg-paper sticky top-0 z-20 flex items-center justify-between flex-wrap gap-2">
                 <div className="flex items-center gap-2">
@@ -1425,8 +1295,7 @@ export default function AdminModal({ isOpen, onClose }) {
                   </div>
                 </div>
               )}
-            </div>
-          )}
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>

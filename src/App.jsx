@@ -10,6 +10,7 @@ import ProductModal from './components/ProductModal';
 import AdminModal from './components/AdminModal';
 import CategoryPage from './pages/CategoryPage';
 import PolicyPage from './pages/PolicyPage';
+import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import { ProductProvider } from './context/ProductContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -60,6 +61,14 @@ function AppContent() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
+
+  /**
+   * Redirect to the standalone /admin-login page.
+   * Uses a real path navigation so it's fully separate from the public site.
+   */
+  const navigateToAdminLogin = () => {
+    window.location.href = '/admin-login';
+  };
 
   const navigateToCategory = (catId) => {
     setIsPolicyView(false);
@@ -130,7 +139,7 @@ function AppContent() {
       </main>
 
       {/* Footer */}
-      <Footer onOpenAdmin={() => setIsAdminOpen(true)} />
+      <Footer />
 
       {/* Floating Action Button */}
       <FloatingWhatsApp />
@@ -146,18 +155,27 @@ function AppContent() {
         </ErrorBoundary>
       )}
 
-      {/* Discreet Admin Dashboard & Manager */}
-      <ErrorBoundary>
-        <AdminModal
-          isOpen={isAdminOpen}
-          onClose={() => {
-            setIsAdminOpen(false);
-            if (window.location.hash === '#admin') {
-              window.location.hash = activeCategory ? `#category/${activeCategory}` : '#home';
-            }
-          }}
-        />
-      </ErrorBoundary>
+      {/*
+        Protected Admin Dashboard — only mount when the admin is actively
+        trying to open the panel. This prevents the session check from
+        firing on every normal page load and accidentally redirecting
+        visitors to the login page.
+      */}
+      {isAdminOpen && (
+        <ErrorBoundary>
+          <ProtectedAdminRoute onUnauthenticated={navigateToAdminLogin}>
+            <AdminModal
+              isOpen={isAdminOpen}
+              onClose={() => {
+                setIsAdminOpen(false);
+                if (window.location.hash === '#admin') {
+                  window.location.hash = activeCategory ? `#category/${activeCategory}` : '#home';
+                }
+              }}
+            />
+          </ProtectedAdminRoute>
+        </ErrorBoundary>
+      )}
     </div>
   );
 }
