@@ -5,7 +5,7 @@ import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
  * ProtectedAdminRoute — wraps any admin-only content.
  *
  * Usage:
- *   <ProtectedAdminRoute onUnauthenticated={() => navigateTo('#admin-login')}>
+ *   <ProtectedAdminRoute onUnauthenticated={() => navigateTo('/admin-login')}>
  *     <AdminDashboard />
  *   </ProtectedAdminRoute>
  *
@@ -13,14 +13,27 @@ import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
  *  - Shows a loading spinner while the session check is in flight.
  *  - If a valid Supabase session exists → renders children.
  *  - If no session exists → calls onUnauthenticated() and renders nothing.
+ *  - Never calls onUnauthenticated() when the user is already on /admin-login,
+ *    which would cause an infinite redirect loop.
  */
+
+/**
+ * Safely invoke onUnauthenticated only when the visitor is NOT already on
+ * the login page — prevents the infinite /admin-login → /admin-login loop.
+ */
+function redirectIfNotOnLoginPage(onUnauthenticated) {
+  if (window.location.pathname !== '/admin-login') {
+    onUnauthenticated?.();
+  }
+}
+
 export default function ProtectedAdminRoute({ children, onUnauthenticated }) {
   const [status, setStatus] = useState('loading'); // 'loading' | 'authenticated' | 'unauthenticated'
 
   useEffect(() => {
     if (!supabase || !isSupabaseConfigured) {
       setStatus('unauthenticated');
-      onUnauthenticated?.();
+      redirectIfNotOnLoginPage(onUnauthenticated);
       return;
     }
 
@@ -30,17 +43,23 @@ export default function ProtectedAdminRoute({ children, onUnauthenticated }) {
         setStatus('authenticated');
       } else {
         setStatus('unauthenticated');
-        onUnauthenticated?.();
+        redirectIfNotOnLoginPage(onUnauthenticated);
       }
     });
 
-    // Also react to auth state changes (e.g., token expiry, sign-out)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    // React to auth state changes, but only redirect on an explicit sign-out
+    // event — not on every null-session tick (which fires during the login
+    // flow itself and would cause a redirect before the user finishes logging in).
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
         setStatus('authenticated');
       } else {
         setStatus('unauthenticated');
-        onUnauthenticated?.();
+        // Only redirect on explicit sign-out, not on intermediate null states
+        // (e.g. INITIAL_SESSION with no session, or mid-login token exchange).
+        if (event === 'SIGNED_OUT') {
+          redirectIfNotOnLoginPage(onUnauthenticated);
+        }
       }
     });
 
