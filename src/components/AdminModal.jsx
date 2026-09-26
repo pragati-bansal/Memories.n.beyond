@@ -55,10 +55,35 @@ export default function AdminModal({ isOpen, onClose }) {
     resetToOriginalProducts,
   } = useProducts();
 
-  // Auth State
+  // Auth State & Rate Limiting
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState('');
   const [pinError, setPinError] = useState('');
+  const [failedAttempts, setFailedAttempts] = useState(() => {
+    return Number(sessionStorage.getItem('mnb_admin_failed_attempts') || 0);
+  });
+  const [lockoutTimer, setLockoutTimer] = useState(0);
+
+  // Check and update lockout countdown
+  useEffect(() => {
+    const lockoutEnd = Number(sessionStorage.getItem('mnb_admin_lockout_until') || 0);
+    const now = Date.now();
+    if (lockoutEnd > now) {
+      setLockoutTimer(Math.ceil((lockoutEnd - now) / 1000));
+    }
+
+    const interval = setInterval(() => {
+      const activeLockout = Number(sessionStorage.getItem('mnb_admin_lockout_until') || 0);
+      const remaining = Math.ceil((activeLockout - Date.now()) / 1000);
+      if (remaining > 0) {
+        setLockoutTimer(remaining);
+      } else {
+        setLockoutTimer(0);
+      }
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   // Navigation State: 'list' | 'form' | 'settings'
   const [activeTab, setActiveTab] = useState('list');
@@ -106,15 +131,33 @@ export default function AdminModal({ isOpen, onClose }) {
     }, 2800);
   };
 
-  // PIN authentication handler
+  // PIN authentication handler with Rate Limiting (max 5 attempts -> 30s cooldown)
   const handlePinSubmit = (e) => {
     e.preventDefault();
+    if (lockoutTimer > 0) return;
+
     if (pinInput.trim() === ADMIN_PIN) {
       setIsAuthenticated(true);
       setPinError('');
       setPinInput('');
+      setFailedAttempts(0);
+      sessionStorage.removeItem('mnb_admin_failed_attempts');
+      sessionStorage.removeItem('mnb_admin_lockout_until');
     } else {
-      setPinError('Incorrect PIN. Please enter the valid admin passcode.');
+      const nextAttempts = failedAttempts + 1;
+      setFailedAttempts(nextAttempts);
+      sessionStorage.setItem('mnb_admin_failed_attempts', String(nextAttempts));
+
+      if (nextAttempts >= 5) {
+        const cooldownMs = nextAttempts >= 10 ? 60000 : 30000;
+        const lockoutUntil = Date.now() + cooldownMs;
+        sessionStorage.setItem('mnb_admin_lockout_until', String(lockoutUntil));
+        setLockoutTimer(Math.ceil(cooldownMs / 1000));
+        setPinError(`Too many failed attempts. Locked out for ${Math.ceil(cooldownMs / 1000)} seconds.`);
+      } else {
+        const remaining = 5 - nextAttempts;
+        setPinError(`Incorrect PIN. ${remaining} attempt${remaining > 1 ? 's' : ''} remaining before temporary lockout.`);
+      }
     }
   };
 
@@ -401,17 +444,22 @@ export default function AdminModal({ isOpen, onClose }) {
                   <input
                     type="password"
                     autoFocus
-                    placeholder="Enter PIN (e.g. admin123)"
+                    disabled={lockoutTimer > 0}
+                    placeholder={lockoutTimer > 0 ? `Locked (${lockoutTimer}s)` : "Enter Admin PIN"}
                     value={pinInput}
                     onChange={(e) => {
                       setPinInput(e.target.value);
                       setPinError('');
                     }}
-                    className="w-full text-center tracking-widest text-lg font-bold px-4 py-3 rounded-2xl bg-cream border border-burgundy/20 focus:border-burgundy focus:ring-2 focus:ring-blush-deep/30 outline-none text-burgundy-deep transition-all shadow-inner"
+                    className={`w-full text-center tracking-widest text-lg font-bold px-4 py-3 rounded-2xl border outline-none text-burgundy-deep transition-all shadow-inner ${
+                      lockoutTimer > 0
+                        ? 'bg-cream/40 border-rose-300 opacity-60 cursor-not-allowed text-rose-deep'
+                        : 'bg-cream border border-burgundy/20 focus:border-burgundy focus:ring-2 focus:ring-blush-deep/30'
+                    }`}
                   />
                   {pinError && (
-                    <div className="flex items-center gap-1.5 text-xs text-rose-deep font-semibold justify-center mt-2">
-                      <AlertCircle className="w-3.5 h-3.5" />
+                    <div className="flex items-center gap-1.5 text-xs text-rose-deep font-semibold justify-center mt-2 text-center">
+                      <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                       <span>{pinError}</span>
                     </div>
                   )}
@@ -419,19 +467,21 @@ export default function AdminModal({ isOpen, onClose }) {
 
                 <button
                   type="submit"
-                  className="w-full py-3 rounded-2xl bg-burgundy hover:bg-burgundy-deep text-cream font-bold text-sm shadow-craft-soft hover:shadow-craft-lg transition-all flex items-center justify-center gap-2"
+                  disabled={lockoutTimer > 0}
+                  className={`w-full py-3 rounded-2xl font-bold text-sm shadow-craft-soft transition-all flex items-center justify-center gap-2 ${
+                    lockoutTimer > 0
+                      ? 'bg-burgundy/50 text-cream/70 cursor-not-allowed'
+                      : 'bg-burgundy hover:bg-burgundy-deep text-cream hover:shadow-craft-lg cursor-pointer'
+                  }`}
                 >
                   <Unlock className="w-4 h-4" />
-                  <span>Unlock Admin Panel</span>
+                  <span>
+                    {lockoutTimer > 0
+                      ? `Locked (Retry in ${lockoutTimer}s)`
+                      : 'Unlock Admin Panel'}
+                  </span>
                 </button>
               </form>
-
-              <div className="mt-8 p-3 rounded-xl bg-cream/70 border border-burgundy/10 text-[11px] text-ink-soft max-w-xs text-center">
-                <span>Current Passcode: </span>
-                <code className="bg-blush px-1.5 py-0.5 rounded font-bold text-burgundy-deep">
-                  {ADMIN_PIN}
-                </code>
-              </div>
             </div>
           ) : (
             /* =================== AUTHENTICATED DASHBOARD =================== */

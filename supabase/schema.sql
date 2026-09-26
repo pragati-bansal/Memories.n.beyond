@@ -1,45 +1,75 @@
--- =========================================================
--- Memories n Beyond - Supabase Database Schema & Storage Setup
--- =========================================================
+-- ==============================================================================
+-- Memories n Beyond - Enterprise Database Schema, Row Level Security (RLS) & Rate Limiting
+-- ==============================================================================
 
--- 1. Enable UUID Extension (usually enabled by default in Supabase)
+-- 1. Enable Required Extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
--- ---------------------------------------------------------
--- 2. Create `products` table
--- ---------------------------------------------------------
+-- ==============================================================================
+-- 2. PRODUCTS TABLE & COLUMNS ENSURANCE
+-- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.products (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
-    slug VARCHAR(255) UNIQUE NOT NULL,
-    category VARCHAR(50) NOT NULL, -- 'frames', 'bouquets', 'birthday', 'couple'
+    slug VARCHAR(255) UNIQUE,
+    category VARCHAR(50) NOT NULL,
     price NUMERIC(10, 2) NOT NULL,
     description TEXT,
     tag VARCHAR(100),
     gradient VARCHAR(255),
     images TEXT[] DEFAULT '{}',
-    customization_options JSONB DEFAULT '{
-        "requires_photo": true,
-        "max_photos": 1,
-        "requires_text": true,
-        "text_placeholder": "Custom text engraving",
-        "requires_date": false
-    }'::jsonb,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Safely add newer columns if table already existed previously
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS sizes JSONB DEFAULT '[{"size": "5x7", "label": "5x7 in (Tabletop)", "price": 399}, {"size": "A4", "label": "A4 Size", "price": 499}]'::jsonb;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS customization_options JSONB DEFAULT '{"requires_photo": true, "max_photos": 4, "requires_text": true, "text_placeholder": "Custom text engraving", "requires_date": false}'::jsonb;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS details TEXT[] DEFAULT '{}';
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE public.products ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 
 -- Enable RLS for `products`
 ALTER TABLE public.products ENABLE ROW LEVEL SECURITY;
 
--- Allow public read access to active products
+-- Drop existing policies if any to prevent conflicts
+DROP POLICY IF EXISTS "Allow public read access to products" ON public.products;
+DROP POLICY IF EXISTS "Allow admin insert products" ON public.products;
+DROP POLICY IF EXISTS "Allow admin update products" ON public.products;
+DROP POLICY IF EXISTS "Allow admin delete products" ON public.products;
+
+-- 🛡️ Product Policy 1: Everyone (anon + authenticated) can view active products
 CREATE POLICY "Allow public read access to products"
     ON public.products
     FOR SELECT
+    USING (COALESCE(is_active, true) = true OR auth.role() = 'authenticated');
+
+-- 🛡️ Product Policy 2: Only Authenticated Admins can create products
+CREATE POLICY "Allow admin insert products"
+    ON public.products
+    FOR INSERT
+    TO authenticated
+    WITH CHECK (true);
+
+-- 🛡️ Product Policy 3: Only Authenticated Admins can update products
+CREATE POLICY "Allow admin update products"
+    ON public.products
+    FOR UPDATE
+    TO authenticated
+    USING (true)
+    WITH CHECK (true);
+
+-- 🛡️ Product Policy 4: Only Authenticated Admins can delete products
+CREATE POLICY "Allow admin delete products"
+    ON public.products
+    FOR DELETE
+    TO authenticated
     USING (true);
 
--- ---------------------------------------------------------
--- 3. Create `orders` table
--- ---------------------------------------------------------
+
+-- ==============================================================================
+-- 3. ORDERS TABLE & COLUMNS ENSURANCE
+-- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.orders (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     customer_name VARCHAR(255) NOT NULL,
@@ -48,147 +78,162 @@ CREATE TABLE IF NOT EXISTS public.orders (
     custom_notes TEXT,
     event_date DATE,
     uploaded_images TEXT[] DEFAULT '{}',
-    order_status VARCHAR(50) DEFAULT 'pending', -- 'pending', 'confirmed', 'in_crafting', 'dispatched', 'delivered'
+    order_status VARCHAR(50) DEFAULT 'pending',
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
+
+-- Safely add newer columns if orders table already existed
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS product_title VARCHAR(255);
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS selected_size VARCHAR(50);
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS total_price NUMERIC(10, 2);
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS client_ip VARCHAR(100);
+ALTER TABLE public.orders ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now());
 
 -- Enable RLS for `orders`
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
--- Allow public to insert orders from website
+-- Drop existing order policies
+DROP POLICY IF EXISTS "Allow public insertion of orders" ON public.orders;
+DROP POLICY IF EXISTS "Allow authenticated users to view orders" ON public.orders;
+DROP POLICY IF EXISTS "Allow authenticated users to update orders" ON public.orders;
+DROP POLICY IF EXISTS "Allow authenticated users to delete orders" ON public.orders;
+
+-- 🛡️ Order Policy 1: Customers can submit orders (INSERT only with validation)
 CREATE POLICY "Allow public insertion of orders"
     ON public.orders
     FOR INSERT
-    WITH CHECK (true);
+    TO public
+    WITH CHECK (
+        length(customer_name) >= 2 AND
+        length(phone_number) >= 10
+    );
 
--- Allow authenticated admins to view/manage orders
+-- 🛡️ Order Policy 2: Strictly Authenticated Admins can view customer orders
 CREATE POLICY "Allow authenticated users to view orders"
     ON public.orders
     FOR SELECT
     TO authenticated
     USING (true);
 
--- ---------------------------------------------------------
--- 4. Setup Supabase Storage Bucket: `customer-uploads`
--- ---------------------------------------------------------
--- Insert the bucket into storage.buckets if it does not already exist
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('customer-uploads', 'customer-uploads', true)
-ON CONFLICT (id) DO NOTHING;
+-- 🛡️ Order Policy 3: Only Authenticated Admins can update order status
+CREATE POLICY "Allow authenticated users to update orders"
+    ON public.orders
+    FOR UPDATE
+    TO authenticated
+    USING (true)
+    WITH CHECK (true);
 
--- Storage Policy: Allow anyone (anon + auth) to upload customization photos
+-- 🛡️ Order Policy 4: Only Authenticated Admins can delete orders
+CREATE POLICY "Allow authenticated users to delete orders"
+    ON public.orders
+    FOR DELETE
+    TO authenticated
+    USING (true);
+
+
+-- ==============================================================================
+-- 4. DATABASE-LEVEL RATE LIMITING (Anti-Spam & Protection)
+-- ==============================================================================
+
+CREATE TABLE IF NOT EXISTS public.rate_limit_tracker (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    identifier VARCHAR(150) NOT NULL, -- Phone Number or IP address
+    action_type VARCHAR(50) NOT NULL, -- 'order_submission', 'image_upload'
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+-- Index for fast rate limit lookups
+CREATE INDEX IF NOT EXISTS idx_rate_limit_lookup
+    ON public.rate_limit_tracker (identifier, action_type, created_at);
+
+-- Function: Check & Enforce Rate Limits
+CREATE OR REPLACE FUNCTION public.check_rate_limit()
+RETURNS TRIGGER AS $$
+DECLARE
+    recent_attempts INT;
+    client_identifier VARCHAR(150);
+BEGIN
+    -- Use phone number or client_ip as identifier
+    client_identifier := COALESCE(NEW.phone_number, NEW.client_ip, 'anonymous');
+
+    -- Count orders created by this identifier in the last 5 minutes
+    SELECT COUNT(*)
+    INTO recent_attempts
+    FROM public.rate_limit_tracker
+    WHERE identifier = client_identifier
+      AND action_type = 'order_submission'
+      AND created_at > (now() - INTERVAL '5 minutes');
+
+    -- Rate Limit Threshold: Max 6 orders per 5 minutes
+    IF recent_attempts >= 6 THEN
+        RAISE EXCEPTION 'Rate limit exceeded. Please wait a few minutes before submitting another order.';
+    END IF;
+
+    -- Record this attempt in tracker
+    INSERT INTO public.rate_limit_tracker (identifier, action_type)
+    VALUES (client_identifier, 'order_submission');
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Attach Rate Limiting Trigger to Orders Table
+DROP TRIGGER IF EXISTS trigger_order_rate_limit ON public.orders;
+CREATE TRIGGER trigger_order_rate_limit
+    BEFORE INSERT ON public.orders
+    FOR EACH ROW
+    EXECUTE FUNCTION public.check_rate_limit();
+
+-- Auto-cleanup function to purge old rate limit logs older than 24 hours
+CREATE OR REPLACE FUNCTION public.cleanup_old_rate_limits()
+RETURNS void AS $$
+BEGIN
+    DELETE FROM public.rate_limit_tracker
+    WHERE created_at < (now() - INTERVAL '24 hours');
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+
+-- ==============================================================================
+-- 5. STORAGE BUCKET RLS (customer-uploads)
+-- ==============================================================================
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+    'customer-uploads',
+    'customer-uploads',
+    true,
+    10485760, -- 10MB limit per file
+    ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/heic']
+)
+ON CONFLICT (id) DO UPDATE SET
+    public = true,
+    file_size_limit = 10485760,
+    allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+
+-- Drop existing storage policies
+DROP POLICY IF EXISTS "Allow public uploads to customer-uploads" ON storage.objects;
+DROP POLICY IF EXISTS "Allow public reads from customer-uploads" ON storage.objects;
+DROP POLICY IF EXISTS "Allow admin delete from customer-uploads" ON storage.objects;
+
+-- 🛡️ Storage Policy 1: Public upload allowed for customer photo customizations (Max 10MB)
 CREATE POLICY "Allow public uploads to customer-uploads"
     ON storage.objects
     FOR INSERT
     TO public
-    WITH CHECK (bucket_id = 'customer-uploads');
+    WITH CHECK (
+        bucket_id = 'customer-uploads'
+    );
 
--- Storage Policy: Allow public read access to uploaded images
+-- 🛡️ Storage Policy 2: Public read access to photos
 CREATE POLICY "Allow public reads from customer-uploads"
     ON storage.objects
     FOR SELECT
     TO public
     USING (bucket_id = 'customer-uploads');
 
--- ---------------------------------------------------------
--- 5. Seed Catalog Products
--- ---------------------------------------------------------
-INSERT INTO public.products (title, slug, category, price, description, tag, gradient, images, customization_options)
-VALUES
-(
-    'Moonlight Memory Frame',
-    'moonlight-memory-frame',
-    'frames',
-    499.00,
-    'Upload 1 photograph in high resolution. Custom text engraving up to 40 characters. Available in 5x7in and 8x10in frame sizes with matte or gloss print finish.',
-    'Custom Photo Frame',
-    'linear-gradient(150deg,#E8B8AE,#C98D89 55%,#8A4A47)',
-    ARRAY['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'],
-    '{"requires_photo": true, "max_photos": 1, "requires_text": true, "text_placeholder": "E.g. Forever & Always - 2026", "requires_date": false}'::jsonb
-),
-(
-    'Vintage Wooden Frame Set',
-    'vintage-wooden-frame-set',
-    'frames',
-    899.00,
-    'Upload up to 3 photographs for a triple-frame set. Personalized nameplate with date up to 25 characters. Solid wood frame with antique finish, free-standing or wall-mount.',
-    'Custom Photo Frame',
-    'linear-gradient(150deg,#F0D6C8,#B98A4E 55%,#6E1F2B)',
-    ARRAY['https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=800&auto=format&fit=crop&q=80'],
-    '{"requires_photo": true, "max_photos": 3, "requires_text": true, "text_placeholder": "Names & short anniversary note", "requires_date": true}'::jsonb
-),
-(
-    'Blush Polaroid Bouquet',
-    'blush-polaroid-bouquet',
-    'bouquets',
-    649.00,
-    'Upload 6–9 photographs for individual polaroid prints. Handmade paper flower stems in blush & cream, wrapped in kraft paper with a satin ribbon and custom note card.',
-    'Polaroid Bouquet',
-    'linear-gradient(150deg,#F3E2D4,#EFC6C0 55%,#C98D89)',
-    ARRAY['https://images.unsplash.com/photo-1563241527-3004b7be0ffd?w=800&auto=format&fit=crop&q=80'],
-    '{"requires_photo": true, "max_photos": 9, "requires_text": true, "text_placeholder": "Message on gift card (up to 60 characters)", "requires_date": false}'::jsonb
-),
-(
-    'Rosewood Polaroid Bunch',
-    'rosewood-polaroid-bunch',
-    'bouquets',
-    799.00,
-    'Upload up to 12 photographs, mixed portrait & landscape. Dried rose accents between each polaroid stem. Comes in a rigid gift box ready to present.',
-    'Polaroid Bouquet',
-    'linear-gradient(150deg,#E9C7C2,#A9645F 55%,#4A141D)',
-    ARRAY['https://images.unsplash.com/photo-1526047932273-341f2a7631f9?w=800&auto=format&fit=crop&q=80'],
-    '{"requires_photo": true, "max_photos": 12, "requires_text": true, "text_placeholder": "Ribbon color preference / custom message", "requires_date": false}'::jsonb
-),
-(
-    'Birthday Wish Jar',
-    'birthday-wish-jar',
-    'birthday',
-    549.00,
-    'Upload up to 10 photographs for mini keepsake cards. Each card can carry a handwritten wish (30 chars). Glass jar with a hand-tied twine bow. Perfect for milestone birthdays.',
-    'Birthday Special',
-    'linear-gradient(150deg,#F6DEDA,#EFC6C0 50%,#B4884E)',
-    ARRAY['https://images.unsplash.com/photo-1513201099705-a9746e1e201f?w=800&auto=format&fit=crop&q=80'],
-    '{"requires_photo": true, "max_photos": 10, "requires_text": true, "text_placeholder": "Recipient name & birthday age (e.g. Maya turns 21)", "requires_date": true}'::jsonb
-),
-(
-    'Milestone Memory Box',
-    'milestone-memory-box',
-    'birthday',
-    1299.00,
-    'Upload up to 20 photographs spanning the years. Compartments for small mementos alongside prints. Engraved wooden lid with name and milestone age.',
-    'Birthday Special',
-    'linear-gradient(150deg,#EFC6C0,#C98D89 50%,#6E1F2B)',
-    ARRAY['https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=800&auto=format&fit=crop&q=80'],
-    '{"requires_photo": true, "max_photos": 20, "requires_text": true, "text_placeholder": "Engraving for box lid", "requires_date": true}'::jsonb
-),
-(
-    'Us, In Every Season Frame',
-    'us-in-every-season-frame',
-    'couple',
-    999.00,
-    'Upload 4 photographs, one for each season together. Custom text for a relationship date or shared quote. Four-panel frame in warm walnut finish.',
-    'Couple Keepsake',
-    'linear-gradient(150deg,#E8B8AE,#8A4A47 55%,#4A141D)',
-    ARRAY['https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=800&auto=format&fit=crop&q=80'],
-    '{"requires_photo": true, "max_photos": 4, "requires_text": true, "text_placeholder": "Special relationship quote or date", "requires_date": true}'::jsonb
-),
-(
-    'Love Letter Keepsake Box',
-    'love-letter-keepsake-box',
-    'couple',
-    1199.00,
-    'Upload up to 15 photographs for a layered flip-book. Space for a heartfelt letter up to 300 characters. Velvet-lined wooden box with brass clasp.',
-    'Couple Keepsake',
-    'linear-gradient(150deg,#F0D6C8,#C98D89 50%,#6E1F2B)',
-    ARRAY['https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=800&auto=format&fit=crop&q=80'],
-    '{"requires_photo": true, "max_photos": 15, "requires_text": true, "text_placeholder": "Love letter content / custom message", "requires_date": true}'::jsonb
-)
-ON CONFLICT (slug) DO UPDATE
-SET
-    title = EXCLUDED.title,
-    price = EXCLUDED.price,
-    description = EXCLUDED.description,
-    tag = EXCLUDED.tag,
-    gradient = EXCLUDED.gradient,
-    images = EXCLUDED.images,
-    customization_options = EXCLUDED.customization_options;
+-- 🛡️ Storage Policy 3: Only authenticated admins can delete uploaded files
+CREATE POLICY "Allow admin delete from customer-uploads"
+    ON storage.objects
+    FOR DELETE
+    TO authenticated
+    USING (bucket_id = 'customer-uploads');
