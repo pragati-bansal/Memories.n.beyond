@@ -203,9 +203,17 @@ export default function AdminLoginPage({ onLoginSuccess }) {
           </form>
 
           {/* Footer note */}
-          <p className="mt-6 text-center text-xs text-ink/30">
-            This page is not indexed or linked publicly.
-          </p>
+          <div className="mt-6 text-center space-y-3">
+            <p className="text-xs text-ink/30">
+              This page is not indexed or linked publicly.
+            </p>
+            <a
+              href="/"
+              className="inline-block text-xs font-semibold text-burgundy/70 hover:text-burgundy transition-colors"
+            >
+              &larr; Return to Store
+            </a>
+          </div>
         </div>
       </div>
     </div>
