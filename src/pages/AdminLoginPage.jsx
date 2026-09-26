@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { supabase, isSupabaseConfigured } from '../lib/supabaseClient';
 import { logger } from '../lib/logger';
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+const configuredAdminEmail = import.meta.env.VITE_ADMIN_EMAIL?.trim().toLowerCase();
 
 /**
  * AdminLoginPage — rendered inline at /admin when the user is unauthenticated.
- * Authenticates via Supabase and enforces a single-email whitelist.
+ * Authenticates via Supabase and optionally checks configured admin whitelist email.
  */
 export default function AdminLoginPage({ onLoginSuccess }) {
   const [email, setEmail] = useState('');
@@ -19,7 +19,10 @@ export default function AdminLoginPage({ onLoginSuccess }) {
   useEffect(() => {
     if (!supabase || !isSupabaseConfigured) return;
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.email === ADMIN_EMAIL) {
+      if (!session) return;
+      const userEmail = session.user?.email?.trim().toLowerCase();
+      const isEmailRestricted = configuredAdminEmail && configuredAdminEmail !== 'your-email@example.com';
+      if (!isEmailRestricted || userEmail === configuredAdminEmail) {
         onLoginSuccess();
       }
     });
@@ -45,21 +48,25 @@ export default function AdminLoginPage({ onLoginSuccess }) {
 
       if (signInError) {
         logger.warn('AdminLoginPage', 'Sign-in failed', signInError);
-        setError('Invalid email or password. Please try again.');
+        setError(signInError.message || 'Invalid email or password. Please try again.');
         setLoading(false);
         return;
       }
 
-      // Step 2: Whitelist check — sign out immediately if not the admin
-      if (data.user?.email !== ADMIN_EMAIL) {
+      // Step 2: Whitelist check — only enforce if a valid, non-placeholder admin email is configured
+      const userEmail = data.user?.email?.trim().toLowerCase();
+      const isEmailRestricted = configuredAdminEmail && configuredAdminEmail !== 'your-email@example.com';
+
+      if (isEmailRestricted && userEmail !== configuredAdminEmail) {
         logger.warn('AdminLoginPage', 'Unauthorised login attempt', { email: data.user?.email });
         await supabase.auth.signOut();
-        setError('Access denied. This portal is restricted.');
+        setError(`Access denied. Account "${data.user?.email}" is not authorized.`);
         setLoading(false);
         return;
       }
 
       logger.info('AdminLoginPage', 'Admin authenticated successfully');
+      setLoading(false);
       onLoginSuccess();
     } catch (err) {
       logger.error('AdminLoginPage', 'Unexpected error during sign-in', err);

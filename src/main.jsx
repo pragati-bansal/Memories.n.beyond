@@ -31,8 +31,8 @@ function AdminRoute() {
     }
 
     // Retrieve active session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      setSession(initialSession);
       setLoading(false);
     }).catch(() => {
       setSession(null);
@@ -40,9 +40,14 @@ function AdminRoute() {
     });
 
     // Listen for auth state transitions (sign in, sign out, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
+      if (newSession) {
+        setSession(newSession);
+        setLoading(false);
+      } else if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -66,8 +71,10 @@ function AdminRoute() {
       <AdminLoginPage
         onLoginSuccess={() => {
           if (!supabase || !isSupabaseConfigured) return;
-          supabase.auth.getSession().then(({ data: { session } }) => {
-            setSession(session);
+          supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+            if (currentSession) {
+              setSession(currentSession);
+            }
           });
         }}
       />
@@ -80,10 +87,7 @@ function AdminRoute() {
       <AdminModal
         isOpen
         onClose={() => {
-          supabase?.auth.signOut().finally(() => {
-            setSession(null);
-            window.location.href = '/';
-          });
+          window.location.href = '/';
         }}
       />
     </ProductProvider>
