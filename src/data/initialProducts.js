@@ -1,4 +1,4 @@
-import { frameImages } from '../assets/frames/index';
+import { frameImages } from '../assets/frames/index.js';
 import customFramesImg from '../assets/hero/custom-frames.jpg';
 import giftBoxImg from '../assets/hero/gift-box.jpg';
 import polaroidBouquetImg from '../assets/hero/polaroid-bouquet.jpg';

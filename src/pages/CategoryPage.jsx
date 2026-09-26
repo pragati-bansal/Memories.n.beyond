@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useProducts } from '../context/ProductContext';
 import ProductCard from '../components/ProductCard';
 import EmptyState from '../components/EmptyState';
+import { ProductGridSkeleton } from '../components/LoadingSkeleton';
 import {
   ArrowLeft,
   ShieldCheck,
@@ -74,7 +75,7 @@ export default function CategoryPage({
   onBackToHome,
   onSelectProduct,
 }) {
-  const { products: allProducts } = useProducts();
+  const { products: allProducts, loading } = useProducts();
   const meta = categoryMeta[categoryId] || categoryMeta.frames;
   const products = allProducts.filter((p) => p.category === categoryId);
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
@@ -187,7 +188,9 @@ export default function CategoryPage({
 
       {/* Product Cards Grid: 2 columns on mobile (Meesho / Myntra style) */}
       <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 mb-16 sm:mb-20">
-        {products.length === 0 ? (
+        {loading ? (
+          <ProductGridSkeleton count={6} />
+        ) : products.length === 0 ? (
           <EmptyState
             title={`No items currently in ${meta.title}`}
             description="We are crafting new bespoke items for this category. Contact our artisan team directly on WhatsApp to place a custom request."

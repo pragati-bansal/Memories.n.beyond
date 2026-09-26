@@ -24,7 +24,7 @@ import {
   Star,
 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
-import { supabase, uploadCustomerPhoto } from '../lib/supabaseClient';
+import { supabase, uploadProductImage } from '../lib/supabaseClient';
 import { logger } from '../lib/logger';
 import { newProductSubmissionSchema, getFirstZodErrorMessage } from '../lib/validation';
 import ImageWithFallback from './ImageWithFallback';
@@ -52,6 +52,9 @@ const getImageLimit = (categoryId) => (categoryId === 'magazines' ? 15 : 5);
 export default function AdminModal({ isOpen, onClose }) {
   const {
     products,
+    loading,
+    error: productsError,
+    refreshProducts,
     addProduct,
     updateProduct,
     deleteProduct,
@@ -82,6 +85,7 @@ export default function AdminModal({ isOpen, onClose }) {
   const [imagesList, setImagesList] = useState([]);
   const [urlInput, setUrlInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   
   // Customization Options
   const [requiresPhoto, setRequiresPhoto] = useState(true);
@@ -215,54 +219,35 @@ export default function AdminModal({ isOpen, onClose }) {
       filesToProcess = files.slice(0, availableSlots);
     }
 
-    // Immediate local preview for all selected files
-    const previewPromises = filesToProcess.map(
-      (file) =>
-        new Promise((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result);
-          reader.readAsDataURL(file);
-        })
-    );
-
-    const newPreviews = await Promise.all(previewPromises);
-    setImagesList((prev) => [...prev, ...newPreviews]);
-    if (fileInputRef.current) fileInputRef.current.value = '';
-
-    // Upload to Supabase in background if configured
     try {
       setIsUploading(true);
-      const uploadWithTimeout = async (file) => {
+      showToast('Uploading images to Supabase Storage...', 'info');
+
+      for (const file of filesToProcess) {
         try {
-          return await Promise.race([
-            uploadCustomerPhoto(file),
-            new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 8000))
-          ]);
-        } catch (err) {
-          logger.warn('AdminModal', 'Photo upload fallback to local preview', err);
-          return null;
-        }
-      };
-
-      const uploadPromises = filesToProcess.map((file) => uploadWithTimeout(file));
-      const uploadedUrls = await Promise.all(uploadPromises);
-
-      setImagesList((prev) => {
-        const updated = [...prev];
-        uploadedUrls.forEach((url, idx) => {
-          if (url && typeof url === 'string' && url.startsWith('http')) {
-            const targetIdx = currentCount + idx;
-            if (targetIdx < updated.length) {
-              updated[targetIdx] = url;
-            }
+          const publicUrl = await uploadProductImage(file);
+          if (publicUrl) {
+            setImagesList((prev) => [...prev, publicUrl]);
+            showToast('✅ Product image uploaded to Supabase Storage!');
           }
-        });
-        return updated;
-      });
+        } catch (uploadErr) {
+          console.error('Supabase product image storage upload error:', uploadErr);
+          showToast(`⚠️ Storage upload issue: ${uploadErr.message || 'Check storage RLS'}. Using local preview.`, 'error');
+
+          // Fallback to local Data URL preview
+          const reader = new FileReader();
+          reader.onload = () => {
+            setImagesList((prev) => [...prev, reader.result]);
+          };
+          reader.readAsDataURL(file);
+        }
+      }
     } catch (err) {
-      logger.warn('AdminModal', 'Supabase upload skipped or failed, using local Data URL preview', err);
+      console.error('Image processing error:', err);
+      showToast('Failed to process image file.', 'error');
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
@@ -337,14 +322,16 @@ export default function AdminModal({ isOpen, onClose }) {
   };
 
   // Handle Save (Add or Update)
-  const handleSaveProduct = (e) => {
+  const handleSaveProduct = async (e) => {
     e.preventDefault();
     if (!title.trim()) {
+      showToast('Please enter a product title.', 'error');
       alert('Please enter a product title.');
       return;
     }
 
     if (imagesList.length === 0) {
+      showToast('Please upload or add at least one product image.', 'error');
       alert('Please upload or add at least one product image.');
       return;
     }
@@ -394,38 +381,62 @@ export default function AdminModal({ isOpen, onClose }) {
     if (!validation.success) {
       const errMsg = getFirstZodErrorMessage(validation.error, 'Please check product form inputs.');
       showToast(`⚠️ ${errMsg}`, 'error');
-      logger.warn('AdminModal', 'Product validation failed', errMsg);
+      console.error('Product validation failed:', errMsg);
       return;
     }
 
     const validPayload = validation.data;
 
-    if (editingProductId) {
-      // Edit existing product
-      updateProduct(editingProductId, validPayload);
-      showToast(`✨ "${validPayload.title}" updated successfully!`);
-    } else {
-      // Add new product
-      addProduct(validPayload);
-      showToast(`🎉 "${validPayload.title}" added to catalogue!`);
+    try {
+      setIsSaving(true);
+      if (editingProductId) {
+        // Edit existing product via Supabase
+        await updateProduct(editingProductId, validPayload);
+        showToast(`✨ "${validPayload.title}" updated in Supabase!`);
+      } else {
+        // Add new product directly to Supabase
+        await addProduct(validPayload);
+        showToast(`🎉 "${validPayload.title}" added to Supabase catalogue!`);
+      }
+
+      setActiveTab('list');
+      setEditingProductId(null);
+    } catch (err) {
+      console.error('Failed to save product in Supabase:', err);
+      const errMsg = err.message || 'Database error occurred. Please check RLS policies or column types.';
+      showToast(`❌ Supabase Error: ${errMsg}`, 'error');
+      alert(`Supabase Product Mutation Failed!\n\nError: ${errMsg}\n\nPlease check browser console and Supabase RLS policies.`);
+    } finally {
+      setIsSaving(false);
     }
-
-    setActiveTab('list');
-    setEditingProductId(null);
   };
 
-  // Delete product
-  const handleDelete = (id) => {
-    deleteProduct(id);
-    setDeleteConfirmId(null);
-    showToast('🗑️ Product deleted from catalogue.', 'info');
+  // Delete product directly from Supabase
+  const handleDelete = async (id) => {
+    try {
+      await deleteProduct(id);
+      setDeleteConfirmId(null);
+      showToast('🗑️ Product deleted from catalogue.', 'info');
+    } catch (err) {
+      console.error('Failed to delete product from Supabase:', err);
+      const errMsg = err.message || 'Database deletion error.';
+      showToast(`❌ Delete failed: ${errMsg}`, 'error');
+      alert(`Failed to delete product from Supabase:\n\n${errMsg}`);
+    }
   };
 
-  // Reset to original factory data
-  const handleResetToDefault = () => {
-    resetToOriginalProducts();
-    setShowResetConfirm(false);
-    showToast('🔄 Catalogue reset to original 12+ factory products.', 'info');
+  // Reset / Restore factory products to Supabase
+  const handleResetToDefault = async () => {
+    try {
+      await resetToOriginalProducts();
+      setShowResetConfirm(false);
+      showToast('🔄 Factory catalogue restored in Supabase.', 'info');
+    } catch (err) {
+      console.error('Failed to reset catalogue in Supabase:', err);
+      const errMsg = err.message || 'Database reset error.';
+      showToast(`❌ Reset failed: ${errMsg}`, 'error');
+      alert(`Failed to reset catalogue in Supabase:\n\n${errMsg}`);
+    }
   };
 
   // Sign out via Supabase and redirect to home
@@ -642,7 +653,14 @@ export default function AdminModal({ isOpen, onClose }) {
                   </div>
 
                   {/* Product Cards Grid with Edit & Delete */}
-                  {filteredProducts.length === 0 ? (
+                  {loading ? (
+                    <div className="py-16 text-center flex flex-col items-center justify-center">
+                      <div className="w-8 h-8 border-3 border-burgundy/25 border-t-burgundy rounded-full animate-spin mb-3" />
+                      <p className="text-xs font-bold text-burgundy-deep">
+                        Loading products directly from Supabase...
+                      </p>
+                    </div>
+                  ) : filteredProducts.length === 0 ? (
                     <div className="py-12 text-center flex flex-col items-center justify-center">
                       <Package className="w-10 h-10 text-burgundy/50 mb-2" />
                       <p className="text-sm font-bold text-burgundy-deep">
@@ -1226,10 +1244,15 @@ export default function AdminModal({ isOpen, onClose }) {
                     <button
                       type="button"
                       onClick={handleSaveProduct}
-                      disabled={isUploading}
+                      disabled={isUploading || isSaving}
                       className="px-7 py-2.5 rounded-full bg-burgundy hover:bg-burgundy-deep text-cream text-xs sm:text-sm font-bold shadow-craft-soft hover:shadow-craft-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isUploading ? (
+                      {isSaving ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-cream/30 border-t-cream rounded-full animate-spin" />
+                          <span>Saving to Supabase...</span>
+                        </>
+                      ) : isUploading ? (
                         <>
                           <span className="w-4 h-4 border-2 border-cream/30 border-t-cream rounded-full animate-spin" />
                           <span>Uploading Images...</span>

@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Sparkles, MessageCircle, ArrowRight, Heart, Flower2 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import ProductCard from './ProductCard';
+import { ProductCardSkeleton } from './LoadingSkeleton';
 
 export default function GeneralGiftsSection({ onSelectProduct, onNavigateToCategory }) {
-  const { products } = useProducts();
+  const { products, loading } = useProducts();
   const generalProducts = products.filter((p) => p.category === 'general');
 
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
@@ -50,15 +51,19 @@ export default function GeneralGiftsSection({ onSelectProduct, onNavigateToCateg
 
         {/* Product Cards Grid */}
         <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          <AnimatePresence>
-            {generalProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                onSelect={(p) => onSelectProduct && onSelectProduct(p)}
-              />
-            ))}
-          </AnimatePresence>
+          {loading ? (
+            Array.from({ length: 3 }).map((_, i) => <ProductCardSkeleton key={i} />)
+          ) : (
+            <AnimatePresence>
+              {generalProducts.map((product) => (
+                <ProductCard
+                  key={product.id || product.slug}
+                  product={product}
+                  onSelect={(p) => onSelectProduct && onSelectProduct(p)}
+                />
+              ))}
+            </AnimatePresence>
+          )}
         </motion.div>
 
         {/* Custom Combo WhatsApp Callout Strip */}
