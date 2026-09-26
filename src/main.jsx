@@ -37,9 +37,14 @@ function AdminRoute() {
       return;
     }
 
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setAuthStatus(session ? 'authenticated' : 'unauthenticated');
+    // Verify the session with the Supabase Auth server.
+    // getUser() makes a live network request to validate the JWT — unlike
+    // getSession() which only reads the locally cached token and can't detect
+    // revoked or expired sessions until the next refresh cycle.
+    supabase.auth.getUser().then(({ data: { user }, error }) => {
+      // Treat any error (network failure, invalid/expired token, etc.)
+      // as unauthenticated — show the login form, never the dashboard.
+      setAuthStatus(user && !error ? 'authenticated' : 'unauthenticated');
     });
 
     // Keep auth status in sync with session changes.
