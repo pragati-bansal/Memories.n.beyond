@@ -66,13 +66,23 @@ export default function ReviewSection() {
   // Reviews state with localStorage persistence - strictly user-added reviews only
   const [reviewsList, setReviewsList] = useState(() => {
     try {
+      // Clean up legacy dummy reviews keys
+      localStorage.removeItem('mb_customer_reviews_v2');
+      localStorage.removeItem('mb_customer_reviews_v3');
+
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const parsedReviews = safeParseLegacyReviews(parsed);
-          // Only keep user submitted reviews
-          return parsedReviews.filter((r) => r.isUserSubmitted || (typeof r.id === 'string' && r.id.startsWith('rev-')));
+          // Strictly keep only real user submitted reviews
+          return parsedReviews.filter(
+            (r) =>
+              r &&
+              r.isUserSubmitted === true &&
+              r.id &&
+              String(r.id).startsWith('rev-')
+          );
         }
       }
     } catch (e) {
