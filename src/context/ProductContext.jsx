@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { initialProducts } from '../data/initialProducts';
+import { resolveProductImage, resolveProductImages } from '../lib/productImages';
 import {
   supabase,
   isSupabaseConfigured,
@@ -12,9 +13,25 @@ import {
 
 const ProductContext = createContext();
 
+/**
+ * Normalises product image URLs ensuring no empty placeholders or broken paths
+ */
+const normaliseProduct = (p) => {
+  if (!p) return p;
+  const resolvedImages = resolveProductImages(p);
+  const primaryImg = resolveProductImage(p);
+  return {
+    ...p,
+    image: primaryImg,
+    imageUrl: primaryImg,
+    image_url: primaryImg,
+    images: resolvedImages.length > 0 ? resolvedImages : [primaryImg],
+  };
+};
+
 export function ProductProvider({ children }) {
-  // Initialize with original recovered catalog so site NEVER looks blank while fetching
-  const [products, setProducts] = useState(initialProducts);
+  // Initialize with original recovered catalog with resolved images
+  const [products, setProducts] = useState(() => initialProducts.map(normaliseProduct));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -28,17 +45,9 @@ export function ProductProvider({ children }) {
       // Perform dynamic Supabase fetch & automatic migration check
       const list = await syncInitialProducts(initialProducts);
 
-      // Normalise database products so client components can read images / imageUrl uniformly
-      const normalised = (list && list.length > 0 ? list : initialProducts).map((p) => {
-        const imgs = Array.isArray(p.images) && p.images.length > 0 ? p.images.filter(Boolean) : [];
-        const primaryImg = imgs[0] || p.imageUrl || p.image_url || '';
-        return {
-          ...p,
-          images: imgs.length > 0 ? imgs : primaryImg ? [primaryImg] : [],
-          imageUrl: primaryImg,
-          image_url: primaryImg,
-        };
-      });
+      // Normalise database products so client components can read genuine image URLs
+      const rawCatalog = list && list.length > 0 ? list : initialProducts;
+      const normalised = rawCatalog.map(normaliseProduct);
 
       setProducts(normalised);
       return normalised;
@@ -46,8 +55,9 @@ export function ProductProvider({ children }) {
       console.error('Failed to retrieve products from Supabase:', err);
       setError(err.message || 'Failed to fetch products');
       // Safe fallback so site NEVER looks blank
-      setProducts(initialProducts);
-      return initialProducts;
+      const fallbackList = initialProducts.map(normaliseProduct);
+      setProducts(fallbackList);
+      return fallbackList;
     } finally {
       setLoading(false);
     }
@@ -64,20 +74,7 @@ export function ProductProvider({ children }) {
   const addProduct = async (newProductData) => {
     try {
       const insertedProduct = await insertProductInDb(newProductData);
-
-      // Normalise image fields for UI consistency
-      const imgs =
-        Array.isArray(insertedProduct.images) && insertedProduct.images.length > 0
-          ? insertedProduct.images.filter(Boolean)
-          : [];
-      const primaryImg = imgs[0] || insertedProduct.imageUrl || insertedProduct.image_url || '';
-
-      const normalisedProduct = {
-        ...insertedProduct,
-        images: imgs.length > 0 ? imgs : primaryImg ? [primaryImg] : [],
-        imageUrl: primaryImg,
-        image_url: primaryImg,
-      };
+      const normalisedProduct = normaliseProduct(insertedProduct);
 
       // Immediately update local state without requiring manual page refresh
       setProducts((prev) => [normalisedProduct, ...prev]);
@@ -94,19 +91,7 @@ export function ProductProvider({ children }) {
   const updateProduct = async (productId, updatedData) => {
     try {
       const updatedProduct = await updateProductInDb(productId, updatedData);
-
-      const imgs =
-        Array.isArray(updatedProduct.images) && updatedProduct.images.length > 0
-          ? updatedProduct.images.filter(Boolean)
-          : [];
-      const primaryImg = imgs[0] || updatedProduct.imageUrl || updatedProduct.image_url || '';
-
-      const normalisedProduct = {
-        ...updatedProduct,
-        images: imgs.length > 0 ? imgs : primaryImg ? [primaryImg] : [],
-        imageUrl: primaryImg,
-        image_url: primaryImg,
-      };
+      const normalisedProduct = normaliseProduct(updatedProduct);
 
       // Immediately update state
       setProducts((prev) =>

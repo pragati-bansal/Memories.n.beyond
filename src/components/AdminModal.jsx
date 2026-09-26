@@ -28,6 +28,7 @@ import { supabase, uploadProductImage } from '../lib/supabaseClient';
 import { logger } from '../lib/logger';
 import { newProductSubmissionSchema, getFirstZodErrorMessage } from '../lib/validation';
 import ImageWithFallback from './ImageWithFallback';
+import { resolveProductImage, resolveProductImages } from '../lib/productImages';
 
 const CATEGORIES = [
   { id: 'frames', label: 'Frames', defaultTag: 'Custom Frame' },
@@ -681,13 +682,8 @@ export default function AdminModal({ isOpen, onClose }) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       {filteredProducts.map((item) => {
                         const isConfirming = deleteConfirmId === item.id;
-                        const itemImages =
-                          Array.isArray(item.images) && item.images.length > 0
-                            ? item.images.filter(Boolean)
-                            : item.imageUrl || item.image_url
-                            ? [item.imageUrl || item.image_url]
-                            : [];
-                        const displayImg = itemImages[0] || item.imageUrl || item.image_url;
+                        const itemImages = resolveProductImages(item);
+                        const displayImg = resolveProductImage(item);
                         const imageCount = itemImages.length;
 
                         return (

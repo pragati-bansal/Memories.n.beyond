@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Eye, Layers } from 'lucide-react';
-import ImageWithFallback from './ImageWithFallback';
+import { Eye, Layers } from 'lucide-react';
+import { resolveProductImage, resolveProductImages } from '../lib/productImages';
 
 export default function ProductCard({ product, onSelect }) {
   const [selectedSizeIndex, setSelectedSizeIndex] = useState(0);
 
-  const images =
-    Array.isArray(product.images) && product.images.length > 0
-      ? product.images.filter(Boolean)
-      : (product.imageUrl || product.image_url)
-      ? [product.imageUrl || product.image_url]
-      : [];
-
-  const displayImage = images[0] || null;
+  const images = resolveProductImages(product);
+  const initialImage = resolveProductImage(product);
+  const [currentImage, setCurrentImage] = useState(initialImage);
   const imageCount = images.length;
 
   const hasSizes = product.sizes && product.sizes.length > 0;
@@ -24,6 +19,8 @@ export default function ProductCard({ product, onSelect }) {
     onSelect({
       ...product,
       images,
+      imageUrl: currentImage,
+      image_url: currentImage,
       selectedSize: activeSize,
       price: displayPrice,
     });
@@ -41,7 +38,7 @@ export default function ProductCard({ product, onSelect }) {
       className="group bg-paper rounded-xl sm:rounded-3xl overflow-hidden border border-burgundy/10 shadow-craft-soft hover:shadow-craft-modal cursor-pointer flex flex-col justify-between transition-all duration-300"
     >
       {/* Visual Thumbnail Area */}
-      <div className="relative h-44 sm:h-64 bg-blush/40 flex items-center justify-center overflow-hidden p-2 sm:p-5">
+      <div className="relative h-44 sm:h-64 bg-blush/30 flex items-center justify-center overflow-hidden p-2 sm:p-5">
         {/* Multi-Image Counter Badge */}
         {imageCount > 1 && (
           <div className="absolute top-2.5 right-2.5 z-10 bg-burgundy-deep/85 backdrop-blur-sm text-cream px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold flex items-center gap-1 shadow-craft-soft border border-cream/15">
@@ -54,21 +51,20 @@ export default function ProductCard({ product, onSelect }) {
 
         {/* Craft Polaroid Mini Card Effect */}
         <div className="w-28 xs:w-32 sm:w-36 h-36 xs:h-38 sm:h-44 bg-paper rounded-none p-1.5 sm:p-2 pb-3.5 sm:pb-6 shadow-craft-soft border border-burgundy/10 transition-transform duration-500 ease-out group-hover:scale-105 group-hover:-rotate-1 flex flex-col">
-          <div
-            className="w-full flex-grow rounded-none overflow-hidden flex items-center justify-center"
-            style={{ background: product.gradient || '#EFC6C0' }}
-          >
-            {displayImage ? (
-              <ImageWithFallback
-                src={displayImage}
-                alt={product.title ? `${product.title} - Handcrafted personalized memory gift` : 'Handcrafted personalized memory gift'}
-                gradient={product.gradient || 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)'}
-                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                loading="lazy"
-              />
-            ) : (
-              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-cream/80" />
-            )}
+          <div className="w-full flex-grow rounded-none overflow-hidden relative bg-blush/20 flex items-center justify-center">
+            <img
+              src={currentImage || product.image_url || product.image}
+              alt={product.title ? `${product.title} - Handcrafted personalized memory gift` : 'Handcrafted personalized memory gift'}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+              loading="lazy"
+              onError={(e) => {
+                // If remote or relative URL fails, immediately switch to authentic local asset fallback
+                const fallback = resolveProductImage({ ...product, image_url: null, image: null, images: [] });
+                if (fallback && currentImage !== fallback) {
+                  setCurrentImage(fallback);
+                }
+              }}
+            />
           </div>
         </div>
 

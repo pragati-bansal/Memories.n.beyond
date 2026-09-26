@@ -1,49 +1,51 @@
-import React, { useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { resolveProductImage } from '../lib/productImages';
 
 /**
  * ImageWithFallback
- * Non-destructively handles broken image URLs by rendering a gradient placeholder
- * with an icon without altering existing image sizes, aspect ratios, or visual layouts.
+ * Guarantees real image rendering with safe image fallback to authentic product assets.
+ * Never renders an empty placeholder or gradient box in place of an actual product photo.
  */
 export default function ImageWithFallback({
   src,
   alt = 'Memories n Beyond handcrafted keepsake',
   className = '',
-  gradient = 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)',
+  gradient,
   style = {},
   loading = 'lazy',
   ...props
 }) {
-  const [hasError, setHasError] = useState(false);
+  const resolvedInitial = typeof src === 'string' && src ? src : resolveProductImage({ title: alt });
+  const [imgSrc, setImgSrc] = useState(resolvedInitial);
+  const [hasFailed, setHasFailed] = useState(false);
 
-  // If source is missing or image errored out
-  if (!src || hasError) {
-    return (
-      <div
-        className={`flex items-center justify-center overflow-hidden transition-all select-none ${className}`}
-        style={{
-          background: gradient || 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)',
-          ...style,
-        }}
-        role="img"
-        aria-label={alt}
-      >
-        <div className="flex flex-col items-center justify-center p-2 text-cream/80 pointer-events-none">
-          <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 opacity-80" />
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (src) {
+      setImgSrc(src);
+      setHasFailed(false);
+    } else {
+      setImgSrc(resolveProductImage({ title: alt }));
+    }
+  }, [src, alt]);
+
+  const handleError = () => {
+    if (!hasFailed) {
+      setHasFailed(true);
+      const fallback = resolveProductImage({ image: src, imageUrl: src, title: alt });
+      if (fallback && fallback !== imgSrc) {
+        setImgSrc(fallback);
+      }
+    }
+  };
 
   return (
     <img
-      src={src}
+      src={imgSrc}
       alt={alt}
       className={className}
       style={style}
       loading={loading}
-      onError={() => setHasError(true)}
+      onError={handleError}
       {...props}
     />
   );

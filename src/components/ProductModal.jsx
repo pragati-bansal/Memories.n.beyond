@@ -18,6 +18,7 @@ import {
   Layers,
 } from 'lucide-react';
 import ImageWithFallback from './ImageWithFallback';
+import { resolveProductImages } from '../lib/productImages';
 
 export default function ProductModal({ product, onClose, onOpenCancellationPolicy }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -38,14 +39,7 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
     }
   }, [product]);
 
-  const rawImages =
-    Array.isArray(product?.images) && product.images.length > 0
-      ? product.images.filter(Boolean)
-      : product?.imageUrl || product?.image_url
-      ? [product.imageUrl || product.image_url]
-      : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
-
-  const images = rawImages.length > 0 ? rawImages : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
+  const images = resolveProductImages(product);
   const isMagazine = product?.category === 'magazines';
 
   const handlePrevImage = (e) => {
