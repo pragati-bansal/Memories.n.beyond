@@ -72,9 +72,13 @@ export default function CategoryPage({
   onSelectCategory,
   onBackToHome,
   onSelectProduct,
+  allProducts = [],
 }) {
   const meta = categoryMeta[categoryId] || categoryMeta.frames;
-  const products = initialProducts.filter((p) => p.category === categoryId);
+  const productSource = allProducts && allProducts.length > 0 ? allProducts : initialProducts;
+  const products = productSource.filter(
+    (p) => (p.category || '').toLowerCase().trim() === categoryId.toLowerCase().trim()
+  );
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
   // Smooth scroll to top when category changes

@@ -9,27 +9,50 @@ import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ProductModal from './components/ProductModal';
 import CategoryPage from './pages/CategoryPage';
 import PolicyPage from './pages/PolicyPage';
+import AdminPage from './pages/AdminPage';
+import { useProducts } from './hooks/useProducts';
 
 export default function App() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null); // 'frames' | 'magazines' | 'hampers' | 'addons' | 'general' | null
   const [isPolicyView, setIsPolicyView] = useState(false);
+  const [isAdminView, setIsAdminView] = useState(false);
 
-  // Synchronize with URL hash routing for direct links & browser back button
+  // Dynamic real-time products hook from Supabase
+  const { products: dynamicProducts, isUsingSupabase, refreshProducts } = useProducts();
+
+  // Synchronize with URL hash & path routing for direct links, /admin & browser back button
   useEffect(() => {
-    const handleHashChange = () => {
-      const hash = window.location.hash;
+    const handleRouteChange = () => {
+      const hash = window.location.hash || '';
+      const pathname = window.location.pathname || '';
+      const search = window.location.search || '';
+
+      const isAdmin =
+        hash.toLowerCase().includes('admin') ||
+        pathname.toLowerCase().includes('admin') ||
+        search.toLowerCase().includes('admin');
+
+      if (isAdmin) {
+        setIsAdminView(true);
+        setIsPolicyView(false);
+        setActiveCategory(null);
+        return;
+      }
+
       if (hash.startsWith('#category/')) {
         const cat = hash.replace('#category/', '').trim().toLowerCase();
         if (['frames', 'magazines', 'hampers', 'addons', 'general'].includes(cat)) {
           setActiveCategory(cat);
           setIsPolicyView(false);
+          setIsAdminView(false);
           return;
         }
       }
       if (hash === '#collection') {
         setActiveCategory('frames');
         setIsPolicyView(false);
+        setIsAdminView(false);
         return;
       }
       if (
@@ -40,20 +63,28 @@ export default function App() {
       ) {
         setIsPolicyView(true);
         setActiveCategory(null);
+        setIsAdminView(false);
         return;
       }
+
       setActiveCategory(null);
       setIsPolicyView(false);
+      setIsAdminView(false);
     };
 
     // Check on mount
-    handleHashChange();
+    handleRouteChange();
 
-    window.addEventListener('hashchange', handleHashChange);
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    window.addEventListener('hashchange', handleRouteChange);
+    window.addEventListener('popstate', handleRouteChange);
+    return () => {
+      window.removeEventListener('hashchange', handleRouteChange);
+      window.removeEventListener('popstate', handleRouteChange);
+    };
   }, []);
 
   const navigateToCategory = (catId) => {
+    setIsAdminView(false);
     setIsPolicyView(false);
     setActiveCategory(catId);
     window.location.hash = `#category/${catId}`;
@@ -61,9 +92,18 @@ export default function App() {
   };
 
   const navigateToHome = () => {
+    setIsAdminView(false);
     setIsPolicyView(false);
     setActiveCategory(null);
     window.location.hash = '#home';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const navigateToAdmin = () => {
+    setIsPolicyView(false);
+    setActiveCategory(null);
+    setIsAdminView(true);
+    window.location.hash = '#admin';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -77,6 +117,12 @@ export default function App() {
     window.location.hash = '#policy/cancellation';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  if (isAdminView) {
+    return (
+      <AdminPage onBackToStore={navigateToHome} />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream flex flex-col selection:bg-blush selection:text-burgundy-deep">
@@ -107,6 +153,7 @@ export default function App() {
             onSelectCategory={navigateToCategory}
             onBackToHome={navigateToHome}
             onSelectProduct={(product) => setSelectedProduct(product)}
+            allProducts={dynamicProducts}
           />
         ) : (
           /* Home Page Experience */
@@ -120,7 +167,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer onNavigateAdmin={navigateToAdmin} />
 
       {/* Floating Action Button */}
       <FloatingWhatsApp />

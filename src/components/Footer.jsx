@@ -13,10 +13,11 @@ import {
   Sparkles,
   CheckCircle2,
   Package,
+  Lock,
 } from 'lucide-react';
 import logoImg from '../assets/logo.png';
 
-export default function Footer() {
+export default function Footer({ onNavigateAdmin }) {
   const [activePolicy, setActivePolicy] = useState(null); // 'about' | 'cancellation' | 'shipping' | null
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
@@ -232,6 +233,21 @@ export default function Footer() {
               className="hover:text-cream transition-colors cursor-pointer"
             >
               Shipping &amp; Return Policy
+            </button>
+            <span>•</span>
+            <button
+              type="button"
+              onClick={() => {
+                if (onNavigateAdmin) {
+                  onNavigateAdmin();
+                } else {
+                  window.location.hash = '#admin';
+                }
+              }}
+              className="hover:text-cream text-cream/70 transition-colors cursor-pointer inline-flex items-center gap-1"
+            >
+              <Lock className="w-3 h-3 text-blush/80" />
+              <span>Admin Portal</span>
             </button>
           </div>
         </div>
