@@ -7,10 +7,8 @@ import CtaStrip from './components/CtaStrip';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ProductModal from './components/ProductModal';
-import AdminModal from './components/AdminModal';
 import CategoryPage from './pages/CategoryPage';
 import PolicyPage from './pages/PolicyPage';
-import ProtectedAdminRoute from './components/ProtectedAdminRoute';
 import { ProductProvider } from './context/ProductContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 
@@ -18,16 +16,11 @@ function AppContent() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null); // 'frames' | 'magazines' | 'hampers' | 'addons' | 'general' | null
   const [isPolicyView, setIsPolicyView] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Synchronize with URL hash routing for direct links & browser back button
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-      if (hash === '#admin' || hash.startsWith('#admin')) {
-        setIsAdminOpen(true);
-        return;
-      }
       if (hash.startsWith('#category/')) {
         const cat = hash.replace('#category/', '').trim().toLowerCase();
         if (['frames', 'magazines', 'hampers', 'addons', 'general'].includes(cat)) {
@@ -61,14 +54,6 @@ function AppContent() {
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
   }, []);
-
-  /**
-   * Redirect to the standalone /admin-login page.
-   * Uses a real path navigation so it's fully separate from the public site.
-   */
-  const navigateToAdminLogin = () => {
-    window.location.href = '/admin-login';
-  };
 
   const navigateToCategory = (catId) => {
     setIsPolicyView(false);
@@ -152,28 +137,6 @@ function AppContent() {
             onClose={() => setSelectedProduct(null)}
             onOpenCancellationPolicy={openCancellationPolicy}
           />
-        </ErrorBoundary>
-      )}
-
-      {/*
-        Protected Admin Dashboard — only mount when the admin is actively
-        trying to open the panel. This prevents the session check from
-        firing on every normal page load and accidentally redirecting
-        visitors to the login page.
-      */}
-      {isAdminOpen && (
-        <ErrorBoundary>
-          <ProtectedAdminRoute onUnauthenticated={navigateToAdminLogin}>
-            <AdminModal
-              isOpen={isAdminOpen}
-              onClose={() => {
-                setIsAdminOpen(false);
-                if (window.location.hash === '#admin') {
-                  window.location.hash = activeCategory ? `#category/${activeCategory}` : '#home';
-                }
-              }}
-            />
-          </ProtectedAdminRoute>
         </ErrorBoundary>
       )}
     </div>
