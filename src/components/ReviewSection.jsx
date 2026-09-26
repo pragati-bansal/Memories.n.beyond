@@ -75,7 +75,14 @@ export default function ReviewSection() {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const parsedReviews = safeParseLegacyReviews(parsed);
-          return parsedReviews.filter((r) => r && r.isUserSubmitted);
+          // Strictly keep only real user submitted reviews
+          return parsedReviews.filter(
+            (r) =>
+              r &&
+              r.isUserSubmitted === true &&
+              r.id &&
+              String(r.id).startsWith('rev-')
+          );
         }
       }
     } catch (e) {
@@ -101,39 +108,58 @@ export default function ReviewSection() {
   // Lightbox Zoom Modal State
   const [zoomImage, setZoomImage] = useState(null);
 
-  // Live Data Fetching: Fetch approved reviews from Supabase on mount
+  // Fetch only real user reviews from Supabase on mount
   useEffect(() => {
     let isMounted = true;
-    if (isSupabaseConfigured && supabase) {
-      supabase
-        .from('reviews')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .then(({ data, error }) => {
-          console.log('Supabase fetch reviews response:', { data, error });
-          if (!isMounted || error || !Array.isArray(data)) return;
-          setReviewsList(
-            data.map((r) => ({
-              id: r.id,
-              name: r.name,
-              city: r.city || 'Verified Buyer',
-              productName: r.product_name || 'Handmade Keepsake',
-              stars: r.rating || 5,
-              text: r.comment || '',
-              image: r.image_url || null,
-              date: r.created_at
-                ? new Date(r.created_at).toLocaleDateString('en-GB', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })
-                : 'Recent',
-              isUserSubmitted: true,
-            }))
-          );
+    if (isSupabaseConfigured) {
+      fetchReviewsFromDb()
+        .then((dbReviews) => {
+          if (!isMounted || !Array.isArray(dbReviews) || dbReviews.length === 0) return;
+          setReviewsList((prev) => {
+            const dbMap = new Map();
+            dbReviews.forEach((r) => {
+              const key = String(r.id);
+              dbMap.set(key, {
+                id: r.id,
+                name: r.name,
+                city: r.city,
+                productName: r.product_name || r.productName,
+                stars: r.stars,
+                text: r.text,
+                image: r.image_url || r.image,
+                date: r.date,
+                isUserSubmitted: true,
+              });
+            });
+
+            const merged = prev.map((item) => {
+              const key = String(item.id);
+              return dbMap.has(key) ? { ...item, ...dbMap.get(key) } : item;
+            });
+
+            const existingKeys = new Set(merged.map((r) => String(r.id)));
+            dbReviews.forEach((r) => {
+              const key = String(r.id);
+              if (!existingKeys.has(key)) {
+                merged.unshift({
+                  id: r.id,
+                  name: r.name,
+                  city: r.city,
+                  productName: r.product_name || r.productName,
+                  stars: r.stars,
+                  text: r.text,
+                  image: r.image_url || r.image,
+                  date: r.date,
+                  isUserSubmitted: true,
+                });
+              }
+            });
+
+            return merged;
+          });
         })
         .catch((err) => {
-          console.error('Failed to fetch reviews:', err);
+          logger.warn('ReviewSection', 'Failed to fetch Supabase reviews', err);
         });
     }
     return () => {
@@ -193,102 +219,85 @@ export default function ReviewSection() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Handle Review Submission with direct payload alignment and explicit logging
+  // Handle Submit with validation, cloud upload and database sync
   const handleSubmitReview = async (e) => {
     e.preventDefault();
+
+    const validation = newReviewSubmissionSchema.safeParse({
+      name: name.trim(),
+      city: city.trim() || undefined,
+      productName: productName.trim() || undefined,
+      stars: Number(rating),
+      text: text.trim(),
+      image: imagePreview || null,
+    });
+
+    if (!validation.success) {
+      const errorMsg = getFirstZodErrorMessage(
+        validation.error,
+        'Please check the review information entered.'
+      );
+      setFormValidationError(errorMsg);
+      logger.warn('ReviewSection', 'Review validation rejected', errorMsg);
+      return;
+    }
+
     setFormValidationError('');
-
-    const trimmedName = name.trim();
-    const trimmedComment = text.trim();
-    const numRating = Number(rating) || 5;
-
-    if (!trimmedName) {
-      setFormValidationError('Please enter your name.');
-      return;
-    }
-    if (!trimmedComment || trimmedComment.length < 3) {
-      setFormValidationError('Review message must be at least 3 characters.');
-      return;
-    }
-
     setIsSubmitting(true);
+    const validData = validation.data;
+
     let finalImageUrl = imagePreview || null;
 
-    // Upload to Supabase Storage if configured and file was picked
+    // Upload to Supabase Storage if configured
     if (imageFile && isSupabaseConfigured) {
       try {
         const publicUrl = await Promise.race([
           uploadCustomerPhoto(imageFile),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 6000)),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000)),
         ]);
         if (publicUrl && typeof publicUrl === 'string' && publicUrl.startsWith('http')) {
           finalImageUrl = publicUrl;
         }
-      } catch (uploadErr) {
-        console.warn('Storage upload fallback to compressed image preview', uploadErr);
+      } catch (err) {
+        logger.warn('ReviewSection', 'Supabase image upload fallback to local preview', err);
       }
     }
 
     try {
-      // Exact payload column names: name, city, product_name, rating, comment, image_url
-      const payload = {
-        name: trimmedName,
-        city: city.trim() || null,
-        product_name: productName.trim() || null,
-        rating: numRating,
-        comment: trimmedComment,
+      const dbSaved = await saveReviewInDb({
+        name: validData.name,
+        city: validData.city || 'Verified Buyer',
+        product_name: validData.productName || 'Handmade Keepsake',
+        rating: validData.stars,
+        comment: validData.text,
         image_url: finalImageUrl,
+        is_approved: true,
+      });
+
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
+
+      const newReviewItem = {
+        id: dbSaved?.id || `rev-${Date.now()}`,
+        name: dbSaved?.name || validData.name,
+        city: dbSaved?.city || validData.city || 'Verified Buyer',
+        productName: dbSaved?.product_name || validData.productName || 'Handmade Keepsake',
+        stars: dbSaved?.rating || validData.stars,
+        text: dbSaved?.comment || validData.text,
+        image: dbSaved?.image_url || finalImageUrl,
+        date: formattedDate,
+        isUserSubmitted: true,
       };
 
-      const { data, error } = isSupabaseConfigured && supabase
-        ? await supabase.from('reviews').insert([payload]).select().single()
-        : {
-            data: {
-              id: `local-${Date.now()}`,
-              ...payload,
-              created_at: new Date().toISOString(),
-            },
-            error: null,
-          };
-
-      console.log('Supabase insert response:', { data, error });
-
-      if (error) {
-        console.error('Failed to insert review into Supabase:', error);
-        setFormValidationError(error.message || 'Failed to submit review. Please try again.');
-        setIsSubmitting(false);
-        return;
-      }
-
-      if (data) {
-        const formattedReview = {
-          id: data.id,
-          name: data.name,
-          city: data.city || 'Verified Buyer',
-          productName: data.product_name || 'Handmade Keepsake',
-          stars: data.rating || numRating,
-          text: data.comment,
-          image: data.image_url || null,
-          date: data.created_at
-            ? new Date(data.created_at).toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })
-            : new Date().toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              }),
-          isUserSubmitted: true,
-        };
-
-        setReviewsList((prev) => [formattedReview, ...prev]);
-        setIsSubmitted(true);
-      }
+      setReviewsList((prev) => [newReviewItem, ...prev]);
+      setIsSubmitted(true);
     } catch (err) {
-      console.error('Unexpected error during review submission:', err);
-      setFormValidationError(err.message || 'Something went wrong. Please try again.');
+      logger.error('ReviewSection', 'Error during review submission', err);
+      setFormValidationError('Failed to submit review. Please try again.');
     } finally {
       setIsSubmitting(false);
     }

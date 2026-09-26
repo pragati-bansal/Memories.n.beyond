@@ -12,12 +12,6 @@ export const isSupabaseConfigured = Boolean(
   !supabaseUrl.includes('your-project-id')
 );
 
-if (!isSupabaseConfigured) {
-  console.warn(
-    '⚠️ Supabase Warning: VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is missing or unconfigured. Supabase cloud features will run in local fallback mode.'
-  );
-}
-
 // Initialize client if credentials are provided, or create null/fallback wrapper
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseAnonKey)
@@ -184,7 +178,7 @@ export async function deleteProductFromDb(productId) {
 }
 
 /**
- * Fetch public reviews from Supabase `reviews` table
+ * Fetch public approved reviews from Supabase `reviews` table
  */
 export async function fetchReviewsFromDb() {
   if (!supabase || !isSupabaseConfigured) return null;
@@ -192,9 +186,8 @@ export async function fetchReviewsFromDb() {
     const { data, error } = await supabase
       .from('reviews')
       .select('*')
+      .eq('is_approved', true)
       .order('created_at', { ascending: false });
-
-    console.log('Supabase fetch reviews response:', { data, error });
 
     if (error) {
       logger.warn('supabaseClient', 'Failed to fetch reviews from Supabase', error);
@@ -209,37 +202,31 @@ export async function fetchReviewsFromDb() {
 
 /**
  * Insert a customer review into Supabase `reviews` table
- * Matches exact schema columns: id, name, city, product_name, rating, comment, image_url, created_at
  */
 export async function saveReviewInDb(review) {
   if (!supabase || !isSupabaseConfigured) {
-    console.warn('⚠️ Supabase client not configured; review saved to local state.');
     return {
-      data: {
-        id: `local-${Date.now()}`,
-        name: review.name,
-        city: review.city || null,
-        product_name: review.product_name || review.productName || null,
-        rating: Number(review.rating || review.stars) || 5,
-        comment: review.comment || review.text,
-        image_url: review.image_url || review.image || null,
-        created_at: new Date().toISOString(),
-      },
-      error: null,
+      id: review.id || `local-${Date.now()}`,
+      name: review.name,
+      rating: Number(review.rating || review.stars) || 5,
+      comment: review.comment || review.text,
+      city: review.city || 'Verified Buyer',
+      product_name: review.product_name || review.productName || 'Handmade Keepsake',
+      image_url: review.image_url || review.image || null,
+      is_approved: true,
+      created_at: new Date().toISOString(),
     };
   }
 
   try {
     const payload = {
-      name: review.name ? review.name.trim() : '',
-      city: review.city && review.city.trim() ? review.city.trim() : null,
-      product_name:
-        (review.product_name || review.productName) && (review.product_name || review.productName).trim()
-          ? (review.product_name || review.productName).trim()
-          : null,
+      name: review.name.trim(),
       rating: Number(review.rating || review.stars) || 5,
       comment: (review.comment || review.text || '').trim(),
+      city: (review.city || 'Verified Buyer').trim(),
+      product_name: (review.product_name || review.productName || 'Handmade Keepsake').trim(),
       image_url: review.image_url || review.image || null,
+      is_approved: true,
     };
 
     const { data, error } = await supabase
@@ -248,17 +235,14 @@ export async function saveReviewInDb(review) {
       .select()
       .single();
 
-    console.log('Supabase insert response:', { data, error });
-
     if (error) {
-      logger.error('supabaseClient', 'Supabase review insert error:', error);
-      return { data: null, error };
+      logger.error('supabaseClient', 'Failed to insert review in Supabase', error);
+      throw error;
     }
-
-    return { data, error: null };
+    return data;
   } catch (err) {
-    console.error('Supabase review insert exception:', err);
-    return { data: null, error: err };
+    logger.error('supabaseClient', 'Error inserting review in Supabase', err);
+    throw err;
   }
 }
 
