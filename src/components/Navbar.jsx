@@ -39,7 +39,7 @@ export default function Navbar({ onNavigateHome, onNavigateCategories }) {
         >
           <img
             src={logoImg}
-            alt="memories n beyond"
+            alt="Memories n Beyond logo - Where feelings find forms"
             className="w-12 h-12 sm:w-13 sm:h-13 rounded-full object-cover shadow-craft-sm group-hover:scale-105 transition-transform border-2 border-burgundy/15"
           />
           <div className="flex flex-col justify-center">

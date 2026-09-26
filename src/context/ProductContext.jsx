@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initialProducts } from '../data/initialProducts';
+import { logger } from '../lib/logger';
+import { safeParseLegacyProducts } from '../lib/validation';
 
 const ProductContext = createContext();
 
@@ -12,22 +14,52 @@ export function ProductProvider({ children }) {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          // Non-destructively parse legacy products - never drops or removes legacy records
+          const parsedProducts = safeParseLegacyProducts(parsed);
+
+          // Non-destructively merge factory default items from initialProducts
+          // This ensures newly added categories (hampers, magazines, addons, general) appear
+          // even if the user's browser had an older cached product list from localStorage.
+          const existingIds = new Set(
+            parsedProducts.map((p) => p.id || p.slug).filter(Boolean)
+          );
+          const missingDefaults = initialProducts.filter(
+            (p) => !existingIds.has(p.id || p.slug)
+          );
+
+          if (missingDefaults.length > 0) {
+            return [...parsedProducts, ...missingDefaults];
+          }
+          return parsedProducts;
         }
       }
     } catch (err) {
-      console.error('Failed to load products from localStorage:', err);
+      logger.error('ProductContext', 'Failed to load products from localStorage', err);
     }
     // Default initial seed
     return initialProducts;
   });
+
+  // Ensure any missing factory products are also merged into active state on mount
+  useEffect(() => {
+    setProducts((prev) => {
+      const existingIds = new Set(prev.map((p) => p.id || p.slug).filter(Boolean));
+      const missingDefaults = initialProducts.filter(
+        (p) => !existingIds.has(p.id || p.slug)
+      );
+      if (missingDefaults.length > 0) {
+        return [...prev, ...missingDefaults];
+      }
+      return prev;
+    });
+  }, []);
 
   // Persist products state to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
     } catch (err) {
-      console.error('Failed to save products to localStorage:', err);
+      logger.error('ProductContext', 'Failed to save products to localStorage', err);
     }
   }, [products]);
 
@@ -181,7 +213,7 @@ export function ProductProvider({ children }) {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(initialProducts));
     } catch (err) {
-      console.error('Failed to reset products in localStorage:', err);
+      logger.error('ProductContext', 'Failed to reset products in localStorage', err);
     }
   };
 

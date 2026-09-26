@@ -57,7 +57,7 @@ export default function Footer({ onOpenAdmin }) {
             <div className="flex items-center gap-3">
               <img
                 src={logoImg}
-                alt="memories n beyond"
+                alt="Memories n Beyond logo - Where feelings find forms"
                 className="w-12 h-12 rounded-full object-cover shadow-sm border border-cream/20"
               />
               <div className="flex flex-col justify-center">
@@ -271,6 +271,9 @@ export default function Footer({ onOpenAdmin }) {
             />
 
             <motion.div
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="footer-policy-title"
               initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 15 }}
@@ -284,7 +287,7 @@ export default function Footer({ onOpenAdmin }) {
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
-                    <h3 className="font-serif text-lg font-bold text-burgundy-deep">
+                    <h3 id="footer-policy-title" className="font-serif text-lg font-bold text-burgundy-deep">
                       Memories n Beyond
                     </h3>
                     <p className="text-[11px] text-ink-soft">Transparency &amp; Handcrafted Trust</p>

@@ -1,4 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
+import { logger } from './logger';
+import { newOrderSubmissionSchema } from './validation';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -22,7 +24,7 @@ export const supabase = isSupabaseConfigured
  */
 export async function uploadCustomerPhoto(file) {
   if (!supabase || !isSupabaseConfigured) {
-    console.warn('Supabase is not configured yet. Returning simulated preview data URL.');
+    logger.info('supabaseClient', 'Supabase is not configured yet. Returning simulated preview data URL.');
     return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result);
@@ -42,7 +44,7 @@ export async function uploadCustomerPhoto(file) {
     });
 
   if (uploadError) {
-    console.error('Error uploading file to Supabase:', uploadError);
+    logger.error('supabaseClient', 'Error uploading file to Supabase Storage', uploadError);
     throw uploadError;
   }
 
@@ -58,21 +60,26 @@ export async function uploadCustomerPhoto(file) {
  * @param {Object} orderData 
  */
 export async function createOrderRecord(orderData) {
+  // Validate order data payload safely
+  const validation = newOrderSubmissionSchema.safeParse(orderData);
+  const payload = validation.success ? validation.data : orderData;
+
   if (!supabase || !isSupabaseConfigured) {
-    console.log('[Mock Order Created in local state]:', orderData);
-    return { data: { id: 'local-' + Date.now(), ...orderData }, error: null };
+    logger.info('supabaseClient', 'Mock Order Created in local state', payload);
+    return { data: { id: 'local-' + Date.now(), ...payload }, error: null };
   }
 
   const { data, error } = await supabase
     .from('orders')
-    .insert([orderData])
+    .insert([payload])
     .select()
     .single();
 
   if (error) {
-    console.error('Error saving order into Supabase:', error);
+    logger.error('supabaseClient', 'Error saving order into Supabase', error);
     throw error;
   }
 
   return { data, error: null };
 }
+

@@ -11,6 +11,7 @@ import AdminModal from './components/AdminModal';
 import CategoryPage from './pages/CategoryPage';
 import PolicyPage from './pages/PolicyPage';
 import { ProductProvider } from './context/ProductContext';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 function AppContent() {
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -95,35 +96,37 @@ function AppContent() {
 
       {/* Main Content Area */}
       <main className="flex-grow">
-        {isPolicyView ? (
-          /* Dedicated Detailed Return & Cancellation Policy Section */
-          <PolicyPage
-            onBack={() => {
-              if (activeCategory) {
-                navigateToCategory(activeCategory);
-              } else {
-                navigateToHome();
-              }
-            }}
-            onNavigateCategories={navigateToCategoriesOverview}
-          />
-        ) : activeCategory ? (
-          /* Dedicated Full Web Page for the chosen Category */
-          <CategoryPage
-            categoryId={activeCategory}
-            onSelectCategory={navigateToCategory}
-            onBackToHome={navigateToHome}
-            onSelectProduct={(product) => setSelectedProduct(product)}
-          />
-        ) : (
-          /* Home Page Experience */
-          <>
-            <HeroSection onNavigateToCategory={navigateToCategory} />
-            <HowItWorks />
-            <ReviewSection />
-            <CtaStrip />
-          </>
-        )}
+        <ErrorBoundary>
+          {isPolicyView ? (
+            /* Dedicated Detailed Return & Cancellation Policy Section */
+            <PolicyPage
+              onBack={() => {
+                if (activeCategory) {
+                  navigateToCategory(activeCategory);
+                } else {
+                  navigateToHome();
+                }
+              }}
+              onNavigateCategories={navigateToCategoriesOverview}
+            />
+          ) : activeCategory ? (
+            /* Dedicated Full Web Page for the chosen Category */
+            <CategoryPage
+              categoryId={activeCategory}
+              onSelectCategory={navigateToCategory}
+              onBackToHome={navigateToHome}
+              onSelectProduct={(product) => setSelectedProduct(product)}
+            />
+          ) : (
+            /* Home Page Experience */
+            <>
+              <HeroSection onNavigateToCategory={navigateToCategory} />
+              <HowItWorks />
+              <ReviewSection />
+              <CtaStrip />
+            </>
+          )}
+        </ErrorBoundary>
       </main>
 
       {/* Footer */}
@@ -134,23 +137,27 @@ function AppContent() {
 
       {/* Interactive Customization & Checkout Modal */}
       {selectedProduct && (
-        <ProductModal
-          product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          onOpenCancellationPolicy={openCancellationPolicy}
-        />
+        <ErrorBoundary>
+          <ProductModal
+            product={selectedProduct}
+            onClose={() => setSelectedProduct(null)}
+            onOpenCancellationPolicy={openCancellationPolicy}
+          />
+        </ErrorBoundary>
       )}
 
       {/* Discreet Admin Dashboard & Manager */}
-      <AdminModal
-        isOpen={isAdminOpen}
-        onClose={() => {
-          setIsAdminOpen(false);
-          if (window.location.hash === '#admin') {
-            window.location.hash = activeCategory ? `#category/${activeCategory}` : '#home';
-          }
-        }}
-      />
+      <ErrorBoundary>
+        <AdminModal
+          isOpen={isAdminOpen}
+          onClose={() => {
+            setIsAdminOpen(false);
+            if (window.location.hash === '#admin') {
+              window.location.hash = activeCategory ? `#category/${activeCategory}` : '#home';
+            }
+          }}
+        />
+      </ErrorBoundary>
     </div>
   );
 }

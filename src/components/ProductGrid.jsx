@@ -4,6 +4,7 @@ import customFramesImg from '../assets/hero/custom-frames.jpg';
 import giftBoxImg from '../assets/hero/gift-box.jpg';
 import hamperBouquetImg from '../assets/hero/hamper-bouquet.jpg';
 import embroideredKeepsakeImg from '../assets/hero/embroidered-keepsake.jpg';
+import ImageWithFallback from './ImageWithFallback';
 
 export default function ProductGrid({ onNavigateToCategory }) {
   // 4 Big Category Definitions (Strictly NO prices mentioned here)
@@ -81,9 +82,10 @@ export default function ProductGrid({ onNavigateToCategory }) {
             >
               {/* Visual Thumbnail Banner */}
               <div className="relative h-60 sm:h-64 overflow-hidden bg-blush/30">
-                <img
+                <ImageWithFallback
                   src={cat.image}
-                  alt={cat.title}
+                  alt={`${cat.title} collection banner - Memories n Beyond`}
+                  gradient="linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)"
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
                 />
                 
@@ -108,7 +110,7 @@ export default function ProductGrid({ onNavigateToCategory }) {
                   <span className="text-[11px] font-bold text-cream/75 uppercase tracking-wider block">
                     Collection {idx + 1}
                   </span>
-                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-cream drop-shadow-sm">
+                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-cream drop-shadow-sm break-words">
                     {cat.title}
                   </h3>
                 </div>
@@ -117,7 +119,7 @@ export default function ProductGrid({ onNavigateToCategory }) {
               {/* Card Body & Feature Highlights (NO PRICE) */}
               <div className="p-5 sm:p-6 flex flex-col justify-between flex-grow">
                 <div>
-                  <p className="text-xs text-ink-soft leading-relaxed mb-4">
+                  <p className="text-xs text-ink-soft leading-relaxed mb-4 break-words">
                     {cat.subtitle}
                   </p>
 

@@ -10,8 +10,12 @@ import {
   PenLine,
   CheckCircle2,
   ZoomIn,
+  AlertCircle,
 } from 'lucide-react';
 import { reviews as initialReviews } from '../data/reviews';
+import { logger } from '../lib/logger';
+import { newReviewSubmissionSchema, safeParseLegacyReviews, getFirstZodErrorMessage } from '../lib/validation';
+import ImageWithFallback from './ImageWithFallback';
 
 const STORAGE_KEY = 'mb_customer_reviews_v2';
 
@@ -19,16 +23,16 @@ export default function ReviewSection() {
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Reviews state with localStorage persistence (starts with 0 pre-data)
+  // Reviews state with localStorage persistence - safe non-destructive legacy parsing
   const [reviewsList, setReviewsList] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) return safeParseLegacyReviews(parsed);
       }
     } catch (e) {
-      console.error('Failed to load reviews from localStorage', e);
+      logger.error('ReviewSection', 'Failed to load reviews from localStorage', e);
     }
     return [];
   });
@@ -44,6 +48,7 @@ export default function ReviewSection() {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formValidationError, setFormValidationError] = useState('');
 
   // Lightbox Zoom Modal State
   const [zoomImage, setZoomImage] = useState(null);
@@ -53,7 +58,7 @@ export default function ReviewSection() {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(reviewsList));
     } catch (e) {
-      console.error('Failed to save reviews to localStorage', e);
+      logger.error('ReviewSection', 'Failed to save reviews to localStorage', e);
     }
   }, [reviewsList]);
 
@@ -88,10 +93,31 @@ export default function ReviewSection() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Handle Submit
+  // Handle Submit with Zod validation
   const handleSubmitReview = (e) => {
     e.preventDefault();
-    if (!name.trim() || !text.trim() || !rating) return;
+
+    const validation = newReviewSubmissionSchema.safeParse({
+      name: name.trim(),
+      city: city.trim() || undefined,
+      productName: productName.trim() || undefined,
+      stars: Number(rating),
+      text: text.trim(),
+      image: imagePreview || null,
+    });
+
+    if (!validation.success) {
+      const errorMsg = getFirstZodErrorMessage(
+        validation.error,
+        'Please check the review information entered.'
+      );
+      setFormValidationError(errorMsg);
+      logger.warn('ReviewSection', 'Review validation rejected', errorMsg);
+      return;
+    }
+
+    setFormValidationError('');
+    const validData = validation.data;
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString('en-GB', {
@@ -102,12 +128,12 @@ export default function ReviewSection() {
 
     const newReview = {
       id: `rev-${Date.now()}`,
-      name: name.trim(),
-      city: city.trim() || 'Verified Buyer',
-      productName: productName.trim() || 'Handmade Keepsake',
-      stars: Number(rating),
-      text: text.trim(),
-      image: imagePreview || null,
+      name: validData.name,
+      city: validData.city || 'Verified Buyer',
+      productName: validData.productName || 'Handmade Keepsake',
+      stars: validData.stars,
+      text: validData.text,
+      image: validData.image || null,
       date: formattedDate,
       isUserSubmitted: true,
     };
@@ -124,6 +150,7 @@ export default function ReviewSection() {
       setText('');
       setImageFile(null);
       setImagePreview(null);
+      setFormValidationError('');
       setIsSubmitted(false);
       setIsFormOpen(false);
 
@@ -228,9 +255,10 @@ export default function ReviewSection() {
                     onClick={() => setZoomImage({ src: rev.image, title: `${rev.name}'s Keepsake`, sub: rev.productName })}
                     className="relative mb-4 sm:mb-5 rounded-2xl overflow-hidden aspect-[4/3] bg-blush/20 border border-burgundy/10 group shadow-xs cursor-zoom-in"
                   >
-                    <img
+                    <ImageWithFallback
                       src={rev.image}
-                      alt={`${rev.name}'s keepsake`}
+                      alt={rev.name ? `${rev.name}'s customer keepsake unboxing photo` : 'Customer unboxing keepsake photo'}
+                      gradient="linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)"
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"
                     />
@@ -270,7 +298,7 @@ export default function ReviewSection() {
                 </div>
 
                 {/* Review Text */}
-                <p className="font-serif italic text-xs sm:text-sm text-ink leading-relaxed mb-5 sm:mb-6">
+                <p className="font-serif italic text-xs sm:text-sm text-ink leading-relaxed mb-5 sm:mb-6 break-words [overflow-wrap:anywhere]">
                   "{rev.text}"
                 </p>
               </div>
@@ -281,10 +309,10 @@ export default function ReviewSection() {
                   {rev.name ? rev.name.charAt(0).toUpperCase() : 'M'}
                 </div>
                 <div className="min-w-0">
-                  <div className="font-bold text-xs sm:text-sm text-burgundy-deep truncate">
+                  <div className="font-bold text-xs sm:text-sm text-burgundy-deep truncate break-words">
                     {rev.name}
                   </div>
-                  <div className="text-[11px] sm:text-xs text-ink-soft truncate">
+                  <div className="text-[11px] sm:text-xs text-ink-soft truncate break-words">
                     {rev.city || 'Verified Buyer'}
                   </div>
                 </div>
@@ -305,13 +333,18 @@ export default function ReviewSection() {
           />
 
           {/* Modal Card */}
-          <div className="relative bg-paper rounded-3xl shadow-craft-modal border border-burgundy/15 max-w-lg w-full p-6 sm:p-8 z-10 my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-form-title"
+            className="relative bg-paper rounded-3xl shadow-craft-modal border border-burgundy/15 max-w-lg w-full p-6 sm:p-8 z-10 my-auto overflow-hidden animate-in fade-in zoom-in-95 duration-200"
+          >
             {/* Close Button */}
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}
               className="absolute top-4 right-4 w-9 h-9 rounded-full bg-cream hover:bg-blush/50 text-burgundy-deep flex items-center justify-center transition-colors cursor-pointer"
-              aria-label="Close form"
+              aria-label="Close review form"
             >
               <X className="w-4 h-4" />
             </button>
@@ -335,7 +368,7 @@ export default function ReviewSection() {
                   <span className="text-[10px] sm:text-xs font-bold uppercase tracking-wider text-rose-deep block mb-1">
                     Share Your Experience
                   </span>
-                  <h3 className="font-serif text-2xl sm:text-3xl font-bold text-burgundy-deep">
+                  <h3 id="review-form-title" className="font-serif text-2xl sm:text-3xl font-bold text-burgundy-deep">
                     Write a Product Review
                   </h3>
                   <p className="text-xs text-ink-soft mt-1">
@@ -453,7 +486,7 @@ export default function ReviewSection() {
                         <div className="w-24 h-24 rounded-2xl overflow-hidden border-2 border-burgundy/20 shadow-xs">
                           <img
                             src={imagePreview}
-                            alt="Preview"
+                            alt="Uploaded keepsake photo preview"
                             className="w-full h-full object-cover"
                           />
                         </div>
@@ -483,6 +516,17 @@ export default function ReviewSection() {
                     )}
                   </div>
 
+                  {/* Validation Error Alert */}
+                  {formValidationError && (
+                    <div
+                      role="alert"
+                      className="p-3 rounded-xl bg-rose/15 border border-rose/30 text-rose-deep text-xs flex items-center gap-2"
+                    >
+                      <AlertCircle className="w-4 h-4 shrink-0 text-burgundy" />
+                      <span>{formValidationError}</span>
+                    </div>
+                  )}
+
                   {/* Submit Button */}
                   <div className="pt-3">
                     <button
@@ -503,6 +547,9 @@ export default function ReviewSection() {
       {/* ================= Photo Lightbox / Zoom Modal ================= */}
       {zoomImage && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Customer review photo preview"
           onClick={() => setZoomImage(null)}
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-burgundy-deep/80 backdrop-blur-md cursor-pointer animate-in fade-in duration-200"
         >
@@ -514,29 +561,30 @@ export default function ReviewSection() {
               type="button"
               onClick={() => setZoomImage(null)}
               className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-cream text-burgundy flex items-center justify-center shadow-md hover:scale-110 transition-transform cursor-pointer"
-              aria-label="Close preview"
+              aria-label="Close photo preview"
             >
               <X className="w-4 h-4" />
             </button>
-            <div className="aspect-[4/3] sm:aspect-[16/10] bg-blush/20 overflow-hidden">
-              <img
+            <div className="aspect-[4/3] sm:aspect-[16/10] bg-blush/20 overflow-hidden flex items-center justify-center">
+              <ImageWithFallback
                 src={zoomImage.src}
-                alt={zoomImage.title}
+                alt={zoomImage.title || 'Customer unboxing full view'}
+                gradient="linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)"
                 className="w-full h-full object-contain bg-black/5"
               />
             </div>
             <div className="p-4 sm:p-5 flex items-center justify-between bg-paper border-t border-burgundy/10">
-              <div>
-                <div className="font-serif text-base sm:text-lg font-bold text-burgundy-deep">
+              <div className="min-w-0 pr-3">
+                <div className="font-serif text-base sm:text-lg font-bold text-burgundy-deep truncate break-words">
                   {zoomImage.title}
                 </div>
                 {zoomImage.sub && (
-                  <div className="text-xs text-rose-deep font-semibold">
+                  <div className="text-xs text-rose-deep font-semibold truncate break-words">
                     {zoomImage.sub}
                   </div>
                 )}
               </div>
-              <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-cream text-burgundy-deep border border-burgundy/15">
+              <span className="text-[11px] font-bold px-3 py-1 rounded-full bg-cream text-burgundy-deep border border-burgundy/15 shrink-0">
                 Verified Keepsake
               </span>
             </div>

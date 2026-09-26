@@ -27,6 +27,9 @@ import {
 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { uploadCustomerPhoto } from '../lib/supabaseClient';
+import { logger } from '../lib/logger';
+import { newProductSubmissionSchema, getFirstZodErrorMessage } from '../lib/validation';
+import ImageWithFallback from './ImageWithFallback';
 
 const CATEGORIES = [
   { id: 'frames', label: 'Frames', defaultTag: 'Custom Frame' },
@@ -309,7 +312,7 @@ export default function AdminModal({ isOpen, onClose }) {
         return updated;
       });
     } catch (err) {
-      console.warn('Supabase upload skipped or failed, using local Data URL preview:', err);
+      logger.warn('AdminModal', 'Supabase upload skipped or failed, using local Data URL preview', err);
     } finally {
       setIsUploading(false);
     }
@@ -438,14 +441,25 @@ export default function AdminModal({ isOpen, onClose }) {
       details: parsedDetails.length > 0 ? parsedDetails : undefined,
     };
 
+    // Strict validation for new or edited product submissions
+    const validation = newProductSubmissionSchema.safeParse(productPayload);
+    if (!validation.success) {
+      const errMsg = getFirstZodErrorMessage(validation.error, 'Please check product form inputs.');
+      showToast(`⚠️ ${errMsg}`, 'error');
+      logger.warn('AdminModal', 'Product validation failed', errMsg);
+      return;
+    }
+
+    const validPayload = validation.data;
+
     if (editingProductId) {
       // Edit existing product
-      updateProduct(editingProductId, productPayload);
-      showToast(`✨ "${title}" updated successfully!`);
+      updateProduct(editingProductId, validPayload);
+      showToast(`✨ "${validPayload.title}" updated successfully!`);
     } else {
       // Add new product
-      addProduct(productPayload);
-      showToast(`🎉 "${title}" added to catalogue!`);
+      addProduct(validPayload);
+      showToast(`🎉 "${validPayload.title}" added to catalogue!`);
     }
 
     setActiveTab('list');
@@ -785,9 +799,10 @@ export default function AdminModal({ isOpen, onClose }) {
                             <div className="flex gap-3 items-start flex-1 min-w-0">
                               <div className="w-16 h-16 rounded-xl overflow-hidden bg-blush shrink-0 border border-burgundy/10 shadow-xs flex items-center justify-center relative">
                                 {displayImg ? (
-                                  <img
+                                  <ImageWithFallback
                                     src={displayImg}
-                                    alt={item.title}
+                                    alt={item.title ? `${item.title} catalogue thumbnail` : 'Catalogue thumbnail'}
+                                    gradient={item.gradient || 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)'}
                                     className="w-full h-full object-cover"
                                   />
                                 ) : (
@@ -1180,9 +1195,9 @@ export default function AdminModal({ isOpen, onClose }) {
                                     }`}
                                   >
                                     <div className="h-20 w-full bg-blush/20 flex items-center justify-center overflow-hidden">
-                                      <img
+                                      <ImageWithFallback
                                         src={img}
-                                        alt={`Preview ${idx + 1}`}
+                                        alt={`Product upload preview ${idx + 1}`}
                                         className="w-full h-full object-cover"
                                       />
                                     </div>

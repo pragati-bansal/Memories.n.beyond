@@ -58,13 +58,13 @@ export default function HeroSection({ onNavigateToCategory }) {
             </div>
 
             {/* Main Heading */}
-            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-medium text-burgundy-deep leading-[1.12] tracking-tight">
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-medium text-burgundy-deep leading-[1.12] tracking-tight break-words">
               gifts that feels made{' '}
               <span className="italic font-normal text-rose-deep">specifically</span> for you
             </h1>
 
             {/* Lede paragraph */}
-            <p className="text-base sm:text-lg text-ink-soft max-w-xl leading-relaxed">
+            <p className="text-base sm:text-lg text-ink-soft max-w-xl leading-relaxed break-words">
               We help people turn memories into gifts their loved ones actually keep without spending hours searching for the perfect present
             </p>
 
@@ -240,7 +240,7 @@ export default function HeroSection({ onNavigateToCategory }) {
               >
                 <img
                   src={heroGiftsPhoto}
-                  alt="Handcrafted gifts beautifully wrapped with dried flowers and custom seals - memories n beyond"
+                  alt="Handcrafted personalized gifts beautifully wrapped with dried flowers and custom seals - Memories n Beyond"
                   className="w-full h-full object-cover select-none"
                   loading="eager"
                 />

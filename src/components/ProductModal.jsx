@@ -17,6 +17,7 @@ import {
   ChevronRight,
   Layers,
 } from 'lucide-react';
+import ImageWithFallback from './ImageWithFallback';
 
 export default function ProductModal({ product, onClose, onOpenCancellationPolicy }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -119,6 +120,9 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
 
         {/* Modal Window Container */}
         <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="product-modal-title"
           initial={{ opacity: 0, scale: 0.95, y: 20 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
@@ -129,7 +133,7 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
           <button
             onClick={onClose}
             className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-cream/90 hover:bg-cream text-burgundy-deep flex items-center justify-center shadow-craft-soft transition-all hover:scale-110 cursor-pointer"
-            aria-label="Close dialog"
+            aria-label="Close product customization dialog"
           >
             <X className="w-5 h-5" />
           </button>
@@ -145,10 +149,11 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                     className="w-full h-full rounded-xl overflow-hidden relative flex items-center justify-center"
                     style={{ background: product.gradient || '#F6DEDA' }}
                   >
-                    <img
+                    <ImageWithFallback
                       key={activeImageIndex}
                       src={images[activeImageIndex] || images[0]}
-                      alt={`${product.title} - ${isMagazine ? `Page ${activeImageIndex + 1}` : `Preview ${activeImageIndex + 1}`}`}
+                      alt={`${product.title || 'Product'} - ${isMagazine ? `Page ${activeImageIndex + 1}` : `Preview ${activeImageIndex + 1}`}`}
+                      gradient={product.gradient || 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)'}
                       className="w-full h-full object-cover transition-all duration-300"
                     />
 
@@ -219,7 +224,12 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                                 : 'border-burgundy/15 opacity-70 hover:opacity-100 hover:border-burgundy/40'
                             }`}
                           >
-                            <img src={img} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                            <ImageWithFallback
+                              src={img}
+                              alt={`${product.title || 'Product'} thumbnail ${idx + 1}`}
+                              gradient={product.gradient || 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)'}
+                              className="w-full h-full object-cover"
+                            />
                             <span
                               className={`absolute bottom-0 inset-x-0 text-[8px] font-bold py-0.5 text-center truncate ${
                                 isActive ? 'bg-burgundy text-cream' : 'bg-burgundy-deep/75 text-cream'
@@ -344,7 +354,7 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                   <span className="text-xs font-bold text-rose-deep uppercase tracking-wider block mb-1">
                     {product.tag || 'Personalized Gift'}
                   </span>
-                  <h2 className="font-serif text-2xl sm:text-3xl font-medium text-burgundy-deep mb-2">
+                  <h2 id="product-modal-title" className="font-serif text-2xl sm:text-3xl font-medium text-burgundy-deep mb-2 break-words [overflow-wrap:anywhere]">
                     {product.title}
                   </h2>
                   <div className="flex items-baseline gap-2 mb-3">
@@ -353,7 +363,7 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
                     </span>
                   </div>
                   {product.description && (
-                    <p className="text-sm text-ink-soft leading-relaxed">
+                    <p className="text-sm text-ink-soft leading-relaxed break-words">
                       {product.description}
                     </p>
                   )}

@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useProducts } from '../context/ProductContext';
 import ProductCard from '../components/ProductCard';
+import EmptyState from '../components/EmptyState';
 import {
   ArrowLeft,
   ShieldCheck,
@@ -186,15 +187,24 @@ export default function CategoryPage({
 
       {/* Product Cards Grid: 2 columns on mobile (Meesho / Myntra style) */}
       <div className="max-w-7xl mx-auto px-2.5 sm:px-6 lg:px-8 mb-16 sm:mb-20">
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-7">
-          {products.map((product) => (
-            <ProductCard
-              key={product.id || product.slug}
-              product={product}
-              onSelect={onSelectProduct}
-            />
-          ))}
-        </div>
+        {products.length === 0 ? (
+          <EmptyState
+            title={`No items currently in ${meta.title}`}
+            description="We are crafting new bespoke items for this category. Contact our artisan team directly on WhatsApp to place a custom request."
+            actionText="Browse Categories"
+            onAction={onBackToHome}
+          />
+        ) : (
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6 lg:gap-7">
+            {products.map((product) => (
+              <ProductCard
+                key={product.id || product.slug}
+                product={product}
+                onSelect={onSelectProduct}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Frame Sizing & Format Guide - STRICTLY ONLY FOR FRAMES SECTION */}
