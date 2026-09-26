@@ -12,7 +12,6 @@ import {
   ZoomIn,
   AlertCircle,
 } from 'lucide-react';
-import { reviews as initialReviews } from '../data/reviews';
 import { logger } from '../lib/logger';
 import { newReviewSubmissionSchema, safeParseLegacyReviews, getFirstZodErrorMessage } from '../lib/validation';
 import {
@@ -23,7 +22,7 @@ import {
 } from '../lib/supabaseClient';
 import ImageWithFallback from './ImageWithFallback';
 
-const STORAGE_KEY = 'mb_customer_reviews_v3';
+const STORAGE_KEY = 'mb_real_user_reviews_v1';
 
 // Client-side image compression helper to avoid localStorage quota issues
 function compressImageToDataUrl(file, maxDimension = 600, quality = 0.7) {
@@ -64,23 +63,22 @@ export default function ReviewSection() {
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Reviews state with localStorage persistence and default initial reviews
+  // Reviews state with localStorage persistence - strictly user-added reviews only
   const [reviewsList, setReviewsList] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('mb_customer_reviews_v2');
+      const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
           const parsedReviews = safeParseLegacyReviews(parsed);
-          const existingIds = new Set(parsedReviews.map((r) => String(r.id)));
-          const missingDefaults = (initialReviews || []).filter((r) => !existingIds.has(String(r.id)));
-          return [...parsedReviews, ...missingDefaults];
+          // Only keep user submitted reviews
+          return parsedReviews.filter((r) => r.isUserSubmitted || (typeof r.id === 'string' && r.id.startsWith('rev-')));
         }
       }
     } catch (e) {
       logger.error('ReviewSection', 'Failed to load reviews from localStorage', e);
     }
-    return initialReviews || [];
+    return [];
   });
 
   // Write Review Modal & Form States
@@ -100,7 +98,7 @@ export default function ReviewSection() {
   // Lightbox Zoom Modal State
   const [zoomImage, setZoomImage] = useState(null);
 
-  // Fetch reviews from Supabase on mount
+  // Fetch only real user reviews from Supabase on mount
   useEffect(() => {
     let isMounted = true;
     if (isSupabaseConfigured) {
