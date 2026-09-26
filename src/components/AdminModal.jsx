@@ -43,6 +43,9 @@ const PRESET_SIZES = [
   { size: 'Standard', label: 'Standard Single Size' },
 ];
 
+// Admin Passcode: change here or set VITE_ADMIN_PIN in your .env file
+const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'admin123';
+
 export default function AdminModal({ isOpen, onClose }) {
   const {
     products,
@@ -106,7 +109,7 @@ export default function AdminModal({ isOpen, onClose }) {
   // PIN authentication handler
   const handlePinSubmit = (e) => {
     e.preventDefault();
-    if (pinInput.trim() === 'admin123') {
+    if (pinInput.trim() === ADMIN_PIN) {
       setIsAuthenticated(true);
       setPinError('');
       setPinInput('');
@@ -424,9 +427,9 @@ export default function AdminModal({ isOpen, onClose }) {
               </form>
 
               <div className="mt-8 p-3 rounded-xl bg-cream/70 border border-burgundy/10 text-[11px] text-ink-soft max-w-xs text-center">
-                <span>Default Passcode: </span>
+                <span>Current Passcode: </span>
                 <code className="bg-blush px-1.5 py-0.5 rounded font-bold text-burgundy-deep">
-                  admin123
+                  {ADMIN_PIN}
                 </code>
               </div>
             </div>
