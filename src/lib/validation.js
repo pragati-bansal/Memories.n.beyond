@@ -74,7 +74,7 @@ export const newProductSubmissionSchema = z
     imageUrl: z.string().optional(),
     image_url: z.string().optional(),
     requires_photo: z.boolean().optional(),
-    max_photos: z.number().int().min(1).max(50).optional(),
+    max_photos: z.number().int().min(0).max(50).optional(),
     requires_text: z.boolean().optional(),
     requires_date: z.boolean().optional(),
     details: z.array(z.string()).optional(),

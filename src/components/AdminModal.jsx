@@ -371,7 +371,7 @@ export default function AdminModal({ isOpen, onClose }) {
       imageUrl: finalImage,
       image_url: finalImage,
       requires_photo: requiresPhoto,
-      max_photos: maxPhotos,
+      max_photos: requiresPhoto ? (maxPhotos || 4) : 0,
       requires_text: requiresText,
       requires_date: requiresDate,
       details: parsedDetails.length > 0 ? parsedDetails : undefined,
@@ -558,15 +558,15 @@ export default function AdminModal({ isOpen, onClose }) {
                 </div>
               </div>
 
-              {/* Toast Feedback Notification */}
+              {/* Toast Feedback Notification (Floating & Always Visible) */}
               {feedbackMsg.text && (
                 <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="mx-6 mt-4 p-3.5 rounded-2xl bg-blush/90 border border-burgundy/20 text-burgundy-deep font-bold text-xs sm:text-sm flex items-center gap-2 shadow-sm"
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-burgundy-deep text-cream border border-cream/20 font-bold text-xs sm:text-sm flex items-center gap-2.5 shadow-2xl backdrop-blur-md max-w-sm"
                 >
-                  <Sparkles className="w-4 h-4 text-burgundy shrink-0" />
+                  <Sparkles className="w-4 h-4 text-rose-300 shrink-0 animate-pulse" />
                   <span>{feedbackMsg.text}</span>
                 </motion.div>
               )}

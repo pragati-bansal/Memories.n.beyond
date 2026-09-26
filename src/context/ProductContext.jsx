@@ -117,7 +117,7 @@ export function ProductProvider({ children }) {
       sizes: processedSizes,
       customization_options: {
         requires_photo: newProductData.requires_photo ?? true,
-        max_photos: Number(newProductData.max_photos) || 4,
+        max_photos: typeof newProductData.max_photos === 'number' ? newProductData.max_photos : 4,
         requires_text: newProductData.requires_text ?? true,
         text_placeholder: newProductData.text_placeholder || 'Custom names, quote or message',
         requires_date: newProductData.requires_date ?? false,
@@ -185,7 +185,7 @@ export function ProductProvider({ children }) {
                 ...item.customization_options,
                 ...(updatedData.customization_options || {}),
                 requires_photo: updatedData.requires_photo ?? item.customization_options?.requires_photo ?? true,
-                max_photos: Number(updatedData.max_photos) || item.customization_options?.max_photos || 4,
+                max_photos: typeof updatedData.max_photos === 'number' ? updatedData.max_photos : item.customization_options?.max_photos ?? 4,
                 requires_text: updatedData.requires_text ?? item.customization_options?.requires_text ?? true,
                 requires_date: updatedData.requires_date ?? item.customization_options?.requires_date ?? false,
               },
