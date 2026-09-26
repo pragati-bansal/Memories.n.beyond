@@ -263,34 +263,43 @@ export default function ReviewSection() {
       }
     }
 
-    const today = new Date();
-    const formattedDate = today.toLocaleDateString('en-GB', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric',
-    });
+    try {
+      const dbSaved = await saveReviewInDb({
+        name: validData.name,
+        city: validData.city || 'Verified Buyer',
+        product_name: validData.productName || 'Handmade Keepsake',
+        rating: validData.stars,
+        comment: validData.text,
+        image_url: finalImageUrl,
+        is_approved: true,
+      });
 
-    const newReview = {
-      id: `rev-${Date.now()}`,
-      name: validData.name,
-      city: validData.city || 'Verified Buyer',
-      productName: validData.productName || 'Handmade Keepsake',
-      stars: validData.stars,
-      text: validData.text,
-      image: finalImageUrl,
-      date: formattedDate,
-      isUserSubmitted: true,
-    };
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString('en-GB', {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+      });
 
-    setReviewsList((prev) => [newReview, ...prev]);
-    setIsSubmitted(true);
-    setIsSubmitting(false);
+      const newReviewItem = {
+        id: dbSaved?.id || `rev-${Date.now()}`,
+        name: dbSaved?.name || validData.name,
+        city: dbSaved?.city || validData.city || 'Verified Buyer',
+        productName: dbSaved?.product_name || validData.productName || 'Handmade Keepsake',
+        stars: dbSaved?.rating || validData.stars,
+        text: dbSaved?.comment || validData.text,
+        image: dbSaved?.image_url || finalImageUrl,
+        date: formattedDate,
+        isUserSubmitted: true,
+      };
 
-    // Save to Supabase DB in background
-    if (isSupabaseConfigured) {
-      saveReviewInDb(newReview).catch((err) =>
-        logger.warn('ReviewSection', 'Background review save in Supabase failed', err)
-      );
+      setReviewsList((prev) => [newReviewItem, ...prev]);
+      setIsSubmitted(true);
+    } catch (err) {
+      logger.error('ReviewSection', 'Error during review submission', err);
+      setFormValidationError('Failed to submit review. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
 
     // Reset Form
@@ -310,7 +319,7 @@ export default function ReviewSection() {
       if (scrollRef.current) {
         scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
       }
-    }, 1200);
+    }, 1500);
   };
 
   return (
@@ -375,7 +384,7 @@ export default function ReviewSection() {
             </div>
             <div className="space-y-1">
               <h3 className="font-serif text-xl sm:text-2xl font-bold text-burgundy-deep">
-                Be the First to Share Your Story
+                No reviews yet. Be the first to share your experience!
               </h3>
               <p className="text-xs sm:text-sm text-ink-soft max-w-md mx-auto">
                 Received something handcrafted by Memories n Beyond? Share your unboxing moment with photo &amp; rating.

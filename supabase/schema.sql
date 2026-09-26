@@ -240,33 +240,47 @@ CREATE POLICY "Allow admin delete from customer-uploads"
 
 
 -- ==============================================================================
--- 6. REVIEWS TABLE & RLS POLICIES
+-- 6. REVIEWS TABLE & RLS POLICIES (Real Customer Reviews)
 -- ==============================================================================
 CREATE TABLE IF NOT EXISTS public.reviews (
-    id VARCHAR(100) PRIMARY KEY,
-    name VARCHAR(150) NOT NULL,
-    city VARCHAR(100) DEFAULT 'Verified Buyer',
-    product_name VARCHAR(200) DEFAULT 'Handmade Keepsake',
-    stars INT NOT NULL DEFAULT 5,
-    text TEXT NOT NULL,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL,
+    city TEXT,
+    product_name TEXT,
+    rating INTEGER DEFAULT 5,
+    comment TEXT NOT NULL,
     image_url TEXT,
-    date VARCHAR(50),
-    is_active BOOLEAN DEFAULT true,
+    is_approved BOOLEAN DEFAULT true,
     created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Safely ensure columns exist if table existed prior
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS product_name TEXT;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE public.reviews ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT true;
+
+-- Enable RLS
 ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies if any
+DROP POLICY IF EXISTS "Allow public read access to reviews" ON public.reviews;
+DROP POLICY IF EXISTS "Allow public to submit reviews" ON public.reviews;
 DROP POLICY IF EXISTS "Allow public read reviews" ON public.reviews;
 DROP POLICY IF EXISTS "Allow public insert reviews" ON public.reviews;
 
-CREATE POLICY "Allow public read reviews"
-    ON public.reviews FOR SELECT
+-- 🛡️ Policy 1: Public can read all approved reviews
+CREATE POLICY "Allow public read access to reviews"
+    ON public.reviews
+    FOR SELECT
     TO public
-    USING (is_active = true);
+    USING (COALESCE(is_approved, true) = true);
 
-CREATE POLICY "Allow public insert reviews"
-    ON public.reviews FOR INSERT
+-- 🛡️ Policy 2: Public can submit new reviews
+CREATE POLICY "Allow public to submit reviews"
+    ON public.reviews
+    FOR INSERT
     TO public
     WITH CHECK (true);
+
 

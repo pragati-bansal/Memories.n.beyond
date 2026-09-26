@@ -178,7 +178,7 @@ export async function deleteProductFromDb(productId) {
 }
 
 /**
- * Fetch public reviews from Supabase `reviews` table
+ * Fetch public approved reviews from Supabase `reviews` table
  */
 export async function fetchReviewsFromDb() {
   if (!supabase || !isSupabaseConfigured) return null;
@@ -186,7 +186,7 @@ export async function fetchReviewsFromDb() {
     const { data, error } = await supabase
       .from('reviews')
       .select('*')
-      .eq('is_active', true)
+      .eq('is_approved', true)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -204,34 +204,46 @@ export async function fetchReviewsFromDb() {
  * Insert a customer review into Supabase `reviews` table
  */
 export async function saveReviewInDb(review) {
-  if (!supabase || !isSupabaseConfigured) return null;
+  if (!supabase || !isSupabaseConfigured) {
+    return {
+      id: review.id || `local-${Date.now()}`,
+      name: review.name,
+      rating: Number(review.rating || review.stars) || 5,
+      comment: review.comment || review.text,
+      city: review.city || 'Verified Buyer',
+      product_name: review.product_name || review.productName || 'Handmade Keepsake',
+      image_url: review.image_url || review.image || null,
+      is_approved: true,
+      created_at: new Date().toISOString(),
+    };
+  }
+
   try {
     const payload = {
-      id: String(review.id || `rev-${Date.now()}`),
-      name: review.name || 'Verified Buyer',
-      city: review.city || 'Verified Buyer',
-      product_name: review.productName || review.product_name || 'Handmade Keepsake',
-      stars: Number(review.stars) || 5,
-      text: review.text || '',
-      image_url: review.image || review.image_url || null,
-      date: review.date || new Date().toLocaleDateString('en-GB'),
-      is_active: true,
+      name: review.name.trim(),
+      rating: Number(review.rating || review.stars) || 5,
+      comment: (review.comment || review.text || '').trim(),
+      city: (review.city || 'Verified Buyer').trim(),
+      product_name: (review.product_name || review.productName || 'Handmade Keepsake').trim(),
+      image_url: review.image_url || review.image || null,
+      is_approved: true,
     };
 
     const { data, error } = await supabase
       .from('reviews')
-      .upsert(payload, { onConflict: 'id' })
+      .insert([payload])
       .select()
-      .maybeSingle();
+      .single();
 
     if (error) {
-      logger.warn('supabaseClient', 'Failed to save review in Supabase', error);
-      return null;
+      logger.error('supabaseClient', 'Failed to insert review in Supabase', error);
+      throw error;
     }
     return data;
   } catch (err) {
-    logger.warn('supabaseClient', 'Error saving review in Supabase', err);
-    return null;
+    logger.error('supabaseClient', 'Error inserting review in Supabase', err);
+    throw err;
   }
 }
+
 
