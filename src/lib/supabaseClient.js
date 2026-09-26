@@ -83,3 +83,97 @@ export async function createOrderRecord(orderData) {
   return { data, error: null };
 }
 
+/**
+ * Fetch all products from Supabase `products` table
+ */
+export async function fetchProductsFromDb() {
+  if (!supabase || !isSupabaseConfigured) return null;
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.warn('supabaseClient', 'Failed to fetch products from Supabase', error);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    logger.warn('supabaseClient', 'Error during products fetch from Supabase', err);
+    return null;
+  }
+}
+
+/**
+ * Upsert (insert or update) a product in Supabase `products` table
+ */
+export async function upsertProductInDb(product) {
+  if (!supabase || !isSupabaseConfigured) return null;
+  try {
+    const rawImages = Array.isArray(product.images) && product.images.length > 0
+      ? product.images.filter(Boolean)
+      : [product.imageUrl || product.image_url].filter(Boolean);
+
+    const payload = {
+      title: product.title,
+      slug: product.slug || product.id,
+      category: product.category || 'frames',
+      price: Number(product.price) || 299,
+      description: product.description || '',
+      tag: product.tag || '',
+      gradient: product.gradient || 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)',
+      images: rawImages,
+      sizes: product.sizes || [],
+      customization_options: product.customization_options || {},
+      details: product.details || [],
+      is_active: true,
+      updated_at: new Date().toISOString(),
+    };
+
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(product.id);
+    if (isUUID) {
+      payload.id = product.id;
+    }
+
+    const { data, error } = await supabase
+      .from('products')
+      .upsert(payload, { onConflict: 'slug' })
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      logger.warn('supabaseClient', 'Failed to upsert product in Supabase', error);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    logger.warn('supabaseClient', 'Error during product upsert in Supabase', err);
+    return null;
+  }
+}
+
+/**
+ * Delete / soft-delete a product from Supabase `products` table
+ */
+export async function deleteProductFromDb(productId) {
+  if (!supabase || !isSupabaseConfigured) return false;
+  try {
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(productId);
+    const query = isUUID
+      ? supabase.from('products').update({ is_active: false }).eq('id', productId)
+      : supabase.from('products').update({ is_active: false }).eq('slug', productId);
+
+    const { error } = await query;
+    if (error) {
+      logger.warn('supabaseClient', 'Failed to delete product in Supabase', error);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    logger.warn('supabaseClient', 'Error deleting product in Supabase', err);
+    return false;
+  }
+}
+

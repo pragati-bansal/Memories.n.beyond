@@ -232,7 +232,19 @@ export default function AdminModal({ isOpen, onClose }) {
     // Upload to Supabase in background if configured
     try {
       setIsUploading(true);
-      const uploadPromises = filesToProcess.map((file) => uploadCustomerPhoto(file));
+      const uploadWithTimeout = async (file) => {
+        try {
+          return await Promise.race([
+            uploadCustomerPhoto(file),
+            new Promise((_, reject) => setTimeout(() => reject(new Error('Upload timeout')), 8000))
+          ]);
+        } catch (err) {
+          logger.warn('AdminModal', 'Photo upload fallback to local preview', err);
+          return null;
+        }
+      };
+
+      const uploadPromises = filesToProcess.map((file) => uploadWithTimeout(file));
       const uploadedUrls = await Promise.all(uploadPromises);
 
       setImagesList((prev) => {
@@ -766,7 +778,7 @@ export default function AdminModal({ isOpen, onClose }) {
 
               {/* ================= TAB 2: PRODUCT EDITOR (ADD & EDIT) ================= */}
               {activeTab === 'form' && (
-                <form onSubmit={handleSaveProduct} className="p-6 sm:p-8 space-y-6">
+                <form onSubmit={handleSaveProduct} noValidate className="p-6 sm:p-8 space-y-6">
                   <div className="flex items-center justify-between pb-3 border-b border-burgundy/10">
                     <div>
                       <h4 className="font-serif text-lg font-bold text-burgundy-deep flex items-center gap-2">
@@ -1212,11 +1224,17 @@ export default function AdminModal({ isOpen, onClose }) {
                       Cancel
                     </button>
                     <button
-                      type="submit"
+                      type="button"
+                      onClick={handleSaveProduct}
                       disabled={isUploading}
-                      className="px-7 py-2.5 rounded-full bg-burgundy hover:bg-burgundy-deep text-cream text-xs sm:text-sm font-bold shadow-craft-soft hover:shadow-craft-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                      className="px-7 py-2.5 rounded-full bg-burgundy hover:bg-burgundy-deep text-cream text-xs sm:text-sm font-bold shadow-craft-soft hover:shadow-craft-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {editingProductId ? (
+                      {isUploading ? (
+                        <>
+                          <span className="w-4 h-4 border-2 border-cream/30 border-t-cream rounded-full animate-spin" />
+                          <span>Uploading Images...</span>
+                        </>
+                      ) : editingProductId ? (
                         <>
                           <Check className="w-4 h-4" />
                           <span>Save &amp; Update Product</span>

@@ -2,6 +2,12 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { initialProducts } from '../data/initialProducts';
 import { logger } from '../lib/logger';
 import { safeParseLegacyProducts } from '../lib/validation';
+import {
+  fetchProductsFromDb,
+  upsertProductInDb,
+  deleteProductFromDb,
+  isSupabaseConfigured,
+} from '../lib/supabaseClient';
 
 const ProductContext = createContext();
 
@@ -40,8 +46,10 @@ export function ProductProvider({ children }) {
     return initialProducts;
   });
 
-  // Ensure any missing factory products are also merged into active state on mount
+  // Ensure any missing factory products are merged, and sync latest products from Supabase DB
   useEffect(() => {
+    let isMounted = true;
+
     setProducts((prev) => {
       const existingIds = new Set(prev.map((p) => p.id || p.slug).filter(Boolean));
       const missingDefaults = initialProducts.filter(
@@ -52,6 +60,42 @@ export function ProductProvider({ children }) {
       }
       return prev;
     });
+
+    if (isSupabaseConfigured) {
+      fetchProductsFromDb()
+        .then((dbProducts) => {
+          if (!isMounted || !Array.isArray(dbProducts) || dbProducts.length === 0) return;
+          setProducts((prev) => {
+            const dbMap = new Map();
+            dbProducts.forEach((p) => {
+              const key = p.slug || p.id;
+              if (key) dbMap.set(key, p);
+            });
+
+            const merged = prev.map((item) => {
+              const key = item.slug || item.id;
+              return dbMap.has(key) ? { ...item, ...dbMap.get(key) } : item;
+            });
+
+            const existingKeys = new Set(merged.map((p) => p.slug || p.id));
+            dbProducts.forEach((p) => {
+              const key = p.slug || p.id;
+              if (key && !existingKeys.has(key)) {
+                merged.unshift(p);
+              }
+            });
+
+            return merged;
+          });
+        })
+        .catch((err) => {
+          logger.warn('ProductContext', 'Failed to fetch initial Supabase products', err);
+        });
+    }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // Persist products state to localStorage
@@ -132,76 +176,101 @@ export function ProductProvider({ children }) {
       updatedAt: new Date().toISOString(),
     };
 
-      setProducts((prev) => [formattedProduct, ...prev]);
-      return formattedProduct;
-    };
+    setProducts((prev) => [formattedProduct, ...prev]);
 
-    /**
-     * Update any product (pre-existing or newly added)
-     */
-    const updateProduct = (productId, updatedData) => {
-      setProducts((prev) =>
-        prev.map((item) => {
-          if (item.id === productId || item.slug === productId) {
-            // Process updated sizes
-            let processedSizes = item.sizes || [];
-            if (Array.isArray(updatedData.sizes) && updatedData.sizes.length > 0) {
-              processedSizes = updatedData.sizes.map((s) => {
-                if (typeof s === 'string') {
-                  return {
-                    size: s,
-                    label: s.includes('Size') || s.includes('in') ? s : `${s} Format`,
-                    price: Number(updatedData.price) || item.price || 299,
-                  };
-                }
-                return {
-                  size: s.size || 'Standard',
-                  label: s.label || `${s.size || 'Standard'} Format`,
-                  price: Number(s.price) || Number(updatedData.price) || item.price || 299,
-                };
-              });
-            }
-
-            const mergedImages =
-              Array.isArray(updatedData.images) && updatedData.images.length > 0
-                ? updatedData.images.filter(Boolean)
-                : updatedData.imageUrl || updatedData.image_url
-                ? [updatedData.imageUrl || updatedData.image_url]
-                : Array.isArray(item.images) && item.images.length > 0
-                ? item.images
-                : item.imageUrl || item.image_url
-                ? [item.imageUrl || item.image_url]
-                : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
-
-            return {
-              ...item,
-              ...updatedData,
-              price: Number(updatedData.price) || item.price,
-              sizes: processedSizes,
-              images: mergedImages,
-              imageUrl: mergedImages[0] || '',
-              image_url: mergedImages[0] || '',
-              customization_options: {
-                ...item.customization_options,
-                ...(updatedData.customization_options || {}),
-                requires_photo: updatedData.requires_photo ?? item.customization_options?.requires_photo ?? true,
-                max_photos: typeof updatedData.max_photos === 'number' ? updatedData.max_photos : item.customization_options?.max_photos ?? 4,
-                requires_text: updatedData.requires_text ?? item.customization_options?.requires_text ?? true,
-                requires_date: updatedData.requires_date ?? item.customization_options?.requires_date ?? false,
-              },
-              updatedAt: new Date().toISOString(),
-            };
-          }
-          return item;
-        })
+    if (isSupabaseConfigured) {
+      upsertProductInDb(formattedProduct).catch((err) =>
+        logger.warn('ProductContext', 'Background Supabase addProduct sync failed', err)
       );
-    };
+    }
+
+    return formattedProduct;
+  };
+
+  /**
+   * Update any product (pre-existing or newly added)
+   */
+  const updateProduct = (productId, updatedData) => {
+    let updatedProductRef = null;
+
+    setProducts((prev) =>
+      prev.map((item) => {
+        if (item.id === productId || item.slug === productId) {
+          // Process updated sizes
+          let processedSizes = item.sizes || [];
+          if (Array.isArray(updatedData.sizes) && updatedData.sizes.length > 0) {
+            processedSizes = updatedData.sizes.map((s) => {
+              if (typeof s === 'string') {
+                return {
+                  size: s,
+                  label: s.includes('Size') || s.includes('in') ? s : `${s} Format`,
+                  price: Number(updatedData.price) || item.price || 299,
+                };
+              }
+              return {
+                size: s.size || 'Standard',
+                label: s.label || `${s.size || 'Standard'} Format`,
+                price: Number(s.price) || Number(updatedData.price) || item.price || 299,
+              };
+            });
+          }
+
+          const mergedImages =
+            Array.isArray(updatedData.images) && updatedData.images.length > 0
+              ? updatedData.images.filter(Boolean)
+              : updatedData.imageUrl || updatedData.image_url
+              ? [updatedData.imageUrl || updatedData.image_url]
+              : Array.isArray(item.images) && item.images.length > 0
+              ? item.images
+              : item.imageUrl || item.image_url
+              ? [item.imageUrl || item.image_url]
+              : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
+
+          const updatedItem = {
+            ...item,
+            ...updatedData,
+            price: Number(updatedData.price) || item.price,
+            sizes: processedSizes,
+            images: mergedImages,
+            imageUrl: mergedImages[0] || '',
+            image_url: mergedImages[0] || '',
+            customization_options: {
+              ...item.customization_options,
+              ...(updatedData.customization_options || {}),
+              requires_photo: updatedData.requires_photo ?? item.customization_options?.requires_photo ?? true,
+              max_photos: typeof updatedData.max_photos === 'number' ? updatedData.max_photos : item.customization_options?.max_photos ?? 4,
+              requires_text: updatedData.requires_text ?? item.customization_options?.requires_text ?? true,
+              requires_date: updatedData.requires_date ?? item.customization_options?.requires_date ?? false,
+            },
+            updatedAt: new Date().toISOString(),
+          };
+
+          updatedProductRef = updatedItem;
+          return updatedItem;
+        }
+        return item;
+      })
+    );
+
+    if (updatedProductRef && isSupabaseConfigured) {
+      upsertProductInDb(updatedProductRef).catch((err) =>
+        logger.warn('ProductContext', 'Background Supabase updateProduct sync failed', err)
+      );
+    }
+  };
 
   /**
    * Delete any product from catalogue
    */
   const deleteProduct = (productId) => {
     setProducts((prev) => prev.filter((p) => p.id !== productId && p.slug !== productId));
+
+    if (isSupabaseConfigured) {
+      deleteProductFromDb(productId).catch((err) =>
+        logger.warn('ProductContext', 'Background Supabase deleteProduct sync failed', err)
+      );
+    }
+
     return true;
   };
 
