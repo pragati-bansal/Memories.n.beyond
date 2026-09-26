@@ -5,7 +5,7 @@ import { logger } from '../lib/logger';
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
 
 /**
- * AdminLoginPage — a private, unlisted route at /admin-login
+ * AdminLoginPage — rendered inline at /admin when the user is unauthenticated.
  * Authenticates via Supabase and enforces a single-email whitelist.
  */
 export default function AdminLoginPage({ onLoginSuccess }) {
