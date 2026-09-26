@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { initialProducts } from '../data/initialProducts';
+import { useProducts } from '../context/ProductContext';
 import ProductCard from '../components/ProductCard';
 import {
   ArrowLeft,
@@ -73,8 +73,9 @@ export default function CategoryPage({
   onBackToHome,
   onSelectProduct,
 }) {
+  const { products: allProducts } = useProducts();
   const meta = categoryMeta[categoryId] || categoryMeta.frames;
-  const products = initialProducts.filter((p) => p.category === categoryId);
+  const products = allProducts.filter((p) => p.category === categoryId);
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
   // Smooth scroll to top when category changes

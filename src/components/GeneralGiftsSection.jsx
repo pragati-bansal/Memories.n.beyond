@@ -1,11 +1,12 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Gift, Sparkles, MessageCircle, ArrowRight, Heart, Flower2 } from 'lucide-react';
-import { initialProducts } from '../data/initialProducts';
+import { useProducts } from '../context/ProductContext';
 import ProductCard from './ProductCard';
 
 export default function GeneralGiftsSection({ onSelectProduct, onNavigateToCategory }) {
-  const generalProducts = initialProducts.filter((p) => p.category === 'general');
+  const { products } = useProducts();
+  const generalProducts = products.filter((p) => p.category === 'general');
 
   const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
   const customComboWhatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(

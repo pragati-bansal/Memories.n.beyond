@@ -7,18 +7,25 @@ import CtaStrip from './components/CtaStrip';
 import Footer from './components/Footer';
 import FloatingWhatsApp from './components/FloatingWhatsApp';
 import ProductModal from './components/ProductModal';
+import AdminModal from './components/AdminModal';
 import CategoryPage from './pages/CategoryPage';
 import PolicyPage from './pages/PolicyPage';
+import { ProductProvider } from './context/ProductContext';
 
-export default function App() {
+function AppContent() {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [activeCategory, setActiveCategory] = useState(null); // 'frames' | 'magazines' | 'hampers' | 'addons' | 'general' | null
   const [isPolicyView, setIsPolicyView] = useState(false);
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
 
   // Synchronize with URL hash routing for direct links & browser back button
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
+      if (hash === '#admin' || hash.startsWith('#admin')) {
+        setIsAdminOpen(true);
+        return;
+      }
       if (hash.startsWith('#category/')) {
         const cat = hash.replace('#category/', '').trim().toLowerCase();
         if (['frames', 'magazines', 'hampers', 'addons', 'general'].includes(cat)) {
@@ -120,7 +127,7 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <Footer />
+      <Footer onOpenAdmin={() => setIsAdminOpen(true)} />
 
       {/* Floating Action Button */}
       <FloatingWhatsApp />
@@ -133,6 +140,25 @@ export default function App() {
           onOpenCancellationPolicy={openCancellationPolicy}
         />
       )}
+
+      {/* Discreet Admin Dashboard & Manager */}
+      <AdminModal
+        isOpen={isAdminOpen}
+        onClose={() => {
+          setIsAdminOpen(false);
+          if (window.location.hash === '#admin') {
+            window.location.hash = activeCategory ? `#category/${activeCategory}` : '#home';
+          }
+        }}
+      />
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ProductProvider>
+      <AppContent />
+    </ProductProvider>
   );
 }
