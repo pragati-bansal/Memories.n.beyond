@@ -237,3 +237,36 @@ CREATE POLICY "Allow admin delete from customer-uploads"
     FOR DELETE
     TO authenticated
     USING (bucket_id = 'customer-uploads');
+
+
+-- ==============================================================================
+-- 6. REVIEWS TABLE & RLS POLICIES
+-- ==============================================================================
+CREATE TABLE IF NOT EXISTS public.reviews (
+    id VARCHAR(100) PRIMARY KEY,
+    name VARCHAR(150) NOT NULL,
+    city VARCHAR(100) DEFAULT 'Verified Buyer',
+    product_name VARCHAR(200) DEFAULT 'Handmade Keepsake',
+    stars INT NOT NULL DEFAULT 5,
+    text TEXT NOT NULL,
+    image_url TEXT,
+    date VARCHAR(50),
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public read reviews" ON public.reviews;
+DROP POLICY IF EXISTS "Allow public insert reviews" ON public.reviews;
+
+CREATE POLICY "Allow public read reviews"
+    ON public.reviews FOR SELECT
+    TO public
+    USING (is_active = true);
+
+CREATE POLICY "Allow public insert reviews"
+    ON public.reviews FOR INSERT
+    TO public
+    WITH CHECK (true);
+

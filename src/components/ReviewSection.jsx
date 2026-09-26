@@ -15,26 +15,72 @@ import {
 import { reviews as initialReviews } from '../data/reviews';
 import { logger } from '../lib/logger';
 import { newReviewSubmissionSchema, safeParseLegacyReviews, getFirstZodErrorMessage } from '../lib/validation';
+import {
+  fetchReviewsFromDb,
+  saveReviewInDb,
+  uploadCustomerPhoto,
+  isSupabaseConfigured,
+} from '../lib/supabaseClient';
 import ImageWithFallback from './ImageWithFallback';
 
-const STORAGE_KEY = 'mb_customer_reviews_v2';
+const STORAGE_KEY = 'mb_customer_reviews_v3';
+
+// Client-side image compression helper to avoid localStorage quota issues
+function compressImageToDataUrl(file, maxDimension = 600, quality = 0.7) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = (readerEvent) => {
+      const img = new Image();
+      img.onload = () => {
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height && width > maxDimension) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else if (height > maxDimension) {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        const dataUrl = canvas.toDataURL('image/jpeg', quality);
+        resolve(dataUrl);
+      };
+      img.onerror = () => resolve(readerEvent.target.result);
+      img.src = readerEvent.target.result;
+    };
+    reader.onerror = () => resolve(null);
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function ReviewSection() {
   const scrollRef = useRef(null);
   const fileInputRef = useRef(null);
 
-  // Reviews state with localStorage persistence - safe non-destructive legacy parsing
+  // Reviews state with localStorage persistence and default initial reviews
   const [reviewsList, setReviewsList] = useState(() => {
     try {
-      const saved = localStorage.getItem(STORAGE_KEY);
+      const saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem('mb_customer_reviews_v2');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return safeParseLegacyReviews(parsed);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const parsedReviews = safeParseLegacyReviews(parsed);
+          const existingIds = new Set(parsedReviews.map((r) => String(r.id)));
+          const missingDefaults = (initialReviews || []).filter((r) => !existingIds.has(String(r.id)));
+          return [...parsedReviews, ...missingDefaults];
+        }
       }
     } catch (e) {
       logger.error('ReviewSection', 'Failed to load reviews from localStorage', e);
     }
-    return [];
+    return initialReviews || [];
   });
 
   // Write Review Modal & Form States
@@ -47,18 +93,87 @@ export default function ReviewSection() {
   const [text, setText] = useState('');
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [formValidationError, setFormValidationError] = useState('');
 
   // Lightbox Zoom Modal State
   const [zoomImage, setZoomImage] = useState(null);
 
-  // Sync to localStorage
+  // Fetch reviews from Supabase on mount
+  useEffect(() => {
+    let isMounted = true;
+    if (isSupabaseConfigured) {
+      fetchReviewsFromDb()
+        .then((dbReviews) => {
+          if (!isMounted || !Array.isArray(dbReviews) || dbReviews.length === 0) return;
+          setReviewsList((prev) => {
+            const dbMap = new Map();
+            dbReviews.forEach((r) => {
+              const key = String(r.id);
+              dbMap.set(key, {
+                id: r.id,
+                name: r.name,
+                city: r.city,
+                productName: r.product_name || r.productName,
+                stars: r.stars,
+                text: r.text,
+                image: r.image_url || r.image,
+                date: r.date,
+                isUserSubmitted: true,
+              });
+            });
+
+            const merged = prev.map((item) => {
+              const key = String(item.id);
+              return dbMap.has(key) ? { ...item, ...dbMap.get(key) } : item;
+            });
+
+            const existingKeys = new Set(merged.map((r) => String(r.id)));
+            dbReviews.forEach((r) => {
+              const key = String(r.id);
+              if (!existingKeys.has(key)) {
+                merged.unshift({
+                  id: r.id,
+                  name: r.name,
+                  city: r.city,
+                  productName: r.product_name || r.productName,
+                  stars: r.stars,
+                  text: r.text,
+                  image: r.image_url || r.image,
+                  date: r.date,
+                  isUserSubmitted: true,
+                });
+              }
+            });
+
+            return merged;
+          });
+        })
+        .catch((err) => {
+          logger.warn('ReviewSection', 'Failed to fetch Supabase reviews', err);
+        });
+    }
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Sync to localStorage safely with quota exhaustion fallback
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(reviewsList));
     } catch (e) {
-      logger.error('ReviewSection', 'Failed to save reviews to localStorage', e);
+      logger.warn('ReviewSection', 'Quota exceeded when saving full reviews, trimming heavy images', e);
+      try {
+        const lightweightList = reviewsList.map((rev) => ({
+          ...rev,
+          image: rev.image && rev.image.length > 50000 ? null : rev.image,
+        }));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(lightweightList));
+      } catch (innerErr) {
+        logger.error('ReviewSection', 'Failed to save fallback reviews to localStorage', innerErr);
+      }
     }
   }, [reviewsList]);
 
@@ -74,16 +189,19 @@ export default function ReviewSection() {
     }
   };
 
-  // Handle Photo Selection
-  const handleImageChange = (e) => {
+  // Handle Photo Selection with automatic compression
+  const handleImageChange = async (e) => {
     const file = e.target.files?.[0];
     if (file) {
       setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedDataUrl = await compressImageToDataUrl(file);
+        setImagePreview(compressedDataUrl);
+      } catch (err) {
+        const reader = new FileReader();
+        reader.onloadend = () => setImagePreview(reader.result);
+        reader.readAsDataURL(file);
+      }
     }
   };
 
@@ -93,8 +211,8 @@ export default function ReviewSection() {
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
-  // Handle Submit with Zod validation
-  const handleSubmitReview = (e) => {
+  // Handle Submit with validation, cloud upload and database sync
+  const handleSubmitReview = async (e) => {
     e.preventDefault();
 
     const validation = newReviewSubmissionSchema.safeParse({
@@ -117,7 +235,25 @@ export default function ReviewSection() {
     }
 
     setFormValidationError('');
+    setIsSubmitting(true);
     const validData = validation.data;
+
+    let finalImageUrl = imagePreview || null;
+
+    // Upload to Supabase Storage if configured
+    if (imageFile && isSupabaseConfigured) {
+      try {
+        const publicUrl = await Promise.race([
+          uploadCustomerPhoto(imageFile),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 6000)),
+        ]);
+        if (publicUrl && typeof publicUrl === 'string' && publicUrl.startsWith('http')) {
+          finalImageUrl = publicUrl;
+        }
+      } catch (err) {
+        logger.warn('ReviewSection', 'Supabase image upload fallback to local preview', err);
+      }
+    }
 
     const today = new Date();
     const formattedDate = today.toLocaleDateString('en-GB', {
@@ -133,13 +269,21 @@ export default function ReviewSection() {
       productName: validData.productName || 'Handmade Keepsake',
       stars: validData.stars,
       text: validData.text,
-      image: validData.image || null,
+      image: finalImageUrl,
       date: formattedDate,
       isUserSubmitted: true,
     };
 
     setReviewsList((prev) => [newReview, ...prev]);
     setIsSubmitted(true);
+    setIsSubmitting(false);
+
+    // Save to Supabase DB in background
+    if (isSupabaseConfigured) {
+      saveReviewInDb(newReview).catch((err) =>
+        logger.warn('ReviewSection', 'Background review save in Supabase failed', err)
+      );
+    }
 
     // Reset Form
     setTimeout(() => {

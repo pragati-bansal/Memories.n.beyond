@@ -177,3 +177,61 @@ export async function deleteProductFromDb(productId) {
   }
 }
 
+/**
+ * Fetch public reviews from Supabase `reviews` table
+ */
+export async function fetchReviewsFromDb() {
+  if (!supabase || !isSupabaseConfigured) return null;
+  try {
+    const { data, error } = await supabase
+      .from('reviews')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      logger.warn('supabaseClient', 'Failed to fetch reviews from Supabase', error);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    logger.warn('supabaseClient', 'Error fetching reviews from Supabase', err);
+    return null;
+  }
+}
+
+/**
+ * Insert a customer review into Supabase `reviews` table
+ */
+export async function saveReviewInDb(review) {
+  if (!supabase || !isSupabaseConfigured) return null;
+  try {
+    const payload = {
+      id: String(review.id || `rev-${Date.now()}`),
+      name: review.name || 'Verified Buyer',
+      city: review.city || 'Verified Buyer',
+      product_name: review.productName || review.product_name || 'Handmade Keepsake',
+      stars: Number(review.stars) || 5,
+      text: review.text || '',
+      image_url: review.image || review.image_url || null,
+      date: review.date || new Date().toLocaleDateString('en-GB'),
+      is_active: true,
+    };
+
+    const { data, error } = await supabase
+      .from('reviews')
+      .upsert(payload, { onConflict: 'id' })
+      .select()
+      .maybeSingle();
+
+    if (error) {
+      logger.warn('supabaseClient', 'Failed to save review in Supabase', error);
+      return null;
+    }
+    return data;
+  } catch (err) {
+    logger.warn('supabaseClient', 'Error saving review in Supabase', err);
+    return null;
+  }
+}
+
