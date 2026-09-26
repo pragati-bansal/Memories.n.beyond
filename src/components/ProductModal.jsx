@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   X,
@@ -13,10 +13,14 @@ import {
   ArrowRight,
   Palette,
   ExternalLink,
+  ChevronLeft,
+  ChevronRight,
+  Layers,
 } from 'lucide-react';
 
 export default function ProductModal({ product, onClose, onOpenCancellationPolicy }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const thumbnailContainerRef = useRef(null);
 
   // Selected size & dynamic price
   const [selectedSize, setSelectedSize] = useState(
@@ -33,24 +37,55 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
     }
   }, [product]);
 
-  const currentPrice = selectedSize ? selectedSize.price : product?.price;
-  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
+  const rawImages =
+    Array.isArray(product?.images) && product.images.length > 0
+      ? product.images.filter(Boolean)
+      : product?.imageUrl || product?.image_url
+      ? [product.imageUrl || product.image_url]
+      : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
 
-  // Keyboard close on Escape
+  const images = rawImages.length > 0 ? rawImages : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
+  const isMagazine = product?.category === 'magazines';
+
+  const handlePrevImage = (e) => {
+    e?.stopPropagation();
+    setActiveImageIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
+  };
+
+  const handleNextImage = (e) => {
+    e?.stopPropagation();
+    setActiveImageIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
+  };
+
+  // Keyboard navigation for arrow keys and escape
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+      } else if (e.key === 'ArrowLeft' && images.length > 1) {
+        handlePrevImage();
+      } else if (e.key === 'ArrowRight' && images.length > 1) {
+        handleNextImage();
+      }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose]);
+  }, [onClose, images.length]);
+
+  // Auto scroll active thumbnail into view
+  useEffect(() => {
+    if (thumbnailContainerRef.current) {
+      const activeEl = thumbnailContainerRef.current.querySelector(`[data-thumb-idx="${activeImageIndex}"]`);
+      if (activeEl) {
+        activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+  }, [activeImageIndex]);
+
+  const currentPrice = selectedSize ? selectedSize.price : product?.price;
+  const whatsappNumber = import.meta.env.VITE_WHATSAPP_NUMBER || '919368606771';
 
   if (!product) return null;
-
-  const images =
-    product.images && product.images.length > 0
-      ? product.images
-      : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
 
   // Direct WhatsApp Inquiry / Order Action
   const handleProceedToWhatsApp = () => {
@@ -93,7 +128,7 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
           {/* Close button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-cream/90 hover:bg-cream text-burgundy-deep flex items-center justify-center shadow-craft-soft transition-all hover:scale-110"
+            className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-cream/90 hover:bg-cream text-burgundy-deep flex items-center justify-center shadow-craft-soft transition-all hover:scale-110 cursor-pointer"
             aria-label="Close dialog"
           >
             <X className="w-5 h-5" />
@@ -104,37 +139,98 @@ export default function ProductModal({ product, onClose, onOpenCancellationPolic
             {/* Left Column: Visual Gallery & Details */}
             <div className="md:col-span-5 bg-gradient-to-br from-blush via-blush-deep/50 to-cream p-6 sm:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-burgundy/10">
               <div className="space-y-4">
-                {/* Main Image Frame Preview */}
-                <div className="w-full aspect-[4/5] bg-paper rounded-2xl p-3 shadow-craft-lg border border-burgundy/10 overflow-hidden flex items-center justify-center">
+                {/* Main Image Frame Preview with Carousel Controls */}
+                <div className="w-full aspect-[4/5] bg-paper rounded-2xl p-3 shadow-craft-lg border border-burgundy/10 overflow-hidden flex items-center justify-center relative group">
                   <div
                     className="w-full h-full rounded-xl overflow-hidden relative flex items-center justify-center"
                     style={{ background: product.gradient || '#F6DEDA' }}
                   >
                     <img
+                      key={activeImageIndex}
                       src={images[activeImageIndex] || images[0]}
-                      alt={product.title}
-                      className="w-full h-full object-cover"
+                      alt={`${product.title} - ${isMagazine ? `Page ${activeImageIndex + 1}` : `Preview ${activeImageIndex + 1}`}`}
+                      className="w-full h-full object-cover transition-all duration-300"
                     />
+
+                    {/* Badge Counter */}
+                    {images.length > 1 && (
+                      <div className="absolute top-3 left-3 bg-burgundy-deep/85 backdrop-blur-md text-cream text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md flex items-center gap-1.5 border border-cream/20 pointer-events-none">
+                        <Layers className="w-3 h-3 text-blush" />
+                        <span>
+                          {isMagazine
+                            ? `Page ${activeImageIndex + 1} of ${images.length}`
+                            : `${activeImageIndex + 1} / ${images.length}`}
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Navigation Arrows */}
+                    {images.length > 1 && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={handlePrevImage}
+                          className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-paper/90 hover:bg-paper text-burgundy-deep shadow-craft-soft flex items-center justify-center transition-all hover:scale-110 opacity-80 group-hover:opacity-100 cursor-pointer"
+                          aria-label="Previous Image"
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleNextImage}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-paper/90 hover:bg-paper text-burgundy-deep shadow-craft-soft flex items-center justify-center transition-all hover:scale-110 opacity-80 group-hover:opacity-100 cursor-pointer"
+                          aria-label="Next Image"
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </button>
+                      </>
+                    )}
                   </div>
                 </div>
 
-                {/* Thumbnails if multiple images exist */}
+                {/* Interactive Thumbnails Strip Slider */}
                 {images.length > 1 && (
-                  <div className="flex gap-2 overflow-x-auto py-1">
-                    {images.map((img, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => setActiveImageIndex(idx)}
-                        className={`w-14 h-14 rounded-lg overflow-hidden border-2 transition-all shrink-0 ${
-                          activeImageIndex === idx
-                            ? 'border-burgundy scale-105 shadow-craft-sm'
-                            : 'border-transparent opacity-70 hover:opacity-100'
-                        }`}
-                      >
-                        <img src={img} alt="" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-[11px] text-ink-soft px-0.5">
+                      <span className="font-bold text-burgundy flex items-center gap-1">
+                        <Layers className="w-3 h-3" />
+                        {isMagazine ? 'Browse All Magazine Pages' : 'Browse All Photo Previews'}
+                      </span>
+                      <span className="text-[10px] text-ink-soft">
+                        {images.length} {isMagazine ? 'pages total' : 'views'}
+                      </span>
+                    </div>
+
+                    <div
+                      ref={thumbnailContainerRef}
+                      className="flex gap-2 overflow-x-auto py-1 px-0.5 scrollbar-thin scrollbar-thumb-burgundy/20"
+                    >
+                      {images.map((img, idx) => {
+                        const isActive = activeImageIndex === idx;
+                        return (
+                          <button
+                            key={idx}
+                            data-thumb-idx={idx}
+                            type="button"
+                            onClick={() => setActiveImageIndex(idx)}
+                            className={`relative w-14 h-16 rounded-xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer flex flex-col items-center justify-center bg-paper ${
+                              isActive
+                                ? 'border-burgundy ring-2 ring-burgundy/30 scale-105 shadow-craft-sm'
+                                : 'border-burgundy/15 opacity-70 hover:opacity-100 hover:border-burgundy/40'
+                            }`}
+                          >
+                            <img src={img} alt={`Preview ${idx + 1}`} className="w-full h-full object-cover" />
+                            <span
+                              className={`absolute bottom-0 inset-x-0 text-[8px] font-bold py-0.5 text-center truncate ${
+                                isActive ? 'bg-burgundy text-cream' : 'bg-burgundy-deep/75 text-cream'
+                              }`}
+                            >
+                              {idx === 0 ? 'Cover' : isMagazine ? `P${idx + 1}` : `#${idx + 1}`}
+                            </span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
 

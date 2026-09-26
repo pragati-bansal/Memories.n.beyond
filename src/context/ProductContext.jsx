@@ -64,6 +64,13 @@ export function ProductProvider({ children }) {
       ];
     }
 
+    const rawImages =
+      Array.isArray(newProductData.images) && newProductData.images.length > 0
+        ? newProductData.images.filter(Boolean)
+        : newProductData.imageUrl || newProductData.image_url
+        ? [newProductData.imageUrl || newProductData.image_url]
+        : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
+
     const formattedProduct = {
       id,
       category: newProductData.category || 'frames',
@@ -72,9 +79,9 @@ export function ProductProvider({ children }) {
       price: Number(newProductData.price) || (processedSizes[0]?.price ?? 299),
       description: newProductData.description || 'Artisan handcrafted customized memory gift.',
       gradient: newProductData.gradient || 'linear-gradient(150deg,#FFE5EC,#FB6F92 55%,#881337)',
-      images: Array.isArray(newProductData.images) && newProductData.images.length > 0
-        ? newProductData.images
-        : [newProductData.imageUrl || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'],
+      images: rawImages,
+      imageUrl: rawImages[0] || '',
+      image_url: rawImages[0] || '',
       sizes: processedSizes,
       customization_options: {
         requires_photo: newProductData.requires_photo ?? true,
@@ -93,64 +100,70 @@ export function ProductProvider({ children }) {
       updatedAt: new Date().toISOString(),
     };
 
-    setProducts((prev) => [formattedProduct, ...prev]);
-    return formattedProduct;
-  };
+      setProducts((prev) => [formattedProduct, ...prev]);
+      return formattedProduct;
+    };
 
-  /**
-   * Update any product (pre-existing or newly added)
-   */
-  const updateProduct = (productId, updatedData) => {
-    setProducts((prev) =>
-      prev.map((item) => {
-        if (item.id === productId || item.slug === productId) {
-          // Process updated sizes
-          let processedSizes = item.sizes || [];
-          if (Array.isArray(updatedData.sizes) && updatedData.sizes.length > 0) {
-            processedSizes = updatedData.sizes.map((s) => {
-              if (typeof s === 'string') {
+    /**
+     * Update any product (pre-existing or newly added)
+     */
+    const updateProduct = (productId, updatedData) => {
+      setProducts((prev) =>
+        prev.map((item) => {
+          if (item.id === productId || item.slug === productId) {
+            // Process updated sizes
+            let processedSizes = item.sizes || [];
+            if (Array.isArray(updatedData.sizes) && updatedData.sizes.length > 0) {
+              processedSizes = updatedData.sizes.map((s) => {
+                if (typeof s === 'string') {
+                  return {
+                    size: s,
+                    label: s.includes('Size') || s.includes('in') ? s : `${s} Format`,
+                    price: Number(updatedData.price) || item.price || 299,
+                  };
+                }
                 return {
-                  size: s,
-                  label: s.includes('Size') || s.includes('in') ? s : `${s} Format`,
-                  price: Number(updatedData.price) || item.price || 299,
+                  size: s.size || 'Standard',
+                  label: s.label || `${s.size || 'Standard'} Format`,
+                  price: Number(s.price) || Number(updatedData.price) || item.price || 299,
                 };
-              }
-              return {
-                size: s.size || 'Standard',
-                label: s.label || `${s.size || 'Standard'} Format`,
-                price: Number(s.price) || Number(updatedData.price) || item.price || 299,
-              };
-            });
+              });
+            }
+
+            const mergedImages =
+              Array.isArray(updatedData.images) && updatedData.images.length > 0
+                ? updatedData.images.filter(Boolean)
+                : updatedData.imageUrl || updatedData.image_url
+                ? [updatedData.imageUrl || updatedData.image_url]
+                : Array.isArray(item.images) && item.images.length > 0
+                ? item.images
+                : item.imageUrl || item.image_url
+                ? [item.imageUrl || item.image_url]
+                : ['https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80'];
+
+            return {
+              ...item,
+              ...updatedData,
+              price: Number(updatedData.price) || item.price,
+              sizes: processedSizes,
+              images: mergedImages,
+              imageUrl: mergedImages[0] || '',
+              image_url: mergedImages[0] || '',
+              customization_options: {
+                ...item.customization_options,
+                ...(updatedData.customization_options || {}),
+                requires_photo: updatedData.requires_photo ?? item.customization_options?.requires_photo ?? true,
+                max_photos: Number(updatedData.max_photos) || item.customization_options?.max_photos || 4,
+                requires_text: updatedData.requires_text ?? item.customization_options?.requires_text ?? true,
+                requires_date: updatedData.requires_date ?? item.customization_options?.requires_date ?? false,
+              },
+              updatedAt: new Date().toISOString(),
+            };
           }
-
-          const mergedImages =
-            Array.isArray(updatedData.images) && updatedData.images.length > 0
-              ? updatedData.images
-              : updatedData.imageUrl
-              ? [updatedData.imageUrl]
-              : item.images;
-
-          return {
-            ...item,
-            ...updatedData,
-            price: Number(updatedData.price) || item.price,
-            sizes: processedSizes,
-            images: mergedImages,
-            customization_options: {
-              ...item.customization_options,
-              ...(updatedData.customization_options || {}),
-              requires_photo: updatedData.requires_photo ?? item.customization_options?.requires_photo ?? true,
-              max_photos: Number(updatedData.max_photos) || item.customization_options?.max_photos || 4,
-              requires_text: updatedData.requires_text ?? item.customization_options?.requires_text ?? true,
-              requires_date: updatedData.requires_date ?? item.customization_options?.requires_date ?? false,
-            },
-            updatedAt: new Date().toISOString(),
-          };
-        }
-        return item;
-      })
-    );
-  };
+          return item;
+        })
+      );
+    };
 
   /**
    * Delete any product from catalogue

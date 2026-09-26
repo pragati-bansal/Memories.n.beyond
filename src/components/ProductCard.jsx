@@ -1,12 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Eye } from 'lucide-react';
+import { Sparkles, Eye, Layers } from 'lucide-react';
 
 export default function ProductCard({ product, onSelect }) {
   const [selectedSizeIndex, setSelectedSizeIndex] = useState(0);
 
-  const displayImage =
-    product.images && product.images.length > 0 ? product.images[0] : null;
+  const images =
+    Array.isArray(product.images) && product.images.length > 0
+      ? product.images.filter(Boolean)
+      : (product.imageUrl || product.image_url)
+      ? [product.imageUrl || product.image_url]
+      : [];
+
+  const displayImage = images[0] || null;
+  const imageCount = images.length;
 
   const hasSizes = product.sizes && product.sizes.length > 0;
   const activeSize = hasSizes ? product.sizes[selectedSizeIndex] : null;
@@ -15,6 +22,7 @@ export default function ProductCard({ product, onSelect }) {
   const handleCardClick = () => {
     onSelect({
       ...product,
+      images,
       selectedSize: activeSize,
       price: displayPrice,
     });
@@ -33,6 +41,16 @@ export default function ProductCard({ product, onSelect }) {
     >
       {/* Visual Thumbnail Area */}
       <div className="relative h-44 sm:h-64 bg-blush/40 flex items-center justify-center overflow-hidden p-2 sm:p-5">
+        {/* Multi-Image Counter Badge */}
+        {imageCount > 1 && (
+          <div className="absolute top-2.5 right-2.5 z-10 bg-burgundy-deep/85 backdrop-blur-sm text-cream px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold flex items-center gap-1 shadow-craft-soft border border-cream/15">
+            <Layers className="w-3 h-3 text-blush" />
+            <span>
+              {imageCount} {product.category === 'magazines' ? 'pages' : 'views'}
+            </span>
+          </div>
+        )}
+
         {/* Craft Polaroid Mini Card Effect */}
         <div className="w-28 xs:w-32 sm:w-36 h-36 xs:h-38 sm:h-44 bg-paper rounded-none p-1.5 sm:p-2 pb-3.5 sm:pb-6 shadow-craft-soft border border-burgundy/10 transition-transform duration-500 ease-out group-hover:scale-105 group-hover:-rotate-1 flex flex-col">
           <div

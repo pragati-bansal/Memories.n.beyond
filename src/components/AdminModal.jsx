@@ -23,6 +23,7 @@ import {
   IndianRupee,
   LogOut,
   Filter,
+  Star,
 } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { uploadCustomerPhoto } from '../lib/supabaseClient';
@@ -42,6 +43,9 @@ const PRESET_SIZES = [
   { size: '18x24', label: '18x24 in (Grand)' },
   { size: 'Standard', label: 'Standard Single Size' },
 ];
+
+// Category based image limit helper: Magazines allows 15 images; all others allow 5 images
+const getImageLimit = (categoryId) => (categoryId === 'magazines' ? 15 : 5);
 
 // Admin Passcode: change here or set VITE_ADMIN_PIN in your .env file
 const ADMIN_PIN = import.meta.env.VITE_ADMIN_PIN || 'admin123';
@@ -104,10 +108,10 @@ export default function AdminModal({ isOpen, onClose }) {
   const [selectedSizes, setSelectedSizes] = useState(['5x7', 'A4']);
   const [customSizeInput, setCustomSizeInput] = useState('');
   
-  // Image State
+  // Multi-Image State
   const [imageMode, setImageMode] = useState('file'); // 'file' | 'url'
-  const [imageUrl, setImageUrl] = useState('');
-  const [imagePreview, setImagePreview] = useState('');
+  const [imagesList, setImagesList] = useState([]);
+  const [urlInput, setUrlInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
   
   // Customization Options
@@ -128,7 +132,7 @@ export default function AdminModal({ isOpen, onClose }) {
     setFeedbackMsg({ text, type });
     setTimeout(() => {
       setFeedbackMsg({ text: '', type: 'success' });
-    }, 2800);
+    }, 3200);
   };
 
   // PIN authentication handler with Rate Limiting (max 5 attempts -> 30s cooldown)
@@ -171,8 +175,8 @@ export default function AdminModal({ isOpen, onClose }) {
     setDescription('');
     setSelectedSizes(['5x7', 'A4']);
     setCustomSizeInput('');
-    setImageUrl('');
-    setImagePreview('');
+    setImagesList([]);
+    setUrlInput('');
     setRequiresPhoto(true);
     setMaxPhotos(4);
     setRequiresText(true);
@@ -186,7 +190,8 @@ export default function AdminModal({ isOpen, onClose }) {
   const startEditProduct = (product) => {
     setEditingProductId(product.id || product.slug);
     setTitle(product.title || '');
-    setCategory(product.category || 'frames');
+    const cat = product.category || 'frames';
+    setCategory(cat);
     setTag(product.tag || '');
     setPrice(product.price ? String(product.price) : '');
     setDescription(product.description || '');
@@ -198,9 +203,15 @@ export default function AdminModal({ isOpen, onClose }) {
       setSelectedSizes(['Standard']);
     }
 
-    const currentImg = product.images?.[0] || product.imageUrl || '';
-    setImageUrl(currentImg);
-    setImagePreview(currentImg);
+    const currentImgs =
+      Array.isArray(product.images) && product.images.length > 0
+        ? product.images.filter(Boolean)
+        : product.imageUrl || product.image_url
+        ? [product.imageUrl || product.image_url]
+        : [];
+
+    setImagesList(currentImgs);
+    setUrlInput('');
 
     // Customization options
     setRequiresPhoto(product.customization_options?.requires_photo ?? true);
@@ -218,32 +229,139 @@ export default function AdminModal({ isOpen, onClose }) {
     setActiveTab('form');
   };
 
-  // Handle Image File Selection
+  // Handle Category Select with dynamic image limit enforcement
+  const handleCategorySelect = (newCategory) => {
+    setCategory(newCategory);
+    const matched = CATEGORIES.find((c) => c.id === newCategory);
+    if (matched && !tag) setTag(matched.defaultTag);
+
+    const maxLimit = getImageLimit(newCategory);
+    if (imagesList.length > maxLimit) {
+      setImagesList((prev) => prev.slice(0, maxLimit));
+      showToast(
+        `⚠️ Switched to ${matched?.label || newCategory}: maximum limit is ${maxLimit} images. Extra images were trimmed.`,
+        'info'
+      );
+    }
+  };
+
+  // Handle Multiple Image Files Selection
   const handleFileChange = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // Instant local preview
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImagePreview(reader.result);
-      setImageUrl(reader.result);
-    };
-    reader.readAsDataURL(file);
+    const maxLimit = getImageLimit(category);
+    const currentCount = imagesList.length;
+    const availableSlots = maxLimit - currentCount;
 
-    // Optional upload to Supabase if configured
+    if (availableSlots <= 0) {
+      showToast(
+        `⚠️ Limit reached! Maximum ${maxLimit} images allowed for ${
+          category === 'magazines' ? 'Magazines (Page Previews)' : 'this category'
+        }.`,
+        'error'
+      );
+      if (fileInputRef.current) fileInputRef.current.value = '';
+      return;
+    }
+
+    let filesToProcess = files;
+    if (files.length > availableSlots) {
+      showToast(
+        `⚠️ Only ${availableSlots} more image${availableSlots > 1 ? 's' : ''} allowed (Max ${maxLimit} for ${
+          category === 'magazines' ? 'Magazines' : 'this category'
+        }). Uploading first ${availableSlots}.`,
+        'info'
+      );
+      filesToProcess = files.slice(0, availableSlots);
+    }
+
+    // Immediate local preview for all selected files
+    const previewPromises = filesToProcess.map(
+      (file) =>
+        new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.readAsDataURL(file);
+        })
+    );
+
+    const newPreviews = await Promise.all(previewPromises);
+    setImagesList((prev) => [...prev, ...newPreviews]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
+    // Upload to Supabase in background if configured
     try {
       setIsUploading(true);
-      const publicUrl = await uploadCustomerPhoto(file);
-      if (publicUrl && typeof publicUrl === 'string' && publicUrl.startsWith('http')) {
-        setImageUrl(publicUrl);
-        setImagePreview(publicUrl);
-      }
+      const uploadPromises = filesToProcess.map((file) => uploadCustomerPhoto(file));
+      const uploadedUrls = await Promise.all(uploadPromises);
+
+      setImagesList((prev) => {
+        const updated = [...prev];
+        uploadedUrls.forEach((url, idx) => {
+          if (url && typeof url === 'string' && url.startsWith('http')) {
+            const targetIdx = currentCount + idx;
+            if (targetIdx < updated.length) {
+              updated[targetIdx] = url;
+            }
+          }
+        });
+        return updated;
+      });
     } catch (err) {
       console.warn('Supabase upload skipped or failed, using local Data URL preview:', err);
     } finally {
       setIsUploading(false);
     }
+  };
+
+  // Add Image via URL input
+  const handleAddUrl = (e) => {
+    e?.preventDefault();
+    const trimmed = urlInput.trim();
+    if (!trimmed) return;
+
+    const maxLimit = getImageLimit(category);
+    if (imagesList.length >= maxLimit) {
+      showToast(
+        `⚠️ Limit reached! Maximum ${maxLimit} images allowed for ${
+          category === 'magazines' ? 'Magazines' : 'this category'
+        }.`,
+        'error'
+      );
+      return;
+    }
+
+    setImagesList((prev) => [...prev, trimmed]);
+    setUrlInput('');
+    showToast('Image URL added!');
+  };
+
+  // Remove specific image
+  const handleRemoveImage = (indexToRemove) => {
+    setImagesList((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
+
+  // Set selected image as Primary Cover (move to index 0)
+  const handleSetCover = (index) => {
+    if (index === 0) return;
+    setImagesList((prev) => {
+      const selected = prev[index];
+      const remaining = prev.filter((_, idx) => idx !== index);
+      return [selected, ...remaining];
+    });
+    showToast('⭐ Primary cover image updated!');
+  };
+
+  // Move image position
+  const handleMoveImage = (fromIndex, toIndex) => {
+    if (toIndex < 0 || toIndex >= imagesList.length) return;
+    setImagesList((prev) => {
+      const updated = [...prev];
+      const [moved] = updated.splice(fromIndex, 1);
+      updated.splice(toIndex, 0, moved);
+      return updated;
+    });
   };
 
   // Toggle Size selection
@@ -275,8 +393,16 @@ export default function AdminModal({ isOpen, onClose }) {
       return;
     }
 
+    if (imagesList.length === 0) {
+      alert('Please upload or add at least one product image.');
+      return;
+    }
+
+    const maxLimit = getImageLimit(category);
+    const finalImages = imagesList.slice(0, maxLimit);
+    const finalImage =
+      finalImages[0] || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80';
     const numPrice = Number(price) || 299;
-    const finalImage = imageUrl || imagePreview || 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80';
     const finalTag = tag.trim() || CATEGORIES.find((c) => c.id === category)?.defaultTag || 'Handmade Keepsake';
 
     // Format sizes
@@ -302,8 +428,9 @@ export default function AdminModal({ isOpen, onClose }) {
       price: numPrice,
       description: description.trim() || 'Artisan handcrafted memory keepsake tailored specifically for your special moments.',
       sizes: sizesArray,
-      images: [finalImage],
+      images: finalImages,
       imageUrl: finalImage,
+      image_url: finalImage,
       requires_photo: requiresPhoto,
       max_photos: maxPhotos,
       requires_text: requiresText,
@@ -640,7 +767,15 @@ export default function AdminModal({ isOpen, onClose }) {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                       {filteredProducts.map((item) => {
                         const isConfirming = deleteConfirmId === item.id;
-                        const displayImg = item.images?.[0] || item.imageUrl;
+                        const itemImages =
+                          Array.isArray(item.images) && item.images.length > 0
+                            ? item.images.filter(Boolean)
+                            : item.imageUrl || item.image_url
+                            ? [item.imageUrl || item.image_url]
+                            : [];
+                        const displayImg = itemImages[0] || item.imageUrl || item.image_url;
+                        const imageCount = itemImages.length;
+
                         return (
                           <div
                             key={item.id || item.slug}
@@ -648,7 +783,7 @@ export default function AdminModal({ isOpen, onClose }) {
                           >
                             {/* Product Thumbnail & Details */}
                             <div className="flex gap-3 items-start flex-1 min-w-0">
-                              <div className="w-16 h-16 rounded-xl overflow-hidden bg-blush shrink-0 border border-burgundy/10 shadow-xs flex items-center justify-center">
+                              <div className="w-16 h-16 rounded-xl overflow-hidden bg-blush shrink-0 border border-burgundy/10 shadow-xs flex items-center justify-center relative">
                                 {displayImg ? (
                                   <img
                                     src={displayImg}
@@ -657,6 +792,11 @@ export default function AdminModal({ isOpen, onClose }) {
                                   />
                                 ) : (
                                   <span className="text-xs font-bold text-burgundy">MnB</span>
+                                )}
+                                {imageCount > 1 && (
+                                  <span className="absolute bottom-0 right-0 bg-burgundy-deep/90 text-cream text-[8px] font-bold px-1.5 py-0.2 rounded-tl-md">
+                                    {imageCount} {item.category === 'magazines' ? 'p.' : 'imgs'}
+                                  </span>
                                 )}
                               </div>
 
@@ -801,16 +941,12 @@ export default function AdminModal({ isOpen, onClose }) {
                         </label>
                         <select
                           value={category}
-                          onChange={(e) => {
-                            setCategory(e.target.value);
-                            const matched = CATEGORIES.find((c) => c.id === e.target.value);
-                            if (matched && !tag) setTag(matched.defaultTag);
-                          }}
+                          onChange={(e) => handleCategorySelect(e.target.value)}
                           className="w-full px-4 py-2.5 rounded-xl bg-cream border border-burgundy/20 focus:border-burgundy outline-none text-sm font-semibold text-burgundy-deep transition-all"
                         >
                           {CATEGORIES.map((cat) => (
                             <option key={cat.id} value={cat.id}>
-                              {cat.label}
+                              {cat.label} (Max {getImageLimit(cat.id)} images)
                             </option>
                           ))}
                         </select>
@@ -919,30 +1055,38 @@ export default function AdminModal({ isOpen, onClose }) {
                         </div>
                       </div>
 
-                      {/* Image Upload / URL Mode */}
+                      {/* Multi-Image Upload / URL Management */}
                       <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <label className="text-xs font-bold uppercase tracking-wider text-burgundy-deep">
-                            Product Image <span className="text-rose-deep">*</span>
-                          </label>
+                        <div className="flex items-center justify-between mb-1.5 flex-wrap gap-2">
+                          <div>
+                            <label className="text-xs font-bold uppercase tracking-wider text-burgundy-deep flex items-center gap-1.5">
+                              <span>Product Images ({imagesList.length}/{getImageLimit(category)})</span>
+                              <span className="text-rose-deep">*</span>
+                            </label>
+                            <span className="text-[10px] text-ink-soft block font-normal">
+                              {category === 'magazines'
+                                ? '📖 Magazines: Up to 15 images (for page-by-page previews)'
+                                : '📷 Max 5 images (1st image is Primary Cover)'}
+                            </span>
+                          </div>
                           <div className="flex items-center gap-1 bg-cream rounded-lg p-0.5 border border-burgundy/10 text-[10px] font-bold">
                             <button
                               type="button"
                               onClick={() => setImageMode('file')}
-                              className={`px-2 py-0.5 rounded ${
-                                imageMode === 'file' ? 'bg-burgundy text-cream' : 'text-ink-soft'
+                              className={`px-2 py-0.5 rounded transition-all ${
+                                imageMode === 'file' ? 'bg-burgundy text-cream shadow-xs' : 'text-ink-soft hover:text-burgundy'
                               }`}
                             >
-                              File Upload
+                              Upload Files
                             </button>
                             <button
                               type="button"
                               onClick={() => setImageMode('url')}
-                              className={`px-2 py-0.5 rounded ${
-                                imageMode === 'url' ? 'bg-burgundy text-cream' : 'text-ink-soft'
+                              className={`px-2 py-0.5 rounded transition-all ${
+                                imageMode === 'url' ? 'bg-burgundy text-cream shadow-xs' : 'text-ink-soft hover:text-burgundy'
                               }`}
                             >
-                              Image URL
+                              Add URL
                             </button>
                           </div>
                         </div>
@@ -951,61 +1095,165 @@ export default function AdminModal({ isOpen, onClose }) {
                           <div>
                             <input
                               type="file"
+                              multiple
                               ref={fileInputRef}
                               accept="image/*"
                               onChange={handleFileChange}
                               className="hidden"
                               id="admin-product-file-edit"
+                              disabled={imagesList.length >= getImageLimit(category)}
                             />
                             <label
                               htmlFor="admin-product-file-edit"
-                              className="w-full border-2 border-dashed border-burgundy/25 hover:border-burgundy/50 bg-cream/70 hover:bg-cream rounded-2xl p-4 flex flex-col items-center justify-center cursor-pointer transition-all group"
+                              className={`w-full border-2 border-dashed rounded-2xl p-4 flex flex-col items-center justify-center transition-all group ${
+                                imagesList.length >= getImageLimit(category)
+                                  ? 'opacity-60 cursor-not-allowed border-burgundy/20 bg-cream/40'
+                                  : 'border-burgundy/25 hover:border-burgundy/50 bg-cream/70 hover:bg-cream cursor-pointer'
+                              }`}
                             >
                               <Upload className="w-6 h-6 text-burgundy mb-1 group-hover:scale-110 transition-transform" />
                               <span className="text-xs font-bold text-burgundy-deep">
-                                Click to select image file
+                                {imagesList.length >= getImageLimit(category)
+                                  ? `Category limit reached (Max ${getImageLimit(category)} images)`
+                                  : `Click to select images (Multiple supported)`}
                               </span>
-                              <span className="text-[10px] text-ink-soft">
-                                PNG, JPG, WEBP preview supported
+                              <span className="text-[10px] text-ink-soft text-center mt-0.5">
+                                {category === 'magazines'
+                                  ? 'Select up to 15 pages • First image will be magazine cover'
+                                  : 'Select up to 5 photos • First image will be primary cover'}
                               </span>
+                              {isUploading && (
+                                <span className="text-[10px] text-rose-deep font-bold animate-pulse mt-1">
+                                  Uploading images in background...
+                                </span>
+                              )}
                             </label>
                           </div>
                         ) : (
-                          <input
-                            type="url"
-                            placeholder="https://images.unsplash.com/..."
-                            value={imageUrl}
-                            onChange={(e) => {
-                              setImageUrl(e.target.value);
-                              setImagePreview(e.target.value);
-                            }}
-                            className="w-full px-4 py-2.5 rounded-xl bg-cream border border-burgundy/20 focus:border-burgundy outline-none text-xs text-burgundy-deep transition-all"
-                          />
-                        )}
-
-                        {/* Live Image Preview Box */}
-                        {imagePreview && (
-                          <div className="mt-2.5 relative rounded-2xl overflow-hidden border border-burgundy/20 h-32 bg-cream flex items-center justify-center">
-                            <img
-                              src={imagePreview}
-                              alt="Product Preview"
-                              className="w-full h-full object-cover"
+                          <div className="flex gap-2">
+                            <input
+                              type="url"
+                              placeholder="https://images.unsplash.com/..."
+                              value={urlInput}
+                              onChange={(e) => setUrlInput(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  handleAddUrl(e);
+                                }
+                              }}
+                              disabled={imagesList.length >= getImageLimit(category)}
+                              className="flex-1 px-4 py-2.5 rounded-xl bg-cream border border-burgundy/20 focus:border-burgundy outline-none text-xs text-burgundy-deep transition-all disabled:opacity-50"
                             />
                             <button
                               type="button"
-                              onClick={() => {
-                                setImagePreview('');
-                                setImageUrl('');
-                                if (fileInputRef.current) fileInputRef.current.value = '';
-                              }}
-                              className="absolute top-2 right-2 bg-burgundy/80 text-cream p-1.5 rounded-full hover:bg-burgundy transition-colors shadow-sm"
-                              title="Remove Image"
+                              onClick={handleAddUrl}
+                              disabled={!urlInput.trim() || imagesList.length >= getImageLimit(category)}
+                              className="px-3.5 py-2 rounded-xl bg-burgundy hover:bg-burgundy-deep disabled:opacity-50 text-cream font-bold text-xs transition-colors whitespace-nowrap"
                             >
-                              <X className="w-3.5 h-3.5" />
+                              + Add URL
                             </button>
-                            <span className="absolute bottom-2 left-2 bg-paper/90 backdrop-blur-sm text-burgundy-deep font-bold text-[10px] px-2 py-0.5 rounded-md">
-                              Live Preview
-                            </span>
+                          </div>
+                        )}
+
+                        {/* Live Multiple Images Preview & Management Grid */}
+                        {imagesList.length > 0 && (
+                          <div className="mt-3 space-y-2">
+                            <div className="flex items-center justify-between text-[11px] text-ink-soft">
+                              <span className="font-semibold text-burgundy-deep flex items-center gap-1">
+                                <Layers className="w-3.5 h-3.5 text-burgundy" />
+                                <span>Images Preview ({imagesList.length}/{getImageLimit(category)})</span>
+                              </span>
+                              <span className="text-[10px] text-ink-soft">
+                                ⭐ Click "Cover" to set main thumbnail
+                              </span>
+                            </div>
+
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-1.5 bg-cream/50 rounded-2xl border border-burgundy/15">
+                              {imagesList.map((img, idx) => {
+                                const isCover = idx === 0;
+                                return (
+                                  <div
+                                    key={idx}
+                                    className={`relative rounded-xl overflow-hidden border transition-all bg-paper shadow-xs flex flex-col justify-between group ${
+                                      isCover ? 'border-burgundy ring-2 ring-burgundy/25' : 'border-burgundy/15'
+                                    }`}
+                                  >
+                                    <div className="h-20 w-full bg-blush/20 flex items-center justify-center overflow-hidden">
+                                      <img
+                                        src={img}
+                                        alt={`Preview ${idx + 1}`}
+                                        className="w-full h-full object-cover"
+                                      />
+                                    </div>
+
+                                    {/* Cover / Page Indicator Badge */}
+                                    <div className="absolute top-1 left-1 flex items-center gap-1">
+                                      {isCover ? (
+                                        <span className="bg-burgundy text-cream text-[9px] font-bold px-1.5 py-0.5 rounded-md shadow-xs flex items-center gap-0.5">
+                                          <Star className="w-2.5 h-2.5 fill-cream text-cream" />
+                                          <span>Cover</span>
+                                        </span>
+                                      ) : (
+                                        <span className="bg-burgundy-deep/80 text-cream text-[9px] font-bold px-1.5 py-0.5 rounded-md backdrop-blur-xs">
+                                          {category === 'magazines' ? `P.${idx + 1}` : `#${idx + 1}`}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    {/* Remove Image (x) Button */}
+                                    <div className="absolute top-1 right-1 flex items-center gap-1">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleRemoveImage(idx)}
+                                        className="bg-burgundy/85 hover:bg-rose-deep text-cream p-1 rounded-full shadow-xs transition-colors cursor-pointer"
+                                        title="Remove Image"
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </button>
+                                    </div>
+
+                                    {/* Bottom Controls: Make Cover & Reorder */}
+                                    <div className="p-1 bg-paper/95 border-t border-burgundy/10 flex items-center justify-between gap-1 text-[10px]">
+                                      {!isCover ? (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleSetCover(idx)}
+                                          className="text-[9px] font-bold text-burgundy hover:text-burgundy-deep hover:underline truncate"
+                                        >
+                                          Make Cover
+                                        </button>
+                                      ) : (
+                                        <span className="text-[9px] font-bold text-emerald-800">Primary</span>
+                                      )}
+
+                                      <div className="flex items-center gap-0.5 ml-auto">
+                                        {idx > 0 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleMoveImage(idx, idx - 1)}
+                                            className="px-1 py-0.5 hover:bg-blush rounded text-burgundy font-bold text-[10px]"
+                                            title="Move Left"
+                                          >
+                                            &larr;
+                                          </button>
+                                        )}
+                                        {idx < imagesList.length - 1 && (
+                                          <button
+                                            type="button"
+                                            onClick={() => handleMoveImage(idx, idx + 1)}
+                                            className="px-1 py-0.5 hover:bg-blush rounded text-burgundy font-bold text-[10px]"
+                                            title="Move Right"
+                                          >
+                                            &rarr;
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
                           </div>
                         )}
                       </div>
